@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Marketing budget scenarios, break-even and funding need for the Vacario India growth plan.">
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif;background:#f1f2ee}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Vacario Budget Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+
+<style>
+:root{
+  color-scheme: light;
+  --ground:#f1f2ee; --surface:#fbfbf8; --well:#e8eae2; --raise:#ffffff;
+  --ink:#15191a; --ink-2:#565d59; --ink-3:#868d88;
+  --rule:#d8dcd2; --rule-2:#c4c9bc;
+  --accent:#0e5b5e; --accent-ink:#0a4446; --accent-soft:#d6e7e6;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --shadow:0 1px 2px rgba(20,28,24,.06), 0 6px 16px -10px rgba(20,28,24,.20);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#101210; --surface:#1a1c19; --well:#23261f; --raise:#23261f;
+    --ink:#f0f2ec; --ink-2:#a7aea3; --ink-3:#7b827a;
+    --rule:#31352d; --rule-2:#404539;
+    --accent:#4fb3ac; --accent-ink:#8fd6d0; --accent-soft:#123634;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#101210; --surface:#1a1c19; --well:#23261f; --raise:#23261f;
+  --ink:#f0f2ec; --ink-2:#a7aea3; --ink-3:#7b827a;
+  --rule:#31352d; --rule-2:#404539;
+  --accent:#4fb3ac; --accent-ink:#8fd6d0; --accent-soft:#123634;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font:400 14px/1.5 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased}
+.num{font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums}
+.shell{max-width:1320px; margin:0 auto; padding-inline:20px; padding-block:22px 56px}
+
+.masthead{display:flex; flex-wrap:wrap; align-items:flex-end; gap:14px 24px; padding-bottom:14px; border-bottom:2px solid var(--ink); margin-bottom:20px}
+.mast-id{flex:1 1 340px; min-width:0}
+.eyebrow{font:500 10.5px/1 'IBM Plex Mono',monospace; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:9px}
+h1{font-family:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif; font-weight:700; font-size:clamp(29px,5vw,44px); line-height:.98; letter-spacing:-.015em; margin:0; text-wrap:balance}
+.dek{margin:9px 0 0; color:var(--ink-2); font-size:13.5px; max-width:64ch}
+.mast-ctl{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+select.cur, button.ghost{font:500 12px 'IBM Plex Mono',monospace; color:var(--ink); background:var(--surface);
+  border:1px solid var(--rule-2); border-radius:3px; padding:7px 9px; cursor:pointer}
+button.ghost:hover, select.cur:hover{border-color:var(--accent); color:var(--accent)}
+.badge{display:inline-flex; align-items:center; gap:6px; font:500 10.5px 'IBM Plex Mono',monospace;
+  letter-spacing:.06em; text-transform:uppercase; padding:5px 9px; border-radius:3px;
+  background:var(--accent-soft); color:var(--accent-ink)}
+.badge i{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+
+.deck{display:grid; grid-template-columns:308px minmax(0,1fr); gap:20px; align-items:start}
+@media (max-width:1060px){ .deck{grid-template-columns:minmax(0,1fr)} }
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:4px; min-width:0}
+.panel-hd{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:12px 14px 10px; border-bottom:1px solid var(--rule); flex-wrap:wrap}
+.panel-hd h2{margin:0; font:600 12px/1 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase}
+.panel-hd .note{font-size:11.5px; color:var(--ink-3)}
+.panel-bd{padding:12px 14px 14px; min-width:0}
+.rail{display:flex; flex-direction:column; gap:14px; min-width:0; position:sticky; top:14px; max-height:calc(100vh - 28px); overflow-y:auto}
+@media (max-width:1060px){ .rail{position:static; max-height:none} }
+
+.grp + .grp{margin-top:13px; padding-top:11px; border-top:1px solid var(--rule)}
+.grp-t{font:500 10px/1 'IBM Plex Mono',monospace; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px}
+.f{display:grid; grid-template-columns:minmax(0,1fr) 112px; gap:3px 10px; align-items:center; padding:4px 0}
+.f > label{font-size:12.5px; color:var(--ink-2); line-height:1.25}
+.in{display:flex; align-items:center; gap:3px; background:var(--well); border:1px solid transparent; border-radius:3px; padding-inline:7px; transition:border-color .12s}
+.in:focus-within{border-color:var(--accent); background:var(--raise)}
+.in .pre,.in .suf{font:400 11px 'IBM Plex Mono',monospace; color:var(--ink-3); flex:none}
+.in input{width:100%; min-width:0; border:0; background:transparent; color:var(--ink); text-align:right;
+  font:500 12.5px/1 'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; padding:7px 0}
+.in input:focus{outline:none}
+.echo{grid-column:2; justify-self:end; font:400 10px 'IBM Plex Mono',monospace; color:var(--ink-3)}
+.hint{grid-column:1/-1; font-size:10.5px; color:var(--ink-3); line-height:1.35}
+details.adv{border-top:1px solid var(--rule); margin-top:13px; padding-top:10px}
+details.adv summary{cursor:pointer; font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--accent); list-style:none; display:flex; align-items:center; gap:6px}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{content:"+"; font-size:13px; line-height:1}
+details.adv[open] summary::before{content:"\2212"}
+details.adv .body{padding-top:10px}
+.gridtab{width:100%; border-collapse:collapse; margin-top:4px}
+.gridtab th{font:500 9.5px 'IBM Plex Mono',monospace; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-3); text-align:right; padding:0 0 5px; font-weight:500}
+.gridtab th:first-child{text-align:left}
+.gridtab td{padding:2px 0 2px 5px}
+.gridtab td:first-child{padding-left:0; font-size:11.5px; color:var(--ink-2); line-height:1.25}
+.gridtab .in input{font-size:11.5px; padding:6px 0}
+.gridtab .in{padding-inline:5px}
+
+.scn-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+@media (max-width:780px){ .scn-grid{grid-template-columns:minmax(0,1fr)} }
+.scn{position:relative; background:var(--surface); border:1px solid var(--rule); border-radius:4px;
+  padding:12px 13px 13px; cursor:pointer; transition:border-color .12s, box-shadow .12s}
+.scn:hover{border-color:var(--rule-2)}
+.scn[aria-pressed="true"]{border-color:var(--sc); box-shadow:var(--shadow)}
+.scn::before{content:""; position:absolute; inset:-1px auto -1px -1px; width:3px; border-radius:4px 0 0 4px; background:var(--sc)}
+.scn-hd{display:flex; align-items:center; gap:7px; margin-bottom:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--sc);flex:none}
+.scn-name{font:600 13px 'IBM Plex Sans Condensed',sans-serif}
+.scn-tag{margin-left:auto; font:500 9.5px 'IBM Plex Mono',monospace; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-3); border:1px solid var(--rule-2); border-radius:2px; padding:2px 5px}
+.scn[aria-pressed="true"] .scn-tag{color:var(--sc); border-color:var(--sc)}
+.scn-row{display:grid; grid-template-columns:minmax(0,1fr) 104px; gap:6px 8px; align-items:center; margin-bottom:5px}
+.scn-row label{font-size:11.5px; color:var(--ink-2)}
+.slider{grid-column:1/-1; width:100%; accent-color:var(--sc); margin:2px 0 5px; height:18px}
+.scn-out{display:flex; flex-wrap:wrap; gap:3px 10px; margin-top:9px; padding-top:9px; border-top:1px solid var(--rule); font-size:11.5px; color:var(--ink-2)}
+.scn-out b{font:600 11.5px 'IBM Plex Mono',monospace; color:var(--ink); font-variant-numeric:tabular-nums}
+
+.tiles{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+@media (max-width:840px){ .tiles{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.tile{background:var(--surface); padding:13px 14px 14px}
+.tile .k{font:500 10px/1.2 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:9px}
+.tile .v{font-family:'IBM Plex Sans Condensed',sans-serif; font-weight:700; font-size:clamp(23px,3.1vw,32px); line-height:1; font-variant-numeric:tabular-nums}
+.tile .sub{margin-top:6px; font-size:11.5px; color:var(--ink-2); line-height:1.35}
+.tile.-good .v{color:var(--good)} .tile.-crit .v{color:var(--crit)}
+
+.chart-host{position:relative; width:100%}
+.chart-host svg{display:block; width:100%; height:auto; touch-action:pan-y}
+.tick{font:400 10.5px 'IBM Plex Mono',monospace; fill:var(--ink-3); font-variant-numeric:tabular-nums}
+.dlab{font:600 11px 'IBM Plex Sans Condensed',sans-serif; font-variant-numeric:tabular-nums}
+.mklab{font:500 10px 'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; padding:0 0 12px; font-size:12px; color:var(--ink-2)}
+.lg{display:flex; align-items:center; gap:6px}
+.lg i{width:14px;height:3px;border-radius:2px;background:var(--c);flex:none}
+.lg i.-dash{background:repeating-linear-gradient(90deg,var(--c) 0 4px,transparent 4px 7px); height:2px}
+.tip{position:absolute; pointer-events:none; z-index:5; background:var(--raise); border:1px solid var(--rule-2);
+  border-radius:4px; box-shadow:var(--shadow); padding:8px 10px; font-size:11.5px; min-width:165px; opacity:0; transition:opacity .1s}
+.tip[data-on="1"]{opacity:1}
+.tip .th{font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px}
+.tip .tr{display:flex; align-items:center; gap:7px; padding:2px 0}
+.tip .tr i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.tip .tr span{color:var(--ink-2)}
+.tip .tr b{margin-left:auto; font:600 11.5px 'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; color:var(--ink)}
+.seg{display:flex; gap:0; border:1px solid var(--rule-2); border-radius:3px; overflow:hidden}
+.seg button{font:500 11px 'IBM Plex Mono',monospace; background:var(--surface); color:var(--ink-2);
+  border:0; padding:5px 9px; cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--surface)}
+.seg button + button{border-left:1px solid var(--rule-2)}
+
+.verdict{display:flex; gap:12px; align-items:flex-start; margin-top:14px; padding:12px 14px; background:var(--accent-soft); border-radius:4px}
+.verdict .mark{font:700 11px 'IBM Plex Mono',monospace; letter-spacing:.09em; color:var(--accent-ink); flex:none; padding-top:2px}
+.verdict p{margin:0; font-size:13px; line-height:1.55}
+.verdict b{font-weight:600; font-variant-numeric:tabular-nums}
+
+.solve{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.solve .cell{background:var(--surface); padding:12px 13px}
+.solve .k{font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:7px}
+.solve .v{font-family:'IBM Plex Sans Condensed',sans-serif; font-weight:700; font-size:22px; line-height:1.05; font-variant-numeric:tabular-nums}
+.solve .s{margin-top:5px; font-size:11px; color:var(--ink-2); line-height:1.35}
+.solve .cell.-key{background:var(--accent-soft)}
+.solve .cell.-key .v{color:var(--accent-ink)}
+.solve .cell.-key .k{color:var(--accent-ink); opacity:.85}
+.apply{margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+button.act{font:500 12px 'IBM Plex Mono',monospace; background:var(--accent); color:#fff; border:0; border-radius:3px; padding:9px 13px; cursor:pointer}
+:root[data-theme="dark"] button.act{color:#0b1a19}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) button.act{color:#0b1a19} }
+button.act:hover{filter:brightness(1.08)}
+.apply .m{font-size:11.5px; color:var(--ink-3)}
+
+.funnel{min-width:0; display:flex; flex-wrap:wrap; align-items:stretch; gap:0; border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.fstep{flex:1 1 116px; background:var(--surface); padding:11px 13px; border-right:1px solid var(--rule); position:relative}
+.fstep:last-child{border-right:0}
+.fstep .k{font:500 9.5px 'IBM Plex Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px}
+.fstep .v{font-family:'IBM Plex Sans Condensed',sans-serif; font-weight:700; font-size:20px; line-height:1; font-variant-numeric:tabular-nums}
+.fstep .r{margin-top:5px; font:500 10.5px 'IBM Plex Mono',monospace; color:var(--accent)}
+.mixrow{display:grid; grid-template-columns:118px minmax(0,1fr) 74px 46px; gap:9px; align-items:center; padding:5px 0; font-size:12px}
+.mixrow .nm{color:var(--ink-2)}
+.mixrow .bar{height:9px; background:var(--well); border-radius:2px; overflow:hidden}
+.mixrow .bar i{display:block; height:100%; background:var(--sc); border-radius:2px}
+.mixrow .vv,.mixrow .pp{text-align:right; font:500 11.5px 'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums}
+.mixrow .pp{color:var(--ink-3)}
+@media (max-width:520px){ .mixrow{grid-template-columns:92px minmax(0,1fr) 62px 40px; gap:7px; font-size:11.5px} }
+
+.tw{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table.dt{border-collapse:collapse; width:100%; min-width:580px}
+table.dt th, table.dt td{text-align:right; padding:8px 10px; border-bottom:1px solid var(--rule); white-space:nowrap}
+table.dt th:first-child, table.dt td:first-child{text-align:left}
+table.dt thead th{font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule-2); position:sticky; top:0; background:var(--surface); z-index:1}
+table.dt tbody td{font:400 12.5px 'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums}
+table.dt tbody td:first-child{font-family:'IBM Plex Sans',sans-serif; color:var(--ink-2)}
+table.dt tbody tr:last-child td{border-bottom:0}
+td .best{display:inline-block; width:5px;height:5px;border-radius:50%; background:var(--accent); margin-left:6px; vertical-align:middle}
+th .sw{display:inline-block; width:8px;height:8px;border-radius:50%; background:var(--c); margin-right:6px; vertical-align:middle}
+tr.-be td{color:var(--good)}
+tr.-yr td{background:var(--well); font-weight:600}
+.ledger-wrap{max-height:400px; overflow:auto}
+.ledger-wrap table.dt{min-width:900px}
+
+.foot{margin-top:26px; padding-top:16px; border-top:1px solid var(--rule); font-size:12px; color:var(--ink-3); line-height:1.6; max-width:82ch}
+.foot h3{font:600 10.5px 'IBM Plex Mono',monospace; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-2); margin:16px 0 8px}
+.foot h3:first-child{margin-top:0}
+.foot code{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-2); background:var(--well); padding:1px 4px; border-radius:2px}
+.foot b{color:var(--ink-2)}
+.stack{display:flex; flex-direction:column; gap:18px; min-width:0}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:2px}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <div class="mast-id">
+      <div class="eyebrow">Marketing spend &rarr; traction &rarr; break-even</div>
+      <h1>Vacario Budget Engine</h1>
+      <p class="dek">Marketing budget is the one lever. Raise it and paid visitors, bookings and commission all follow &mdash; but the spend lands immediately and the traction arrives over months, so break-even moves out and the cash hole gets deeper before the curve turns. This finds the month it turns, and what it is worth afterwards.</p>
+    </div>
+    <div class="mast-ctl">
+      <span class="badge" id="parity"><i></i><span id="parity-t">Scenario A parity</span></span>
+      <select class="cur" id="currency" aria-label="Display currency">
+        <option value="CAD">CA$ CAD</option>
+        <option value="INR">&#8377; INR</option>
+      </select>
+      <button class="ghost" id="reset" type="button">Reset to plan</button>
+    </div>
+  </header>
+
+  <div class="deck">
+    <aside class="rail">
+      <section class="panel">
+        <div class="panel-hd"><h2>Model inputs</h2><span class="note">Scenario A defaults</span></div>
+        <div class="panel-bd">
+          <div id="fields"></div>
+          <details class="adv">
+            <summary>Revenue streams</summary>
+            <div class="body"><table class="gridtab" id="streams"></table></div>
+          </details>
+          <details class="adv">
+            <summary>Cost base &amp; group sales (annual)</summary>
+            <div class="body"><table class="gridtab" id="costs"></table></div>
+          </details>
+          <details class="adv">
+            <summary>Advanced traffic assumptions</summary>
+            <div class="body" id="fields-adv"></div>
+          </details>
+        </div>
+      </section>
+    </aside>
+
+    <main class="stack">
+      <section>
+        <div class="panel-hd" style="border:0; padding:0 0 10px">
+          <h2>Budget scenarios</h2><span class="note">click a card to drive the detail views</span>
+        </div>
+        <div class="scn-grid" id="scenarios"></div>
+      </section>
+
+      <section class="tiles" id="tiles"></section>
+
+      <section class="panel">
+        <div class="panel-hd">
+          <h2>Cumulative cash &mdash; the J&#8209;curve</h2>
+          <div class="seg" id="jwin">
+            <button type="button" data-w="18" aria-pressed="false">First 18 mo</button>
+            <button type="button" data-w="0" aria-pressed="true">Full horizon</button>
+          </div>
+        </div>
+        <div class="panel-bd">
+          <div class="legend" id="legend-j"></div>
+          <div class="chart-host" id="chart-j"><div class="tip" id="tip-j"></div></div>
+          <div class="verdict"><span class="mark">FINDING</span><p id="verdict"></p></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd"><h2 id="ct-title">Net revenue vs. total cost</h2>
+          <span class="note">where the lines cross is operating break&#8209;even</span></div>
+        <div class="panel-bd">
+          <div class="legend" id="legend-c"></div>
+          <div class="chart-host" id="chart-c"><div class="tip" id="tip-c"></div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd"><h2>Budget to hit the target</h2><span class="note" id="solve-note"></span></div>
+        <div class="panel-bd">
+          <div class="solve" id="solve"></div>
+          <div class="apply">
+            <button class="act" id="apply-solve" type="button">Load this budget</button>
+            <span class="m" id="apply-msg"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd"><h2 id="fn-title">People behind the number</h2><span class="note" id="fn-note"></span></div>
+        <div class="panel-bd">
+          <div class="funnel" id="funnel"></div>
+          <div style="margin-top:14px" id="mix"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd"><h2>Scenario comparison</h2><span class="note">&#9679; marks the strongest scenario on that line</span></div>
+        <div class="panel-bd" style="padding:0 0 2px"><div class="tw"><table class="dt" id="cmp"></table></div></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd"><h2 id="led-title">Monthly ledger</h2><span class="note">scroll for the full horizon</span></div>
+        <div class="panel-bd" style="padding:0"><div class="tw ledger-wrap"><table class="dt" id="ledger"></table></div></div>
+      </section>
+
+      <footer class="foot" id="foot"></footer>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== published plan of record (Scenario A, CAD) ===================== */
+var PUB_CASH = [-50532.779,-75098.642,-96324.632,-116320.551,-125526.582,-127348.928,-135392.423,-135917.74,
+-132561.945,-127802.888,-113614.671,-91268.043,-65156.548,13523.146,124985.274,255155.355,397562.561,582613.856,
+782043.783,1000610.735,1236322.199,1490592.946,1767707.84,2057950.828,2393222.805,2770816.461,3169218.764,
+3577349.683,3987073.022,4402366.234,4806268.578,5210034.264,5612958.292,6018643.502,6439725.828,6869701.734];
+var PUB_REV = [17938.122,29129.204,39199.712,49584.599,58806.122,70127.309,77659.391,82019.232,88329.927,95096.567,
+108493.45,119192.708,178940.015,270417.946,350727.904,411229.169,455630.418,543807.432,614690.296,668749.284,
+717727.46,765778.232,816035,856042.795,946994.767,1024421.55,1082017.232,1117268.64,1135094.389,1150156.393,
+1158319.296,1156029.657,1155606.736,1159595.882,1179243.73,1197492.771];
+
+/* ===================== currency ===================== */
+var CUR = {
+  CAD:{sym:"CA$", loc:"en-CA", big:[[1e9,"B"],[1e6,"M"],[1e3,"K"]], min:1e5, rate:function(p){return 1;}},
+  INR:{sym:"₹", loc:"en-IN", big:[[1e7,"Cr"],[1e5,"L"],[1e3,"K"]], min:1e5, rate:function(p){return p.fx;}}
+};
+function cc(){ return CUR[S.currency] || CUR.CAD; }
+function toDisp(v){ return v * cc().rate(S.p); }
+function trimN(t){ return t.indexOf(".") >= 0 ? t.replace(/0+$/,"").replace(/\.$/,"") : t; }
+function money(vCad, dp){
+  if (vCad === null || vCad === undefined || !isFinite(vCad)) return "—";
+  var c = cc(), v = toDisp(vCad), neg = v < 0, a = Math.abs(v);
+  if (a >= c.min){
+    for (var i=0;i<c.big.length;i++){
+      var d = c.big[i][0];
+      if (a >= d){
+        var q = a/d, dec = (dp !== undefined) ? dp : (q >= 100 ? 0 : q >= 10 ? 1 : 2);
+        return (neg?"−":"") + c.sym + trimN(q.toFixed(dec)) + c.big[i][1];
+      }
+    }
+  }
+  return (neg?"−":"") + c.sym + Math.round(a).toLocaleString(c.loc);
+}
+function moneyFull(vCad){
+  if (!isFinite(vCad)) return "—";
+  var v = toDisp(vCad);
+  return (v<0?"−":"") + cc().sym + Math.round(Math.abs(v)).toLocaleString(cc().loc);
+}
+function intf(v){ return isFinite(v) ? Math.round(v).toLocaleString("en-US") : "—"; }
+function moShort(m){ return (m===null||m===undefined) ? "—" : "M"+m; }
+function moLabel(m){ return (m===null||m===undefined) ? "beyond the horizon" : "month "+m; }
+var MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function calMonth(m){ var i = 8 + (m-1); return MN[i%12] + " " + String(2026 + Math.floor(i/12)).slice(2); }
+
+/* ===================== defaults ===================== */
+function baseParams(){
+  return {
+    horizon:36, reinvestFrom:13, fx:68,
+    satExp:.5, refPerCity:15000, cpv:17.3752, cpvImp:2, cpvFloor:65,
+    returning:30, organic1:5000, organicG:8,
+    haloStart:15, haloSteady:40, haloMonths:24,
+    searchPct:50, viewPct:60, mat1:40, matMonths:12,
+    pgPct:2.36, promo1:1.5, promo2:1.25, promo3:1.0,
+    taxPct:25.17, capexM1:11250,
+    targetRev:1200000, targetMonth:24,
+    cities:"1,4,10,18,25",
+    streams:[
+      {name:"Homestays",       abv:13600, take:12,  conv:3},
+      {name:"Hotels",          abv:9000,  take:10,  conv:2},
+      {name:"Tour activities", abv:6800,  take:10,  conv:1},
+      {name:"Packages",        abv:35000, take:10,  conv:1.5},
+      {name:"Flights",         abv:15000, take:6,   conv:1}
+    ],
+    cost:{
+      salaries:[335901.18, 587472.94, 807882.35],
+      subs:    [ 33592.38,  42676.60,  70196.32],
+      office:  [ 73858.82, 118229.41, 158770.59],
+      genable: [ 36770.14,  79892.65, 112925.52],
+      group:   [208289.67, 521867.65, 753372.79],
+      capex:   [ 28455.88,  17205.88,  18529.41],
+      dep:     [  7573.53,  14209.56,  20349.27]
+    }
+  };
+}
+var SCEN_DEF = [
+  {id:"hold", name:"Hold",       tag:"defend", minBudget:7500,  reinvest:10, sv:"var(--s1)"},
+  {id:"planA",name:"Scenario A", tag:"plan",   minBudget:15000, reinvest:25, sv:"var(--s2)"},
+  {id:"push", name:"Push",       tag:"land",   minBudget:30000, reinvest:45, sv:"var(--s3)"}
+];
+
+var S = {currency:"CAD", p:baseParams(), scen:null, sel:"planA", jwin:0};
+function resetAll(){
+  S.p = baseParams();
+  S.scen = SCEN_DEF.map(function(s){ return {id:s.id,name:s.name,tag:s.tag,minBudget:s.minBudget,reinvest:s.reinvest,sv:s.sv}; });
+  S.sel = "planA"; S.currency = "CAD"; S.jwin = 0;
+}
+function save(){ try{ localStorage.setItem("vbe.v2", JSON.stringify({c:S.currency,p:S.p,s:S.scen,sel:S.sel})); }catch(e){} }
+function load(){
+  try{
+    var raw = localStorage.getItem("vbe.v2"); if(!raw) return;
+    var o = JSON.parse(raw); if(!o||!o.p) return;
+    var d = baseParams();
+    Object.keys(d).forEach(function(k){
+      if (k==="streams"||k==="cost") return;
+      if (typeof d[k]==="number" && typeof o.p[k]==="number" && isFinite(o.p[k])) S.p[k]=o.p[k];
+      if (typeof d[k]==="string" && typeof o.p[k]==="string") S.p[k]=o.p[k];
+    });
+    if (Array.isArray(o.p.streams) && o.p.streams.length===5){
+      o.p.streams.forEach(function(s,i){ ["abv","take","conv"].forEach(function(k){
+        if (typeof s[k]==="number" && isFinite(s[k])) S.p.streams[i][k]=s[k]; }); });
+    }
+    if (o.p.cost) Object.keys(S.p.cost).forEach(function(k){
+      if (Array.isArray(o.p.cost[k])) o.p.cost[k].forEach(function(v,i){
+        if (typeof v==="number" && isFinite(v)) S.p.cost[k][i]=v; }); });
+    if (o.c && CUR[o.c]) S.currency=o.c;
+    if (Array.isArray(o.s) && o.s.length===3) S.scen.forEach(function(sc,i){
+      if (typeof o.s[i].minBudget==="number") sc.minBudget=o.s[i].minBudget;
+      if (typeof o.s[i].reinvest==="number") sc.reinvest=o.s[i].reinvest; });
+    if (o.sel) S.sel=o.sel;
+  }catch(e){}
+}
+function isParity(){
+  var d = baseParams(), p = S.p, same = true;
+  Object.keys(d).forEach(function(k){
+    if (k==="streams"||k==="cost"||k==="targetRev"||k==="targetMonth") return;
+    if (typeof d[k]==="number"){ if (Math.abs(d[k]-p[k]) > 1e-9) same=false; }
+    else if (d[k] !== p[k]) same=false;
+  });
+  d.streams.forEach(function(s,i){ ["abv","take","conv"].forEach(function(k){
+    if (Math.abs(s[k]-p.streams[i][k])>1e-9) same=false; }); });
+  Object.keys(d.cost).forEach(function(k){ d.cost[k].forEach(function(v,i){
+    if (Math.abs(v-p.cost[k][i])>0.01) same=false; }); });
+  return same;
+}
+
+/* ===================== engine ===================== */
+function cityList(p){
+  var a = String(p.cities||"").split(",").map(function(x){ return parseInt(x,10); })
+          .filter(function(x){ return isFinite(x) && x>0; });
+  return a.length ? a : [1];
+}
+function yearOf(m){ return Math.min(3, Math.max(1, Math.ceil(m/12))); }
+function groupRev(p, m){
+  var y = yearOf(m), total = p.cost.group[y-1];
+  if (y === 1) return total * m / 78;      /* linear ramp across year 1 */
+  return total / 12;                        /* steady through years 2-3 */
+}
+function annual(p, key, m){ return p.cost[key][yearOf(m)-1] / 12; }
+function promoPct(p, m){ var y=yearOf(m); return y===1?p.promo1:(y===2?p.promo2:p.promo3); }
+
+function simulate(p, sc, N){
+  N = N || p.horizon;
+  var cities = cityList(p);
+  var rows=[], mau=0, prevMau=0, prevRev=0, cum=0, cumCash=0, trough=0, troughM=null, totMkt=0;
+
+  for (var m=1; m<=N; m++){
+    var budget = sc.minBudget;
+    if (m >= p.reinvestFrom && prevRev > 0) budget = Math.max(sc.minBudget, prevRev * sc.reinvest/100);
+
+    var live=0; for (var i=0;i<cities.length;i++) if (cities[i] <= m) live++;
+    live = Math.max(1, live);
+
+    var learn = Math.max(p.cpvFloor/100, Math.pow(Math.max(0,1 - p.cpvImp/100), m-1));
+    var sat   = Math.pow(Math.max(1, (budget/live) / Math.max(1,p.refPerCity)), p.satExp);
+    var cpv   = Math.max(0.01, p.cpv * learn * sat);
+    var paid  = (budget * p.fx) / cpv;
+
+    var organic = p.organic1 * Math.pow(1 + p.organicG/100, m-1);
+    var haloR   = (p.haloStart + (p.haloSteady-p.haloStart) * Math.min(1,(m-1)/Math.max(1,p.haloMonths-1)))/100;
+    var halo    = paid * haloR;
+    var ret     = prevMau * p.returning/100;
+    mau = paid + organic + halo + ret;
+
+    var views = mau * (p.searchPct/100) * (p.viewPct/100);
+    var mat   = (p.mat1 + (100-p.mat1) * Math.min(1,(m-1)/Math.max(1,p.matMonths-1)))/100;
+
+    var gmvI=0, revI=0, bk=0, per=[];
+    for (var s=0;s<p.streams.length;s++){
+      var st=p.streams[s], b = views * (st.conv/100) * mat;
+      var g = b*st.abv, r = g*(st.take/100);
+      gmvI+=g; revI+=r; bk+=b;
+      per.push({name:st.name, bookings:b, rev:r/p.fx});
+    }
+    var gmv = gmvI/p.fx, mkt = revI/p.fx;
+    var group = groupRev(p, m), netRev = mkt + group;
+
+    var pg=gmv*p.pgPct/100, promo=gmv*promoPct(p,m)/100;
+    var sal=annual(p,"salaries",m), subs=annual(p,"subs",m), off=annual(p,"office",m), gen=annual(p,"genable",m);
+    var opex = pg+promo+sal+budget+subs+off+gen;
+    var ebitda = netRev - opex;
+    var dep = annual(p,"dep",m);
+    var pbt = ebitda - dep, tax = pbt>0 ? pbt*p.taxPct/100 : 0;
+    var y = yearOf(m), capex;
+    if (m===1) capex = p.capexM1;
+    else if (y===1) capex = Math.max(0,(p.cost.capex[0]-p.capexM1))/11;
+    else capex = p.cost.capex[y-1]/12;
+    var netCash = ebitda - capex;
+
+    cum += ebitda; cumCash += netCash; totMkt += budget;
+    if (cumCash < trough){ trough=cumCash; troughM=m; }
+
+    rows.push({m:m, budget:budget, live:live, cpv:cpv, paid:paid, organic:organic, halo:halo, ret:ret,
+      mau:mau, views:views, bookings:bk, gmv:gmv, mkt:mkt, group:group, netRev:netRev,
+      pg:pg, promo:promo, sal:sal, subs:subs, off:off, gen:gen, opex:opex,
+      ebitda:ebitda, dep:dep, tax:tax, pat:pbt-tax, capex:capex, cum:cum, cash:cumCash, per:per});
+    prevMau = mau; prevRev = netRev;
+  }
+
+  function sustained(key){
+    var f=null; for (var i=rows.length-1;i>=0;i--){ if (rows[i][key] >= 0) f=rows[i].m; else break; } return f;
+  }
+  var last = rows[rows.length-1] || {};
+  var hit=null; for (var k=0;k<rows.length;k++){ if (rows[k].netRev >= p.targetRev){ hit=rows[k].m; break; } }
+  var totRev=0, totEb=0; rows.forEach(function(r){ totRev+=r.netRev; totEb+=r.ebitda; });
+
+  return {rows:rows, s:{
+    be:sustained("ebitda"), pb:sustained("cash"),
+    peak: trough<0 ? -trough : 0, peakM: troughM,
+    targetHit:hit, totMkt:totMkt, totRev:totRev, totEb:totEb,
+    mktRatio: totRev>0 ? totMkt/totRev : 0,
+    revEnd:last.netRev||0, mauEnd:last.mau||0, cumEnd:last.cum||0, cashEnd:last.cash||0,
+    budget1:rows[0]?rows[0].budget:0, budgetEnd:last.budget||0
+  }};
+}
+
+function solveBudget(p){
+  var T = Math.min(Math.max(1,Math.round(p.targetMonth)), p.horizon);
+  var rein = S.scen.filter(function(x){return x.id===S.sel;})[0];
+  var rr = rein ? rein.reinvest : 25;
+  function revAt(b){ var r = simulate(p,{minBudget:b,reinvest:rr},T).rows; return r.length?r[r.length-1].netRev:0; }
+  if (revAt(0) >= p.targetRev) return {budget:0, ok:true, T:T, free:true};
+  var hi = 5e6;
+  if (revAt(hi) < p.targetRev) return {budget:null, ok:false, T:T};
+  var lo=0;
+  for (var i=0;i<64;i++){ var mid=(lo+hi)/2; if (revAt(mid) < p.targetRev) lo=mid; else hi=mid; }
+  return {budget:hi, ok:true, T:T, rr:rr};
+}
+
+/* ===================== chart ===================== */
+var NS="http://www.w3.org/2000/svg";
+function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+function cssVal(v){ var m=/var\((--[\w-]+)\)/.exec(v); if(!m) return v;
+  return getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim()||"#888"; }
+function niceScale(min,max,n){
+  if(!isFinite(min)||!isFinite(max)){min=0;max=1;}
+  if(min===max){min-=1;max+=1;}
+  var span=max-min, step=Math.pow(10,Math.floor(Math.log10(span/n))), err=(span/n)/step;
+  var mult = err>=7.5?10: err>=3?5: err>=1.5?2:1, s=step*mult;
+  return {lo:Math.floor(min/s)*s, hi:Math.ceil(max/s)*s, step:s};
+}
+function drawChart(host, tip, cfg){
+  var old=host.querySelector("svg"); if(old) old.remove();
+  var W=Math.max(280, Math.round(host.getBoundingClientRect().width)), wide=W>=600;
+  var H=Math.round(Math.min(370, Math.max(235, W*0.44)));
+  var mL=62, mR=wide?104:14, mT=14, mB=32, pw=W-mL-mR, ph=H-mT-mB;
+  var xs=cfg.xs, N=xs.length, all=[];
+  cfg.series.forEach(function(s){ s.pts.forEach(function(v){ if(isFinite(v)) all.push(v); }); });
+  var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all);
+  if(cfg.zero){ lo=Math.min(lo,0); hi=Math.max(hi,0); }
+  var sc=niceScale(lo,hi,5);
+  var X=function(i){ return mL + (N<=1?0:(i/(N-1))*pw); };
+  var Y=function(v){ return mT + ph - ((v-sc.lo)/(sc.hi-sc.lo))*ph; };
+  var svg=el("svg",{width:W,height:H,viewBox:"0 0 "+W+" "+H,role:"img","aria-label":cfg.ariaLabel||""});
+
+  (cfg.bands||[]).forEach(function(b){
+    var x0=X(b.x0), x1=X(b.x1); if(x1<=x0) return;
+    svg.appendChild(el("rect",{x:x0,y:mT,width:x1-x0,height:ph,fill:b.fill,opacity:b.op||1}));
+    if(b.label && x1-x0>72){ var t=el("text",{x:x0+7,y:mT+13,class:"mklab",fill:cssVal("var(--ink-3)")});
+      t.textContent=b.label; svg.appendChild(t); }
+  });
+  for(var v=sc.lo; v<=sc.hi+sc.step*0.5; v+=sc.step){
+    var y=Y(v), z=Math.abs(v)<sc.step*1e-6;
+    svg.appendChild(el("line",{x1:mL,y1:y,x2:mL+pw,y2:y,stroke:cssVal(z?"var(--ink-2)":"var(--rule)"),
+      "stroke-width":z?1.5:1,"shape-rendering":"crispEdges"}));
+    var tl=el("text",{x:mL-9,y:y+3.5,class:"tick","text-anchor":"end"});
+    tl.textContent=cfg.yFmt(v); svg.appendChild(tl);
+  }
+  var stepX = N>42?6: N>24?4: N>12?3:2;
+  for(var i=0;i<N;i++){
+    if(i%stepX!==0 && i!==N-1) continue;
+    if(i!==0 && i!==N-1 && (N-1-i)<stepX*0.6) continue;
+    var tx=el("text",{x:X(i),y:H-11,class:"tick","text-anchor":i===0?"start":(i===N-1?"end":"middle")});
+    tx.textContent="M"+xs[i]; svg.appendChild(tx);
+  }
+  cfg.series.forEach(function(s){
+    if(s.fill){
+      var d="M"+X(0)+" "+Y(Math.max(sc.lo,Math.min(sc.hi,0)));
+      for(var i2=0;i2<N;i2++) d+=" L"+X(i2)+" "+Y(s.pts[i2]);
+      d+=" L"+X(N-1)+" "+Y(Math.max(sc.lo,Math.min(sc.hi,0)))+" Z";
+      svg.appendChild(el("path",{d:d,fill:cssVal(s.color),opacity:.09}));
+    }
+    var pp=""; for(var j=0;j<N;j++) pp+=(j?" L":"M")+X(j)+" "+Y(s.pts[j]);
+    var path=el("path",{d:pp,fill:"none",stroke:cssVal(s.color),"stroke-width":s.dash?1.8:2,
+      "stroke-linejoin":"round","stroke-linecap":"round"});
+    if(s.dash) path.setAttribute("stroke-dasharray","5 4");
+    svg.appendChild(path);
+    if(wide && !s.noLabel){
+      var ly=Y(s.pts[N-1]);
+      var lab=el("text",{x:mL+pw+8,y:ly+4,class:"dlab",fill:cssVal(s.color)});
+      lab.textContent=s.name; svg.appendChild(lab);
+      var sub=el("text",{x:mL+pw+8,y:ly+17,class:"tick",fill:cssVal("var(--ink-3)")});
+      sub.textContent=cfg.yFmt(s.pts[N-1]); svg.appendChild(sub);
+    }
+  });
+  var mks=(cfg.markers||[]).map(function(mk){ return {mk:mk, cx:X(mk.x), cy:Y(mk.y)}; })
+                           .sort(function(a,b){ return a.cx-b.cx; });
+  var lastX=-1e9, row=0;
+  mks.forEach(function(o){
+    if(o.cx-lastX < 92) row++; else row=0;
+    lastX=o.cx;
+    o.ly = Math.min(mT+ph-4, Math.max(mT+11, o.cy-12) + row*14);
+  });
+  mks.forEach(function(o){
+    var mk=o.mk, cx=o.cx, cy=o.cy;
+    svg.appendChild(el("line",{x1:cx,y1:mT,x2:cx,y2:mT+ph,stroke:cssVal(mk.color),
+      "stroke-width":1,"stroke-dasharray":"3 3",opacity:.5}));
+    svg.appendChild(el("circle",{cx:cx,cy:cy,r:5.5,fill:cssVal(mk.color),stroke:cssVal("var(--surface)"),"stroke-width":2}));
+    if(mk.label){
+      var an = cx > mL+pw*0.6 ? "end":"start", dx = an==="end"?-9:9;
+      var t=el("text",{x:cx+dx,y:o.ly,class:"mklab",fill:cssVal(mk.color),"text-anchor":an});
+      t.textContent=mk.label; svg.appendChild(t);
+    }
+  });
+  var cross=el("line",{x1:0,y1:mT,x2:0,y2:mT+ph,stroke:cssVal("var(--ink-2)"),"stroke-width":1,opacity:0,"pointer-events":"none"});
+  svg.appendChild(cross);
+  var dots=cfg.series.map(function(s){
+    var c=el("circle",{cx:0,cy:0,r:4.5,fill:cssVal(s.color),stroke:cssVal("var(--surface)"),"stroke-width":2,opacity:0,"pointer-events":"none"});
+    svg.appendChild(c); return c; });
+  var hit=el("rect",{x:mL,y:mT,width:pw,height:ph,fill:"transparent"}); svg.appendChild(hit);
+  function show(ev){
+    var r=svg.getBoundingClientRect(), px=(ev.clientX-r.left)*(W/r.width);
+    var i=Math.max(0,Math.min(N-1,Math.round(((px-mL)/pw)*(N-1))));
+    cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i)); cross.setAttribute("opacity",.35);
+    var html='<div class="th">Month '+xs[i]+' · '+calMonth(xs[i])+'</div>';
+    cfg.series.forEach(function(s,k){
+      dots[k].setAttribute("cx",X(i)); dots[k].setAttribute("cy",Y(s.pts[i])); dots[k].setAttribute("opacity",1);
+      html+='<div class="tr" style="--c:'+cssVal(s.color)+'"><i></i><span>'+s.name+'</span><b>'+cfg.yFmt(s.pts[i],true)+'</b></div>';
+    });
+    tip.innerHTML=html; tip.setAttribute("data-on","1");
+    var tw=tip.offsetWidth||170, left=(X(i)/W)*r.width+14;
+    if(left+tw > r.width-4) left=(X(i)/W)*r.width-tw-14;
+    tip.style.left=Math.max(2,left)+"px"; tip.style.top=Math.max(2,(mT/H)*r.height+6)+"px";
+  }
+  function hide(){ cross.setAttribute("opacity",0); dots.forEach(function(d){d.setAttribute("opacity",0);}); tip.setAttribute("data-on","0"); }
+  hit.addEventListener("pointermove",show); hit.addEventListener("pointerdown",show); hit.addEventListener("pointerleave",hide);
+  host.appendChild(svg);
+}
+
+/* ===================== fields ===================== */
+var MAIN = [
+  {g:"Target", items:[
+    {id:"targetRev",   l:"Target net revenue",  t:"money", suf:"/mo"},
+    {id:"targetMonth", l:"Reach it by month",   t:"int", suf:"mo", min:1, max:60}
+  ]},
+  {g:"Spend response", items:[
+    {id:"satExp",     l:"Saturation exponent", t:"num", step:.05, min:0, max:1.5,
+      h:"0 = every dollar buys visitors at the same price · 0.5 = doubling spend in a city buys ~1.4× the visitors · 1 = spend stops working"},
+    {id:"refPerCity", l:"Reference spend per live city", t:"money", suf:"/mo",
+      h:"below this, no saturation penalty; above it, visitors get dearer"},
+    {id:"cpv",        l:"Cost per paid visitor", t:"num", step:.5, suf:"INR"},
+    {id:"cpvImp",     l:"Cost improvement",    t:"pct", step:.5, suf:"%/mo"},
+    {id:"cpvFloor",   l:"Cost floor",          t:"pct", h:"of the starting cost per visitor"}
+  ]},
+  {g:"Audience build", items:[
+    {id:"returning", l:"Returning next month", t:"pct", h:"of last month's active users"},
+    {id:"organic1",  l:"Organic visitors, M1",  t:"int"},
+    {id:"organicG",  l:"Organic growth",        t:"pct", step:.5, suf:"%/mo"}
+  ]},
+  {g:"Horizon", items:[
+    {id:"horizon",      l:"Planning horizon",  t:"int", min:12, max:60, suf:"mo"},
+    {id:"reinvestFrom", l:"Reinvest from month",t:"int", min:2, max:60, suf:"mo",
+      h:"before this, budget is the floor set on each card"},
+    {id:"fx",           l:"Exchange rate",      t:"num", step:.5, suf:"INR/CAD"}
+  ]}
+];
+var ADV = [
+  {g:"Funnel", items:[
+    {id:"searchPct",  l:"Active users who search", t:"pct"},
+    {id:"viewPct",    l:"Searchers who view a listing", t:"pct"},
+    {id:"mat1",       l:"Booking conversion in M1", t:"pct", h:"share of steady-state conversion — thin supply early"},
+    {id:"matMonths",  l:"Months to steady conversion", t:"int", min:1, max:60}
+  ]},
+  {g:"Brand halo", items:[
+    {id:"haloStart",  l:"Halo at start", t:"pct", h:"extra organic visitors per paid visitor"},
+    {id:"haloSteady", l:"Halo at steady state", t:"pct"},
+    {id:"haloMonths", l:"Months to steady halo", t:"int", min:1, max:60}
+  ]},
+  {g:"Rates & one-offs", items:[
+    {id:"pgPct",   l:"Payment gateway", t:"pct", step:.01, suf:"% GMV"},
+    {id:"promo1",  l:"Promotions, year 1", t:"pct", step:.05, suf:"% GMV"},
+    {id:"promo2",  l:"Promotions, year 2", t:"pct", step:.05, suf:"% GMV"},
+    {id:"promo3",  l:"Promotions, year 3", t:"pct", step:.05, suf:"% GMV"},
+    {id:"taxPct",  l:"Corporate tax", t:"pct", step:.01},
+    {id:"capexM1", l:"Month-1 equipment spend", t:"money"},
+    {id:"cities",  l:"City launch months", t:"list", h:"comma separated, e.g. 1,4,10,18,25"}
+  ]}
+];
+var COST_ROWS = [
+  {k:"salaries", l:"Salaries incl. statutory"},
+  {k:"subs",     l:"Subscriptions &amp; technology"},
+  {k:"office",   l:"Office &amp; administration"},
+  {k:"genable",  l:"Group sales enablement"},
+  {k:"group",    l:"Group sales net revenue"},
+  {k:"capex",    l:"Capital expenditure"},
+  {k:"dep",      l:"Depreciation"}
+];
+var $ = function(id){ return document.getElementById(id); };
+
+function buildFields(host, cfg){
+  host.innerHTML = "";
+  cfg.forEach(function(g){
+    var wrap=document.createElement("div"); wrap.className="grp";
+    var t=document.createElement("div"); t.className="grp-t"; t.textContent=g.g; wrap.appendChild(t);
+    g.items.forEach(function(f){
+      var row=document.createElement("div"); row.className="f";
+      var lab=document.createElement("label"); lab.setAttribute("for","f-"+f.id); lab.textContent=f.l;
+      var box=document.createElement("div"); box.className="in";
+      if(f.t==="money"){ var pre=document.createElement("span"); pre.className="pre"; pre.id="pre-"+f.id; box.appendChild(pre); }
+      var inp=document.createElement("input");
+      inp.id="f-"+f.id;
+      if(f.t==="list"){ inp.type="text"; inp.value=S.p[f.id]; inp.style.textAlign="right"; }
+      else { inp.type="number"; inp.value=S.p[f.id]; inp.step=f.step||(f.t==="money"?100:1);
+             if(f.min!==undefined) inp.min=f.min; if(f.max!==undefined) inp.max=f.max; }
+      box.appendChild(inp);
+      if(f.t==="pct" && !f.suf){ var pc=document.createElement("span"); pc.className="suf"; pc.textContent="%"; box.appendChild(pc); }
+      else if(f.suf){ var su=document.createElement("span"); su.className="suf"; su.textContent=f.suf; box.appendChild(su); }
+      row.appendChild(lab); row.appendChild(box);
+      if(f.t==="money"){ var ec=document.createElement("div"); ec.className="echo"; ec.id="echo-"+f.id; row.appendChild(ec); }
+      if(f.h){ var h=document.createElement("div"); h.className="hint"; h.innerHTML=f.h; row.appendChild(h); }
+      wrap.appendChild(row);
+      inp.addEventListener("input", function(){
+        if(f.t==="list"){ S.p[f.id]=inp.value; save(); render(); return; }
+        var v=parseFloat(inp.value); if(!isFinite(v)) return;
+        if(f.min!==undefined) v=Math.max(f.min,v);
+        if(f.max!==undefined) v=Math.min(f.max,v);
+        S.p[f.id]=v; save(); render();
+      });
+    });
+    host.appendChild(wrap);
+  });
+}
+function buildStreams(){
+  var h='<thead><tr><th>Stream</th><th>Value INR</th><th>Take %</th><th>Conv %</th></tr></thead><tbody>';
+  S.p.streams.forEach(function(s,i){
+    h+='<tr><td>'+s.name+'</td>'+
+       '<td><div class="in"><input type="number" step="100" id="st-abv-'+i+'"></div></td>'+
+       '<td><div class="in"><input type="number" step="0.5" id="st-take-'+i+'"></div></td>'+
+       '<td><div class="in"><input type="number" step="0.1" id="st-conv-'+i+'"></div></td></tr>';
+  });
+  $("streams").innerHTML = h+'</tbody>';
+  S.p.streams.forEach(function(s,i){
+    ["abv","take","conv"].forEach(function(k){
+      var e=$("st-"+k+"-"+i); e.value=s[k];
+      e.addEventListener("input", function(){
+        var v=parseFloat(e.value); if(!isFinite(v)||v<0) return; s[k]=v; save(); render();
+      });
+    });
+  });
+}
+function buildCosts(){
+  var h='<thead><tr><th>Line (CAD/yr)</th><th>Yr 1</th><th>Yr 2</th><th>Yr 3</th></tr></thead><tbody>';
+  COST_ROWS.forEach(function(r){
+    h+='<tr><td>'+r.l+'</td>';
+    for(var y=0;y<3;y++) h+='<td><div class="in"><input type="number" step="1000" id="cs-'+r.k+'-'+y+'"></div></td>';
+    h+='</tr>';
+  });
+  $("costs").innerHTML = h+'</tbody>';
+  COST_ROWS.forEach(function(r){
+    for(var y=0;y<3;y++)(function(y){
+      var e=$("cs-"+r.k+"-"+y); e.value=Math.round(S.p.cost[r.k][y]);
+      e.addEventListener("input", function(){
+        var v=parseFloat(e.value); if(!isFinite(v)||v<0) return; S.p.cost[r.k][y]=v; save(); render();
+      });
+    })(y);
+  });
+}
+function syncChrome(){
+  MAIN.concat(ADV).forEach(function(g){ g.items.forEach(function(f){
+    if(f.t!=="money") return;
+    var pre=$("pre-"+f.id); if(pre) pre.textContent=cc().sym;
+    var ec=$("echo-"+f.id); if(ec) ec.textContent=money(S.p[f.id]);
+  });});
+  var par=isParity();
+  $("parity-t").textContent = par ? "Matches plan of record" : "Adjusted from plan";
+  $("parity").style.background = par ? "var(--accent-soft)" : "var(--well)";
+  $("parity").style.color = par ? "var(--accent-ink)" : "var(--ink-2)";
+}
+
+/* ===================== scenario cards ===================== */
+function buildScenarios(){
+  var host=$("scenarios"); host.innerHTML="";
+  S.scen.forEach(function(sc){
+    var card=document.createElement("div");
+    card.className="scn"; card.style.setProperty("--sc",sc.sv);
+    card.setAttribute("role","button"); card.setAttribute("tabindex","0");
+    card.innerHTML=
+      '<div class="scn-hd"><span class="dot"></span><span class="scn-name">'+sc.name+'</span><span class="scn-tag">'+sc.tag+'</span></div>'+
+      '<div class="scn-row"><label for="mb-'+sc.id+'">Budget floor</label>'+
+      '<div class="in"><span class="pre" id="mbp-'+sc.id+'"></span><input type="number" step="500" min="0" id="mb-'+sc.id+'"></div>'+
+      '<input class="slider" type="range" min="0" max="100" step="1" id="sl-'+sc.id+'" aria-label="'+sc.name+' budget floor"></div>'+
+      '<div class="scn-row"><label for="ri-'+sc.id+'">Reinvest of revenue</label>'+
+      '<div class="in"><input type="number" step="1" min="0" max="90" id="ri-'+sc.id+'"><span class="suf">%</span></div></div>'+
+      '<div class="scn-out" id="out-'+sc.id+'"></div>';
+    host.appendChild(card);
+    function sel(){ S.sel=sc.id; save(); render(); }
+    card.addEventListener("click", function(ev){ if(ev.target.closest("input")) return; sel(); });
+    card.addEventListener("keydown", function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); sel(); } });
+    var mb=$("mb-"+sc.id), sl=$("sl-"+sc.id), ri=$("ri-"+sc.id);
+    mb.value=Math.round(sc.minBudget); ri.value=sc.reinvest;
+    mb.addEventListener("input", function(){ var v=parseFloat(mb.value); if(!isFinite(v)||v<0) return;
+      sc.minBudget=v; S.sel=sc.id; save(); render(); });
+    sl.addEventListener("input", function(){ sc.minBudget=Math.round((parseFloat(sl.value)/100)*60000/500)*500;
+      S.sel=sc.id; save(); render(); });
+    ri.addEventListener("input", function(){ var v=parseFloat(ri.value); if(!isFinite(v)||v<0) return;
+      sc.reinvest=v; S.sel=sc.id; save(); render(); });
+  });
+}
+function paintScenarios(res){
+  S.scen.forEach(function(sc){
+    var card=$("out-"+sc.id).closest(".scn");
+    card.setAttribute("aria-pressed", S.sel===sc.id ? "true":"false");
+    var mb=$("mb-"+sc.id); if(document.activeElement!==mb) mb.value=Math.round(sc.minBudget);
+    var ri=$("ri-"+sc.id); if(document.activeElement!==ri) ri.value=sc.reinvest;
+    var sl=$("sl-"+sc.id); if(document.activeElement!==sl) sl.value=Math.max(0,Math.min(100,(sc.minBudget/60000)*100));
+    $("mbp-"+sc.id).textContent=cc().sym;
+    var s=res[sc.id].s;
+    $("out-"+sc.id).innerHTML='Break-even <b>'+moShort(s.be)+'</b>'+
+      '<span>Payback <b>'+moShort(s.pb)+'</b></span>'+
+      '<span>Peak need <b>'+money(s.peak)+'</b></span>';
+  });
+}
+function paintTiles(r){
+  var s=r.s, p=S.p;
+  $("tiles").innerHTML=[
+    {k:"Operating break-even", v:moShort(s.be), cls:s.be===null?"-crit":(s.be<=12?"-good":""),
+     sub:s.be===null?"still loss-making at month "+p.horizon:"profitable every month from "+calMonth(s.be)},
+    {k:"Cash payback", v:moShort(s.pb), cls:s.pb===null?"-crit":"",
+     sub:s.pb===null?"has not repaid the hole by month "+p.horizon:"cumulative cash back above zero in "+calMonth(s.pb)},
+    {k:"Peak funding need", v:money(s.peak), cls:"",
+     sub:s.peak>0?"deepest at "+moLabel(s.peakM)+" · "+calMonth(s.peakM):"never dips below zero"},
+    {k:"Cumulative cash, M"+p.horizon, v:money(s.cashEnd), cls:s.cashEnd>=0?"-good":"-crit",
+     sub:money(s.revEnd)+" net revenue in the final month · "+intf(s.mauEnd)+" active users"}
+  ].map(function(t){
+    return '<div class="tile '+t.cls+'"><div class="k">'+t.k+'</div><div class="v num">'+t.v+
+           '</div><div class="sub">'+t.sub+'</div></div>';
+  }).join("");
+}
+function legend(host,items){
+  $(host).innerHTML=items.map(function(e){
+    return '<span class="lg" style="--c:'+cssVal(e.color)+'"><i class="'+(e.dash?"-dash":"")+'"></i>'+e.name+'</span>';
+  }).join("");
+}
+function paintJ(res){
+  var N = S.jwin>0 ? Math.min(S.jwin, S.p.horizon) : S.p.horizon;
+  var xs=[]; for(var i=1;i<=N;i++) xs.push(i);
+  var series=S.scen.map(function(sc){
+    return {name:sc.name, color:sc.sv, pts:res[sc.id].rows.slice(0,N).map(function(r){ return r.cash; })};
+  });
+  var lg=S.scen.map(function(sc){ return {name:sc.name+" — "+money(sc.minBudget)+" floor", color:sc.sv}; });
+  if(N<=36){
+    series.push({name:"Plan of record", color:"var(--ink-2)", pts:PUB_CASH.slice(0,N), dash:true, noLabel:true});
+    lg.push({name:"Plan of record (published Scenario A)", color:"var(--ink-2)", dash:true});
+  }
+  var markers=S.scen.map(function(sc){
+    var s=res[sc.id].s; if(s.pb===null||s.pb>N) return null;
+    return {x:s.pb-1, y:res[sc.id].rows[s.pb-1].cash, color:sc.sv, label:"payback M"+s.pb};
+  }).filter(Boolean);
+  legend("legend-j", lg);
+  drawChart($("chart-j"), $("tip-j"), {xs:xs, series:series, markers:markers, zero:true,
+    yFmt:function(v,f){ return f?moneyFull(v):money(v,1); },
+    ariaLabel:"Cumulative cash by month for three marketing budget scenarios against the published plan. Monthly figures are in the ledger table below."});
+}
+function paintCross(res){
+  var r=res[S.sel], scen=S.scen.filter(function(x){return x.id===S.sel;})[0];
+  var xs=r.rows.map(function(x){ return x.m; });
+  $("ct-title").textContent="Net revenue vs. total cost — "+scen.name;
+  var series=[
+    {name:"Net revenue", color:scen.sv, pts:r.rows.map(function(x){ return x.netRev; }), fill:true},
+    {name:"Total cost", color:"var(--ink-2)", pts:r.rows.map(function(x){ return x.opex; }), dash:true}
+  ];
+  var markers=[], bands=[];
+  if(r.s.be!==null){
+    markers.push({x:r.s.be-1, y:r.rows[r.s.be-1].netRev, color:cssVal("var(--good)"), label:"break-even M"+r.s.be});
+    if(r.s.be>1) bands.push({x0:0,x1:r.s.be-1,fill:cssVal("var(--crit)"),op:.06,label:"BURN · "+(r.s.be-1)+" MONTHS"});
+  } else bands.push({x0:0,x1:xs.length-1,fill:cssVal("var(--crit)"),op:.06,label:"BURN · NO BREAK-EVEN IN HORIZON"});
+  legend("legend-c",[{name:"Net revenue",color:scen.sv},{name:"Total cost incl. marketing",color:"var(--ink-2)",dash:true}]);
+  drawChart($("chart-c"), $("tip-c"), {xs:xs, series:series, markers:markers, bands:bands, zero:true,
+    yFmt:function(v,f){ return f?moneyFull(v):money(v,1); },
+    ariaLabel:"Monthly net revenue against total cost for the "+scen.name+" scenario."});
+}
+
+function paintVerdict(res){
+  var byMkt=S.scen.slice().sort(function(a,b){ return res[a.id].s.totMkt - res[b.id].s.totMkt; });
+  var lo=byMkt[0], hi=byMkt[byMkt.length-1];
+  var L=res[lo.id], H=res[hi.id], N=L.rows.length, t="";
+  var cross=null;
+  for(var i=N-1;i>=0;i--){ if(H.rows[i].cash > L.rows[i].cash) cross=i+1; else break; }
+
+  if(H.s.totMkt <= L.s.totMkt*1.02){
+    t="All three scenarios end up spending much the same. Move the budget floors or the reinvestment rates apart to separate the curves.";
+    $("verdict").innerHTML=t; return;
+  }
+
+  t="<b>"+hi.name+"</b> puts <b>"+money(H.s.totMkt-L.s.totMkt)+"</b> more through marketing over "+N+
+    " months than <b>"+lo.name+"</b> \u2014 "+money(H.s.totMkt)+" against "+money(L.s.totMkt)+". ";
+
+  if(H.s.be===null) t+="It has not reached operating break-even inside the horizon. ";
+  else if(L.s.be===null) t+="It breaks even at "+moLabel(H.s.be)+", where "+lo.name+" never does. ";
+  else {
+    var d=H.s.be-L.s.be;
+    t += d>0 ? "That pushes operating break-even out <b>"+d+" month"+(d===1?"":"s")+"</b>, to M"+H.s.be+". "
+       : d<0 ? "Even so it breaks even <b>"+(-d)+" month"+(d===-1?"":"s")+" earlier</b>, at M"+H.s.be+
+               ", because the fixed cost base gets covered sooner. "
+       : "Both break even in M"+H.s.be+". ";
+  }
+  var dp=H.s.peak-L.s.peak;
+  t += dp>0 ? "It digs the cash hole <b>"+money(dp)+"</b> deeper, to <b>"+money(H.s.peak)+"</b>"
+            : "It needs <b>"+money(Math.abs(dp))+"</b> <i>less</i> peak funding \u2014 <b>"+money(H.s.peak)+
+              "</b> against "+money(L.s.peak)+", since thin spend leaves the fixed costs running with nothing to cover them";
+  t += (H.s.pb!==null&&L.s.pb!==null) ? ", and cash payback lands M"+H.s.pb+" against M"+L.s.pb+". " : ". ";
+
+  if(cross===null){
+    t+="Inside this horizon it never overtakes "+lo.name+" on cumulative cash \u2014 stretch the horizon, cut the cost per visitor, or ease the saturation exponent.";
+  } else {
+    t+="It passes "+lo.name+" on cumulative cash in <b>"+moLabel(cross)+"</b> ("+calMonth(cross)+"). ";
+    var dRev=H.s.revEnd-L.s.revEnd, dCash=H.s.cashEnd-L.s.cashEnd;
+    if(dRev>0 && dCash<0){
+      t+="By M"+N+" it is running <b>"+money(dRev)+"</b> more net revenue a month, yet holds <b>"+money(-dCash)+
+         "</b> <i>less</i> cash \u2014 the extra revenue is being spent to buy the next cohort. "+
+         "That is the real question this model puts to you: growth or cash, not both.";
+    } else if(dCash>=0){
+      t+="By M"+N+" it is <b>"+money(dCash)+"</b> ahead on cash and running <b>"+money(dRev)+
+         "</b> more net revenue a month. On this horizon the heavier budget simply wins.";
+    }
+  }
+  var eHi=H.s.totMkt>0?H.s.cashEnd/H.s.totMkt:0, eLo=L.s.totMkt>0?L.s.cashEnd/L.s.totMkt:0;
+  t+=" Every dollar of marketing returns <b>"+eHi.toFixed(2)+"\u00D7</b> in cumulative cash on "+hi.name+
+     ", against <b>"+eLo.toFixed(2)+"\u00D7</b> on "+lo.name+".";
+  $("verdict").innerHTML=t;
+}
+
+var SOLVED=null;
+function paintSolve(){
+  var p=S.p, scen=S.scen.filter(function(x){return x.id===S.sel;})[0];
+  var sol=solveBudget(p);
+  $("solve-note").textContent="budget floor solved to month "+sol.T+", reinvestment held at "+(scen?scen.reinvest:25)+"%";
+  var cells;
+  if(!sol.ok){
+    SOLVED=null;
+    cells=[{k:"Target",v:money(p.targetRev),s:"net revenue a month by M"+sol.T},
+      {k:"Required budget",v:"Out of reach",s:"month "+sol.T+" is too soon at this cost per visitor",key:true},
+      {k:"What to move",v:"—",s:"push the date out, cut the cost per visitor, or lift booking conversion"}];
+  } else {
+    var r=simulate(p,{minBudget:sol.budget,reinvest:sol.rr||25});
+    var row=r.rows[sol.T-1]||{}, base=simulate(p,scen);
+    var spend=0; for(var i=0;i<sol.T && i<r.rows.length;i++) spend+=r.rows[i].budget;
+    SOLVED=sol.budget;
+    cells=[
+      {k:"Active users needed",v:intf(row.mau),s:"monthly, by "+calMonth(sol.T)+" — up from "+intf(base.rows[0]?base.rows[0].mau:0)+" in month 1"},
+      {k:"Bookings needed",v:intf(row.bookings),s:"a month, across all five streams"},
+      {k:"Budget floor",v:money(sol.budget),s:"a month, against "+money(scen?scen.minBudget:0)+" on "+(scen?scen.name:"the selected card"),key:true},
+      {k:"Total marketing to M"+sol.T,v:money(spend),s:"including reinvestment above the floor"},
+      {k:"Break-even on that plan",v:moShort(r.s.be),s:r.s.be===null?"not inside "+p.horizon+" months":"profitable from "+calMonth(r.s.be)},
+      {k:"Peak funding need",v:money(r.s.peak),s:r.s.peak>0?"deepest at "+moLabel(r.s.peakM):"self-funding throughout"}
+    ];
+  }
+  $("solve").innerHTML=cells.map(function(c){
+    return '<div class="cell '+(c.key?"-key":"")+'"><div class="k">'+c.k+'</div><div class="v num">'+c.v+
+           '</div><div class="s">'+c.s+'</div></div>';
+  }).join("");
+  var btn=$("apply-solve");
+  btn.disabled=SOLVED===null; btn.style.opacity=SOLVED===null?.45:1;
+  btn.textContent="Load this budget into "+(scen?scen.name:"the selected scenario");
+}
+
+function paintFunnel(res){
+  var r=res[S.sel], scen=S.scen.filter(function(x){return x.id===S.sel;})[0];
+  var m=Math.min(S.p.targetMonth, r.rows.length), row=r.rows[m-1];
+  $("fn-title").textContent="People behind the number — "+scen.name;
+  $("fn-note").textContent="month "+m+" · "+calMonth(m);
+  var searches=row.mau*(S.p.searchPct/100), views=searches*(S.p.viewPct/100);
+  $("funnel").innerHTML=[
+    {k:"Paid visitors",v:intf(row.paid),r:money(row.budget)+" at "+(row.cpv).toFixed(1)+" INR each"},
+    {k:"Organic + halo",v:intf(row.organic+row.halo),r:"+ "+intf(row.ret)+" returning"},
+    {k:"Active users",v:intf(row.mau),r:S.p.searchPct+"% search"},
+    {k:"Searches",v:intf(searches),r:S.p.viewPct+"% view"},
+    {k:"Listing views",v:intf(views),r:(row.bookings/views*100).toFixed(2)+"% book"},
+    {k:"Bookings",v:intf(row.bookings),r:money(row.netRev)+" revenue"}
+  ].map(function(f){
+    return '<div class="fstep"><div class="k">'+f.k+'</div><div class="v num">'+f.v+'</div><div class="r">'+f.r+'</div></div>';
+  }).join("");
+  var per=row.per.slice().sort(function(a,b){ return b.rev-a.rev; });
+  var max=per.length?per[0].rev:1, tot=row.netRev||1;
+  var h='<div style="font:500 10px \'IBM Plex Mono\',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Commission by stream · month '+m+'</div>';
+  per.forEach(function(x){
+    h+='<div class="mixrow" style="--sc:'+cssVal(scen.sv)+'"><span class="nm">'+x.name+'</span>'+
+       '<span class="bar"><i style="width:'+Math.max(1,(x.rev/max)*100)+'%"></i></span>'+
+       '<span class="vv">'+money(x.rev)+'</span><span class="pp">'+(x.rev/tot*100).toFixed(0)+'%</span></div>';
+  });
+  h+='<div class="mixrow" style="--sc:'+cssVal("var(--ink-3)")+'"><span class="nm">Group sales (B2B)</span>'+
+     '<span class="bar"><i style="width:'+Math.max(1,(row.group/max)*100)+'%"></i></span>'+
+     '<span class="vv">'+money(row.group)+'</span><span class="pp">'+(row.group/tot*100).toFixed(0)+'%</span></div>';
+  $("mix").innerHTML=h;
+}
+
+function paintCompare(res){
+  var p=S.p;
+  var rows=[
+    {l:"Budget floor",         f:function(s){return money(s.budget1);},  v:function(s){return s.budget1;}, d:0},
+    {l:"Budget in month "+p.horizon, f:function(s){return money(s.budgetEnd);}, v:function(s){return s.budgetEnd;}, d:0},
+    {l:"Total marketing",      f:function(s){return money(s.totMkt);},   v:function(s){return s.totMkt;},  d:0},
+    {l:"Operating break-even", f:function(s){return moShort(s.be);},     v:function(s){return s.be===null?1e9:s.be;}, d:-1},
+    {l:"Cash payback",         f:function(s){return moShort(s.pb);},     v:function(s){return s.pb===null?1e9:s.pb;}, d:-1},
+    {l:"Peak funding need",    f:function(s){return money(s.peak);},     v:function(s){return s.peak;},    d:-1},
+    {l:"Target hit",           f:function(s){return s.targetHit===null?"missed":moShort(s.targetHit);}, v:function(s){return s.targetHit===null?1e9:s.targetHit;}, d:-1},
+    {l:"Active users, M"+p.horizon, f:function(s){return intf(s.mauEnd);}, v:function(s){return s.mauEnd;}, d:1},
+    {l:"Net revenue, M"+p.horizon,  f:function(s){return money(s.revEnd);}, v:function(s){return s.revEnd;}, d:1},
+    {l:"Cumulative EBITDA",    f:function(s){return money(s.cumEnd);},   v:function(s){return s.cumEnd;},  d:1},
+    {l:"Cumulative cash",      f:function(s){return money(s.cashEnd);},  v:function(s){return s.cashEnd;}, d:1},
+    {l:"Marketing as % of revenue", f:function(s){return (s.mktRatio*100).toFixed(1)+"%";}, v:function(s){return s.mktRatio;}, d:-1},
+    {l:"Cash returned per 1 of marketing", f:function(s){return s.totMkt>0?(s.cashEnd/s.totMkt).toFixed(2)+"\u00D7":"\u2014";}, v:function(s){return s.totMkt>0?s.cashEnd/s.totMkt:-1e9;}, d:1}
+  ];
+  var head='<thead><tr><th>Metric</th>'+S.scen.map(function(sc){
+    return '<th style="--c:'+cssVal(sc.sv)+'"><span class="sw"></span>'+sc.name+'</th>'; }).join("")+'</tr></thead>';
+  var body=rows.map(function(r){
+    var vals=S.scen.map(function(sc){ return r.v(res[sc.id].s); }), bi=-1;
+    if(r.d!==0){
+      var best=r.d>0?Math.max.apply(null,vals):Math.min.apply(null,vals);
+      if(vals.filter(function(v){return v===best;}).length < vals.length) bi=vals.indexOf(best);
+    }
+    return '<tr><td>'+r.l+'</td>'+S.scen.map(function(sc,i){
+      return '<td>'+r.f(res[sc.id].s)+(i===bi?'<span class="best" title="strongest"></span>':'')+'</td>'; }).join("")+'</tr>';
+  }).join("");
+  $("cmp").innerHTML=head+'<tbody>'+body+'</tbody>';
+}
+
+function paintLedger(res){
+  var scen=S.scen.filter(function(x){return x.id===S.sel;})[0], r=res[S.sel];
+  $("led-title").textContent="Monthly ledger — "+scen.name;
+  var head='<thead><tr><th>Month</th><th>Marketing</th><th>Paid visitors</th><th>Active users</th><th>Bookings</th>'+
+    '<th>GMV</th><th>Net revenue</th><th>Total cost</th><th>EBITDA</th><th>Cumulative cash</th></tr></thead>';
+  var body="";
+  r.rows.forEach(function(x){
+    var cls = (r.s.be!==null && x.m===r.s.be) ? ' class="-be"' : "";
+    body+='<tr'+cls+'><td>M'+x.m+' · '+calMonth(x.m)+'</td><td>'+money(x.budget)+'</td><td>'+intf(x.paid)+
+      '</td><td>'+intf(x.mau)+'</td><td>'+intf(x.bookings)+'</td><td>'+money(x.gmv)+'</td><td>'+money(x.netRev)+
+      '</td><td>'+money(x.opex)+'</td><td>'+money(x.ebitda)+'</td><td>'+money(x.cash)+'</td></tr>';
+    if(x.m%12===0){
+      var y=x.m/12, f=r.rows.slice(x.m-12,x.m), sum=function(k){ var t=0; f.forEach(function(z){t+=z[k];}); return t; };
+      body+='<tr class="-yr"><td>Year '+y+' total</td><td>'+money(sum("budget"))+'</td><td>'+intf(sum("paid"))+
+        '</td><td>'+intf(x.mau)+'</td><td>'+intf(sum("bookings"))+'</td><td>'+money(sum("gmv"))+'</td><td>'+
+        money(sum("netRev"))+'</td><td>'+money(sum("opex"))+'</td><td>'+money(sum("ebitda"))+'</td><td>'+money(x.cash)+'</td></tr>';
+    }
+  });
+  $("ledger").innerHTML=head+'<tbody>'+body+'</tbody>';
+}
+
+function paintFoot(){
+  var p=S.p;
+  $("foot").innerHTML=
+    '<h3>How the model works</h3>'+
+    '<p>Marketing buys <b>paid visitors</b> at a blended cost per visitor. Two forces pull that cost in opposite '+
+    'directions: creative and targeting improve it by <code>'+p.cpvImp+'%</code> a month down to a floor of <code>'+
+    p.cpvFloor+'%</code>, while <b>saturation</b> pushes it up once spend in a live city passes <code>'+money(p.refPerCity)+
+    '</code> a month — <code>cost × (spend per city ÷ reference)^'+p.satExp+'</code>. At an exponent of '+p.satExp+
+    ', doubling the spend in a city buys about '+Math.pow(2,1-p.satExp).toFixed(2)+'× the visitors, not 2×. That single '+
+    'exponent is why more budget is not simply better.</p>'+
+    '<p>Paid visitors bring organic traffic with them (a brand halo rising from <code>'+p.haloStart+'%</code> to <code>'+
+    p.haloSteady+'%</code> of paid), on top of a compounding SEO base and <code>'+p.returning+'%</code> of last month’s users '+
+    'returning. Those active users search, view listings and book. Booking conversion starts at <code>'+p.mat1+
+    '%</code> of steady state and matures over <code>'+p.matMonths+'</code> months as supply thickens. Bookings × average '+
+    'booking value gives GMV; GMV × take rate gives commission. Group sales (schools, corporate offsites, MICE) are '+
+    'added as a separate B2B line.</p>'+
+    '<p>From month <code>'+p.reinvestFrom+'</code> the budget stops being a fixed floor and becomes '+
+    '<code>max(floor, reinvestment % × last month’s net revenue)</code> — the flywheel that makes the late curve steepen.</p>'+
+    '<h3>Reading the three numbers</h3>'+
+    '<p><b>Operating break-even</b> is the first month from which monthly EBITDA stays positive for the rest of the horizon. '+
+    '<b>Cash payback</b> is the month cumulative cash climbs back through zero — always later, and the one that decides how '+
+    'much funding the plan actually needs. <b>Peak funding need</b> is the deepest point of that curve. Raising the budget '+
+    'moves all three later and deeper before it pays; the crossover month in the finding above is where patience starts earning.</p>'+
+    '<h3>Where the numbers come from</h3>'+
+    '<p>Defaults are the Vacario India Growth Plan, Scenario A (36 months from Sep-2026): commission rates, average booking '+
+    'values and conversion by stream, the CAD 15,000 monthly floor with 25% reinvestment from year 2, saturation exponent 0.5, '+
+    'reference spend of CAD 15,000 per live city, cities launching in months 1, 4, 10, 18 and 25, payment gateway at 2.36% of GMV, '+
+    '12% statutory load already inside the salary line, 25.17% corporate tax and CAD/INR at 68. Run at these settings the traffic '+
+    'engine reproduces the plan’s published monthly active users to within a rounding error — 72,510 in month 1, '+
+    '1,349,092 against 1,349,153 in month 24 — and the dashed line on the J-curve is the plan’s own published cash track, '+
+    'so any divergence you create is visible against it.</p>'+
+    '<p><b>Two things to know.</b> Group sales revenue is spread as a straight ramp across year 1 and evenly thereafter, because '+
+    'the plan states only annual totals for that line; early months therefore differ slightly from the published series. And the '+
+    'earlier 12-month workbook reports peak funding of CAD 31,510 on its dashboard — that is month 1 alone. Its own cash flow '+
+    'sums to CAD 116,177, which is the figure that plan actually has to fund.</p>'+
+    '<p>This is a planning model, not a forecast. Treat break-even months as ranges and re-run it against real cost per visitor '+
+    'and booking conversion once live cohorts land.</p>';
+}
+
+/* ===================== orchestration ===================== */
+var LAST=null;
+function render(){
+  var p=S.p;
+  p.horizon=Math.max(12,Math.min(60,Math.round(p.horizon)));
+  p.targetMonth=Math.max(1,Math.min(p.horizon,Math.round(p.targetMonth)));
+  var res={};
+  S.scen.forEach(function(sc){ res[sc.id]=simulate(p,sc); });
+  if(!res[S.sel]) S.sel=S.scen[0].id;
+  LAST=res;
+  syncChrome(); paintScenarios(res); paintTiles(res[S.sel]);
+  paintJ(res); paintCross(res); paintVerdict(res); paintSolve();
+  paintFunnel(res); paintCompare(res); paintLedger(res); paintFoot();
+}
+function boot(){
+  resetAll(); load();
+  $("currency").value=S.currency;
+  buildFields($("fields"),MAIN); buildFields($("fields-adv"),ADV);
+  buildStreams(); buildCosts(); buildScenarios();
+  render();
+
+  $("currency").addEventListener("change",function(){ S.currency=$("currency").value; save(); render(); });
+  $("reset").addEventListener("click",function(){
+    resetAll(); try{ localStorage.removeItem("vbe.v2"); }catch(e){}
+    $("currency").value=S.currency;
+    buildFields($("fields"),MAIN); buildFields($("fields-adv"),ADV);
+    buildStreams(); buildCosts(); buildScenarios(); render();
+  });
+  $("apply-solve").addEventListener("click",function(){
+    if(SOLVED===null) return;
+    var sc=S.scen.filter(function(x){return x.id===S.sel;})[0];
+    sc.minBudget=Math.round(SOLVED); save(); render();
+    $("apply-msg").textContent="Loaded into "+sc.name+".";
+    setTimeout(function(){ $("apply-msg").textContent=""; },3200);
+  });
+  Array.prototype.forEach.call($("jwin").querySelectorAll("button"),function(b){
+    b.addEventListener("click",function(){
+      S.jwin=parseInt(b.getAttribute("data-w"),10);
+      Array.prototype.forEach.call($("jwin").querySelectorAll("button"),function(o){
+        o.setAttribute("aria-pressed", o===b ? "true":"false"); });
+      if(LAST) paintJ(LAST);
+    });
+  });
+  var t;
+  window.addEventListener("resize",function(){ clearTimeout(t);
+    t=setTimeout(function(){ if(LAST){ paintJ(LAST); paintCross(LAST); } },140); });
+  var mq=window.matchMedia("(prefers-color-scheme: dark)");
+  if(mq.addEventListener) mq.addEventListener("change",function(){ if(LAST){ paintJ(LAST); paintCross(LAST); } });
+  new MutationObserver(function(){ if(LAST){ paintJ(LAST); paintCross(LAST); } })
+    .observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+})();
+</script>
+
+</body>
+</html>
