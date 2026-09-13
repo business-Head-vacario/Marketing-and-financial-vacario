@@ -1,0 +1,354 @@
+// Vacario — travel social network + agent marketplace.
+// SQLite by default so the app runs with zero infrastructure; switch `provider`
+// to "postgresql" and re-run `prisma migrate dev` for production.
+// SQLite has no enum or array support, so enum-like columns are Strings whose
+// allowed values live in src/lib/constants.ts, and lists are JSON strings.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("TRAVELLER") // TRAVELLER | AGENT | ADMIN
+  avatarUrl    String?
+  coverUrl     String?
+  bio          String?
+  homeCity     String?
+  country      String?
+  website      String?
+  interests    String   @default("[]") // JSON string[]
+  travelStyle  String?
+  onboarded    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  agency        Agency?
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  saves         Save[]
+  itineraries   Itinerary[]
+  bookings      Booking[]
+  reviews       Review[]
+  following     Follow[]       @relation("follower")
+  followers     Follow[]       @relation("following")
+  notifications Notification[] @relation("recipient")
+  actorOf       Notification[] @relation("actor")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  authorId     String
+  type         String   @default("PHOTO") // PHOTO | REEL | THREESIXTY | ITINERARY
+  caption      String   @default("")
+  locationName String?
+  country      String?
+  lat          Float?
+  lng          Float?
+  tags         String   @default("[]") // JSON string[]
+  budget       Float?
+  currency     String   @default("INR")
+  tripMonth    String?
+  rating       Int?
+  itineraryId  String?
+  packageId    String?
+  agencyId     String?
+  createdAt    DateTime @default(now())
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  itinerary Itinerary? @relation(fields: [itineraryId], references: [id], onDelete: SetNull)
+  package   Package?   @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  agency    Agency?    @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  media     Media[]
+  comments  Comment[]
+  likes     Like[]
+  saves     Save[]
+
+  @@index([type, createdAt])
+  @@index([authorId])
+}
+
+model Media {
+  id        String  @id @default(cuid())
+  postId    String
+  url       String
+  kind      String  @default("IMAGE") // IMAGE | VIDEO | PANORAMA
+  posterUrl String?
+  alt       String?
+  order     Int     @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model Like {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Save {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Itinerary {
+  id           String   @id @default(cuid())
+  authorId     String
+  title        String
+  destination  String
+  country      String?
+  summary      String   @default("")
+  days         Int      @default(1)
+  budget       Float?
+  currency     String   @default("INR")
+  coverUrl     String?
+  style        String? // BACKPACKING | LUXURY | FAMILY | SOLO | ROADTRIP | HONEYMOON
+  bestSeason   String?
+  tags         String   @default("[]")
+  isPublic     Boolean  @default(true)
+  forkedFromId String?
+  createdAt    DateTime @default(now())
+
+  author   User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  dayPlans ItineraryDay[]
+  posts    Post[]
+
+  @@index([authorId])
+}
+
+model ItineraryDay {
+  id          String @id @default(cuid())
+  itineraryId String
+  dayNumber   Int
+  title       String @default("")
+  notes       String @default("")
+
+  itinerary Itinerary       @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  stops     ItineraryStop[]
+
+  @@index([itineraryId])
+}
+
+model ItineraryStop {
+  id       String  @id @default(cuid())
+  dayId    String
+  order    Int     @default(0)
+  time     String?
+  title    String
+  place    String?
+  note     String?
+  cost     Float?
+  category String  @default("ACTIVITY") // STAY | FOOD | ACTIVITY | TRANSPORT | SIGHT
+
+  day ItineraryDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
+}
+
+model Agency {
+  id              String   @id @default(cuid())
+  ownerId         String   @unique
+  name            String
+  slug            String   @unique
+  tagline         String   @default("")
+  about           String   @default("")
+  logoUrl         String?
+  coverUrl        String?
+  city            String
+  country         String   @default("India")
+  address         String?
+  phone           String
+  email           String
+  website         String?
+  licenseNo       String?
+  gstNo           String?
+  yearsInBusiness Int      @default(0)
+  teamSize        Int      @default(1)
+  specialties     String   @default("[]") // JSON string[]
+  languages       String   @default("[]")
+  status          String   @default("PENDING") // PENDING | VERIFIED | REJECTED
+  reviewNote      String?
+  createdAt       DateTime @default(now())
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  packages Package[]
+  bookings Booking[]
+  reviews  Review[]
+  posts    Post[]
+}
+
+model Package {
+  id              String    @id @default(cuid())
+  agencyId        String
+  title           String
+  slug            String    @unique
+  destination     String
+  country         String    @default("India")
+  startCity       String?
+  summary         String    @default("")
+  description     String    @default("")
+  category        String    @default("ADVENTURE")
+  durationDays    Int       @default(1)
+  durationNights  Int       @default(0)
+  price           Float
+  currency        String    @default("INR")
+  discountPercent Int       @default(0)
+  minGuests       Int       @default(1)
+  maxGuests       Int       @default(12)
+  inclusions      String    @default("[]")
+  exclusions      String    @default("[]")
+  highlights      String    @default("[]")
+  images          String    @default("[]") // JSON string[]
+  coverUrl        String?
+  availableFrom   DateTime?
+  availableTo     DateTime?
+  instantBook     Boolean   @default(true)
+  status          String    @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
+  createdAt       DateTime  @default(now())
+
+  agency   Agency       @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  dayPlans PackageDay[]
+  bookings Booking[]
+  reviews  Review[]
+  posts    Post[]
+
+  @@index([agencyId])
+  @@index([destination])
+}
+
+model PackageDay {
+  id          String @id @default(cuid())
+  packageId   String
+  dayNumber   Int
+  title       String
+  description String @default("")
+  meals       String @default("")
+  stay        String @default("")
+
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId])
+}
+
+model Booking {
+  id             String   @id @default(cuid())
+  reference      String   @unique
+  packageId      String
+  agencyId       String
+  userId         String
+  travelDate     DateTime
+  guests         Int      @default(1)
+  travellerName  String
+  travellerEmail String
+  travellerPhone String
+  notes          String   @default("")
+  subtotal       Float
+  discount       Float    @default(0)
+  taxes          Float    @default(0)
+  total          Float
+  currency       String   @default("INR")
+  status         String   @default("PENDING") // PENDING | CONFIRMED | CANCELLED | COMPLETED
+  createdAt      DateTime @default(now())
+
+  package Package  @relation(fields: [packageId], references: [id])
+  agency  Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment Payment?
+
+  @@index([userId])
+  @@index([agencyId])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  amount    Float
+  currency  String   @default("INR")
+  method    String   @default("MOCK_CARD") // MOCK_CARD | MOCK_UPI | PAY_AT_AGENCY
+  status    String   @default("PAID") // PAID | UNPAID | REFUNDED
+  reference String
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  agencyId  String
+  userId    String
+  packageId String?
+  rating    Int      @default(5)
+  body      String   @default("")
+  createdAt DateTime @default(now())
+
+  agency  Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package Package? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+
+  @@index([agencyId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  actorId   String?
+  type      String // LIKE | COMMENT | FOLLOW | BOOKING | BOOKING_STATUS | AGENCY_STATUS
+  message   String
+  href      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  User  @relation("recipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("actor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read])
+}

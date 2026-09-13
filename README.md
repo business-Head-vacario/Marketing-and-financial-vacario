@@ -222,3 +222,21 @@ Display currency toggles between CAD and INR at the model's exchange rate. All i
 
 A planning model, not a forecast. Treat break-even months as ranges, and re-run against real cost per
 visitor and booking conversion once live cohorts land.
+
+---
+
+## Also in this repo: `vacario-app/`
+
+A full-stack **Vacario travel app** — the social product the budget model above is planning for.
+Next.js 16 + Prisma: a travel feed (photos, reels, 360° panoramas), day-by-day itineraries,
+travel-agency portfolios, bookable packages with checkout, an agent dashboard and an admin
+verification console.
+
+```sh
+cd vacario-app
+npm install && cp .env.example .env
+npm run setup && npm run dev     # http://localhost:3000
+```
+
+See [`vacario-app/README.md`](vacario-app/README.md) for the feature list, API reference,
+demo logins and deployment notes.
