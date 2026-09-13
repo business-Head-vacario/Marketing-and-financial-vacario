@@ -208,6 +208,36 @@ tr.-yr td{background:var(--well); font-weight:600}
 .foot code{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-2); background:var(--well); padding:1px 4px; border-radius:2px}
 .foot b{color:var(--ink-2)}
 .stack{display:flex; flex-direction:column; gap:18px; min-width:0}
+.tabs{display:flex; gap:2px; margin-bottom:18px; border-bottom:1px solid var(--rule); flex-wrap:wrap}
+.tabs button{font:500 12px 'IBM Plex Mono',monospace; letter-spacing:.05em; background:none; border:0;
+  border-bottom:2px solid transparent; color:var(--ink-3); padding:9px 13px; cursor:pointer; margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+.chk{display:grid; grid-template-columns:26px minmax(0,1fr) auto; gap:3px 12px; padding:13px 14px; border-bottom:1px solid var(--rule)}
+.chk:last-child{border-bottom:0}
+.chk .ic{grid-row:1/3; width:22px; height:22px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font:700 12px 'IBM Plex Mono',monospace; color:#fff}
+.chk.-ok .ic{background:var(--good)} .chk.-warn .ic{background:var(--warn); color:#3a2a00} .chk.-bad .ic{background:var(--crit)}
+.chk .t{font-weight:500; font-size:13px}
+.chk .d{grid-column:2; font-size:12px; color:var(--ink-2); line-height:1.45}
+.chk .m{grid-column:3; grid-row:1/3; text-align:right; font:600 12.5px 'IBM Plex Mono',monospace;
+  font-variant-numeric:tabular-nums; white-space:nowrap}
+.chk .m small{display:block; font:400 10.5px 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:3px}
+.exp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+.exp{border:1px solid var(--rule); border-radius:4px; padding:14px; background:var(--surface); display:flex; flex-direction:column; gap:9px}
+.exp h3{margin:0; font:600 13px 'IBM Plex Sans Condensed',sans-serif}
+.exp p{margin:0; font-size:12px; color:var(--ink-2); line-height:1.45; flex:1}
+.exp .row{display:flex; gap:7px; flex-wrap:wrap}
+button.sec{font:500 11.5px 'IBM Plex Mono',monospace; background:var(--well); color:var(--ink);
+  border:1px solid var(--rule-2); border-radius:3px; padding:8px 11px; cursor:pointer}
+button.sec:hover{border-color:var(--accent); color:var(--accent)}
+.dlmsg{font-size:11.5px; color:var(--ink-3); min-height:16px}
+.prev{background:var(--well); border-radius:4px; padding:13px 15px; max-height:400px; overflow:auto}
+.prev h4{margin:0 0 4px; font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.prev .l{display:flex; justify-content:space-between; gap:14px; padding:4px 0; font-size:12.5px; border-bottom:1px solid var(--rule)}
+.prev .l:last-child{border-bottom:0}
+.prev .l b{font:600 12.5px 'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; white-space:nowrap}
+.prev .sec2{margin-top:14px}
 :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:2px}
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
 </style>
@@ -221,18 +251,22 @@ tr.-yr td{background:var(--well); font-weight:600}
     </div>
     <div class="mast-ctl">
       <span class="badge" id="parity"><i></i><span id="parity-t">Scenario A parity</span></span>
+      <select class="cur" id="preset" aria-label="Model preset">
+        <option value="planA">Growth Plan A &middot; 36 mo</option>
+        <option value="y1">Year 1 lean &middot; 12 mo</option>
+      </select>
       <select class="cur" id="currency" aria-label="Display currency">
         <option value="CAD">CA$ CAD</option>
         <option value="INR">&#8377; INR</option>
       </select>
-      <button class="ghost" id="reset" type="button">Reset to plan</button>
+      <button class="ghost" id="reset" type="button">Reset assumptions</button>
     </div>
   </header>
 
   <div class="deck">
     <aside class="rail">
       <section class="panel">
-        <div class="panel-hd"><h2>Model inputs</h2><span class="note">Scenario A defaults</span></div>
+        <div class="panel-hd"><h2>Model inputs</h2><span class="note" id="rail-note"></span></div>
         <div class="panel-bd">
           <div id="fields"></div>
           <details class="adv">
@@ -251,7 +285,13 @@ tr.-yr td{background:var(--well); font-weight:600}
       </section>
     </aside>
 
-    <main class="stack">
+    <main>
+      <nav class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab-model"    data-v="model"    aria-selected="true">Model</button>
+        <button type="button" role="tab" id="tab-traction" data-v="traction" aria-selected="false">Traction check</button>
+        <button type="button" role="tab" id="tab-export"   data-v="export"   aria-selected="false">Export</button>
+      </nav>
+      <div id="view-model" class="stack">
       <section>
         <div class="panel-hd" style="border:0; padding:0 0 10px">
           <h2>Budget scenarios</h2><span class="note">click a card to drive the detail views</span>
@@ -315,6 +355,49 @@ tr.-yr td{background:var(--well); font-weight:600}
       </section>
 
       <footer class="foot" id="foot"></footer>
+      </div>
+
+      <div id="view-traction" class="stack" hidden>
+        <section class="panel">
+          <div class="panel-hd"><h2>Traction check</h2><span class="note" id="chk-note"></span></div>
+          <div class="panel-bd" style="padding:0" id="checks"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-hd"><h2>Benchmarks used</h2><span class="note">from the plan&rsquo;s own sources</span></div>
+          <div class="panel-bd"><div class="tw"><table class="dt" id="bench"></table></div></div>
+        </section>
+      </div>
+
+      <div id="view-export" class="stack" hidden>
+        <section class="panel">
+          <div class="panel-hd"><h2>Download for stakeholders</h2><span class="note" id="exp-note"></span></div>
+          <div class="panel-bd">
+            <div class="exp-grid">
+              <div class="exp">
+                <h3>Excel workbook</h3>
+                <p>Five sheets: headline summary, every assumption with its value, the month-by-month ledger, the scenario comparison and the traction check. Figures as numbers, ready to chart.</p>
+                <div class="row">
+                  <button class="act" id="dl-xlsx" type="button">Download .xlsx</button>
+                  <button class="sec" id="dl-csv" type="button">Copy ledger as CSV</button>
+                </div>
+              </div>
+              <div class="exp">
+                <h3>Word summary</h3>
+                <p>A plain-language brief: what the plan is, what it costs, when it breaks even, what has to be funded and which assumptions carry the risk. Written to be read by someone who will not open the model.</p>
+                <div class="row">
+                  <button class="act" id="dl-doc" type="button">Download .doc</button>
+                  <button class="sec" id="dl-text" type="button">Copy as text</button>
+                </div>
+              </div>
+            </div>
+            <div class="dlmsg" id="dlmsg" role="status" style="margin-top:11px"></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-hd"><h2>What the stakeholder sees</h2><span class="note">live preview of the summary</span></div>
+          <div class="panel-bd"><div class="prev" id="preview"></div></div>
+        </section>
+      </div>
     </main>
   </div>
 </div>
@@ -402,18 +485,18 @@ var SCEN_DEF = [
   {id:"push", name:"Push",       tag:"land",   minBudget:30000, reinvest:45, sv:"var(--s3)"}
 ];
 
-var S = {currency:"CAD", p:baseParams(), scen:null, sel:"planA", jwin:0};
+var S = {currency:"CAD", p:baseParams(), scen:null, sel:"planA", jwin:0, preset:"planA", view:"model"};
 function resetAll(){
-  S.p = baseParams();
-  S.scen = SCEN_DEF.map(function(s){ return {id:s.id,name:s.name,tag:s.tag,minBudget:s.minBudget,reinvest:s.reinvest,sv:s.sv}; });
-  S.sel = "planA"; S.currency = "CAD"; S.jwin = 0;
+  S.currency = "CAD"; S.view = "model";
+  applyPreset(S.preset || "planA");
 }
-function save(){ try{ localStorage.setItem("vbe.v2", JSON.stringify({c:S.currency,p:S.p,s:S.scen,sel:S.sel})); }catch(e){} }
+function save(){ try{ localStorage.setItem("vbe.v2", JSON.stringify({c:S.currency,p:S.p,s:S.scen,sel:S.sel,pr:S.preset})); }catch(e){} }
 function load(){
   try{
     var raw = localStorage.getItem("vbe.v2"); if(!raw) return;
     var o = JSON.parse(raw); if(!o||!o.p) return;
-    var d = baseParams();
+    if(o.pr && PRESETS[o.pr]){ S.preset=o.pr; S.p=PRESETS[o.pr].params(); }
+    var d = (PRESETS[S.preset]||PRESETS.planA).params();
     Object.keys(d).forEach(function(k){
       if (k==="streams"||k==="cost") return;
       if (typeof d[k]==="number" && typeof o.p[k]==="number" && isFinite(o.p[k])) S.p[k]=o.p[k];
@@ -434,7 +517,7 @@ function load(){
   }catch(e){}
 }
 function isParity(){
-  var d = baseParams(), p = S.p, same = true;
+  var d = (PRESETS[S.preset]||PRESETS.planA).params(), p = S.p, same = true;
   Object.keys(d).forEach(function(k){
     if (k==="streams"||k==="cost"||k==="targetRev"||k==="targetMonth") return;
     if (typeof d[k]==="number"){ if (Math.abs(d[k]-p[k]) > 1e-9) same=false; }
@@ -794,8 +877,9 @@ function syncChrome(){
     var pre=$("pre-"+f.id); if(pre) pre.textContent=cc().sym;
     var ec=$("echo-"+f.id); if(ec) ec.textContent=money(S.p[f.id]);
   });});
-  var par=isParity();
-  $("parity-t").textContent = par ? "Matches plan of record" : "Adjusted from plan";
+  var par=isParity(), pl=(PRESETS[S.preset]||PRESETS.planA).label;
+  var rn=$("rail-note"); if(rn) rn.textContent=pl+" defaults";
+  $("parity-t").textContent = par ? ("Matches "+pl) : ("Adjusted from "+pl);
   $("parity").style.background = par ? "var(--accent-soft)" : "var(--well)";
   $("parity").style.color = par ? "var(--accent-ink)" : "var(--ink-2)";
 }
@@ -1092,6 +1176,13 @@ function paintFoot(){
     '<b>Cash payback</b> is the month cumulative cash climbs back through zero — always later, and the one that decides how '+
     'much funding the plan actually needs. <b>Peak funding need</b> is the deepest point of that curve. Raising the budget '+
     'moves all three later and deeper before it pays; the crossover month in the finding above is where patience starts earning.</p>'+
+    '<h3>Two models in one tool</h3>'+
+    '<p>The preset selector switches between the two plans on file. <b>Growth Plan A</b> is the 36-month plan of '+
+    'record, with saturation, a brand halo, a conversion ramp and reinvestment from year 2. <b>Year 1 lean</b> is the '+
+    'conservative 12-month criteria set: a flat CAD 15,000 budget, fixed paid visitors, no halo, no saturation and full '+
+    'conversion from launch. Each preset loads its own assumptions, cost base and scenario floors. The '+
+    '<b>Traction check</b> tab audits whichever set is loaded against benchmarks drawn from the plan\u2019s own sources, '+
+    'and the <b>Export</b> tab writes the whole thing out as a workbook or a stakeholder brief.</p>'+
     '<h3>Where the numbers come from</h3>'+
     '<p>Defaults are the Vacario India Growth Plan, Scenario A (36 months from Sep-2026): commission rates, average booking '+
     'values and conversion by stream, the CAD 15,000 monthly floor with 25% reinvestment from year 2, saturation exponent 0.5, '+
@@ -1108,6 +1199,441 @@ function paintFoot(){
     'and booking conversion once live cohorts land.</p>';
 }
 
+/* ===================== Year 1 lean preset (client criteria) ===================== */
+function y1Params(){
+  var FXR=68.3, C=function(cad){ return cad*FXR; };
+  return {
+    horizon:12, reinvestFrom:13, fx:FXR,
+    satExp:0, refPerCity:15000, cpv:10.928, cpvImp:0, cpvFloor:100,
+    returning:30, organic1:5000, organicG:8,
+    haloStart:0, haloSteady:0, haloMonths:24,
+    searchPct:50, viewPct:60, mat1:100, matMonths:1,
+    pgPct:2.36, promo1:0, promo2:0, promo3:0,
+    taxPct:0, capexM1:0,
+    targetRev:100000, targetMonth:12,
+    cities:"1",
+    streams:[
+      {name:"Homestays",       abv:C(199), take:10, conv:3},
+      {name:"Hotels",          abv:C(132), take:10, conv:2},
+      {name:"Tour activities", abv:C(100), take:10, conv:1},
+      {name:"Packages",        abv:C(512), take:10, conv:1.5},
+      {name:"Flights",         abv:C(220), take:6,  conv:1}
+    ],
+    cost:{
+      salaries:[5750*1.12*12,0,0], subs:[800*12,0,0], office:[(2200+1200+300)*12,0,0],
+      genable:[0,0,0], group:[0,0,0], capex:[0,0,0], dep:[0,0,0]
+    }
+  };
+}
+var PRESETS={
+  planA:{label:"Growth Plan A", params:baseParams,
+         scen:[{name:"Hold",minBudget:7500,reinvest:10,tag:"defend"},
+               {name:"Scenario A",minBudget:15000,reinvest:25,tag:"plan"},
+               {name:"Push",minBudget:30000,reinvest:45,tag:"land"}],
+         src:"Vacario India Growth Plan — Scenario A"},
+  y1:{label:"Year 1 lean", params:y1Params,
+      scen:[{name:"Half budget",minBudget:7500,reinvest:0,tag:"lean"},
+            {name:"Base plan",minBudget:15000,reinvest:0,tag:"stated"},
+            {name:"Double down",minBudget:30000,reinvest:0,tag:"push"}],
+      src:"Vacario Year 1 Assumptions workbook"}
+};
+function applyPreset(k){
+  var P=PRESETS[k]||PRESETS.planA;
+  S.preset=k; S.p=P.params();
+  S.scen=SCEN_DEF.map(function(d,i){
+    var c=P.scen[i];
+    return {id:d.id, name:c.name||d.name, tag:c.tag||d.tag, sv:d.sv,
+            minBudget:c.minBudget, reinvest:c.reinvest};
+  });
+  S.sel="planA"; S.jwin=0;
+}
+
+/* ===================== traction check ===================== */
+function tractionChecks(res){
+  var p=S.p, r=res[S.sel], out=[];
+  var n=Math.min(12,r.rows.length), y1=r.rows.slice(0,n);
+  var y1rev=0, y1gmv=0, y1eb=0, y1mkt=0, y1bk=0;
+  y1.forEach(function(x){ y1rev+=x.netRev; y1gmv+=x.gmv; y1eb+=x.ebitda; y1mkt+=x.budget; y1bk+=x.bookings; });
+  var last=r.rows[r.rows.length-1], m1=r.rows[0];
+
+  function add(st,t,d,v,note){ out.push({st:st,t:t,d:d,v:v,note:note}); }
+
+  var cpv1=m1.cpv;
+  add(cpv1<12?"bad":(cpv1>45?"warn":"ok"), "Cost per paid visitor",
+    cpv1<12 ? "Below the 12 INR floor seen in the plan’s own channel mix, whose blended start is 17.4 INR and Year-1 effective 15.6 INR. Traffic this cheap is the single biggest reason a model looks profitable early."
+    : cpv1>45 ? "Dearer than any channel in the plan’s mix. Check the allocation — events and PR are the expensive tail."
+    : "Inside the band implied by the plan’s channel mix (12–45 INR).",
+    cpv1.toFixed(1)+" INR", "benchmark 15.6–17.4");
+
+  add(p.mat1>=95?"warn":"ok", "Booking conversion at launch",
+    p.mat1>=95 ? "Full steady-state conversion is booked from month 1. Supply is thin at launch and search results are sparse, so early conversion is normally a fraction of mature conversion. Scenario A ramps from 40% over 12 months."
+               : "Conversion ramps from launch, which reflects thin early supply.",
+    p.mat1.toFixed(0)+"% of steady", "Scenario A uses 40%");
+
+  var mgn=y1rev>0?y1eb/y1rev*100:0;
+  add(mgn>15?"bad":(mgn>0?"warn":"ok"), "Year-1 EBITDA margin",
+    mgn>15 ? "A launch-year marketplace clearing this margin is not credible. The plan’s own Scenario A books −8% in Year 1 and only reaches 33–36% by Years 2–3."
+    : mgn>0 ? "Year 1 is profitable. Defensible only if traffic cost and conversion are already proven."
+    : "Negative in Year 1, consistent with a marketplace buying its first cohorts.",
+    mgn.toFixed(0)+"%", "Scenario A: −8%");
+
+  var take=y1gmv>0?y1rev/y1gmv*100:0;
+  add((take<6||take>14)?"warn":"ok", "Blended take rate",
+    "Commission earned across all streams as a share of gross bookings. MakeMyTrip runs about 10%.",
+    take.toFixed(1)+"%", "benchmark ~10%");
+
+  var mg=y1gmv>0?y1mkt/y1gmv*100:0;
+  add(mg<1?"warn":(mg>8?"warn":"ok"), "Marketing as % of GMV",
+    mg<1 ? "Lighter than listed operators who already have brand recall. A challenger buying its first users normally spends more, not less."
+    : mg>8 ? "Heavy against listed peers. Sustainable only while the audience compounds."
+    : "Reasonable for a challenger against MakeMyTrip at 1.7% and EaseMyTrip at 1.1%.",
+    mg.toFixed(1)+"%", "MMT 1.7% · EMT 1.1%");
+
+  add(r.s.peak<=0?"warn":"ok", "Funding requirement",
+    r.s.peak<=0 ? "This configuration never goes cash-negative, so there is no funding ask to buffer. If the plan document quotes a funding line, the two disagree."
+                : "The plan dips before it turns, and the trough is what has to be funded.",
+    r.s.peak>0?money(r.s.peak):"none", r.s.peakM?("deepest M"+r.s.peakM):"—");
+
+  var retShare=last.mau>0?last.ret/last.mau*100:0;
+  add(retShare>55?"warn":"ok", "Returning share of active users",
+    retShare>55 ? "Most of the audience is recycled from the prior month rather than newly acquired. Retention this strong needs evidence from real cohorts."
+                : "New and returning users are reasonably balanced.",
+    retShare.toFixed(0)+"%", "of final-month users");
+
+  var bpu=last.mau>0?last.bookings/last.mau*100:0;
+  add((bpu<0.5||bpu>4)?"warn":"ok", "Bookings per active user",
+    "Share of monthly active users who complete a booking. Scenario A runs 1.8% in Year 1 and 2.5% by Year 2.",
+    bpu.toFixed(2)+"%", "Scenario A 1.8–2.5%");
+
+  add(p.satExp<=0?"warn":"ok", "Spend saturation",
+    p.satExp<=0 ? "Spend never saturates, so the model implies unlimited budget buys visitors at a constant price. Every marketing channel gets dearer as you scale it."
+                : "Visitors get dearer as spend per city rises above the reference level.",
+    p.satExp.toFixed(2)+" exponent", p.satExp<=0?"no ceiling":"doubling buys "+Math.pow(2,1-p.satExp).toFixed(2)+"×");
+
+  return out;
+}
+function paintChecks(res){
+  var c=tractionChecks(res);
+  var bad=c.filter(function(x){return x.st==="bad";}).length, warn=c.filter(function(x){return x.st==="warn";}).length;
+  $("chk-note").textContent = bad? (bad+" assumption"+(bad>1?"s":"")+" outside a defensible range, "+warn+" to review")
+    : warn? (warn+" assumption"+(warn>1?"s":"")+" to review") : "all checks inside benchmark ranges";
+  var IC={ok:"✓",warn:"!",bad:"✕"}, CL={ok:"-ok",warn:"-warn",bad:"-bad"};
+  $("checks").innerHTML=c.map(function(x){
+    return '<div class="chk '+CL[x.st]+'"><span class="ic" aria-hidden="true">'+IC[x.st]+'</span>'+
+      '<div class="t">'+x.t+'</div><div class="d">'+x.d+'</div>'+
+      '<div class="m">'+x.v+'<small>'+x.note+'</small></div></div>';
+  }).join("");
+  $("bench").innerHTML='<thead><tr><th>Benchmark</th><th>Value</th><th>Source</th></tr></thead><tbody>'+
+    [["Blended cost per paid visitor, Year 1","15.6 INR","Growth Plan channel mix"],
+     ["Blended cost per paid visitor, start","17.4 INR","Growth Plan channel mix"],
+     ["MakeMyTrip blended take rate","10%","FY2025 company filings"],
+     ["MakeMyTrip marketing as % of gross bookings","1.7%","FY2025 results"],
+     ["EaseMyTrip marketing as % of gross bookings","1.1%","Annual Report 2024-25"],
+     ["Scenario A Year-1 EBITDA margin","−8%","Growth Plan Scenario A"],
+     ["Scenario A bookings per active user","1.8% Y1 · 2.5% Y2","Growth Plan Scenario A"],
+     ["Scenario A conversion maturity at launch","40% of steady state","Growth Plan assumptions"],
+     ["Payment gateway effective rate","2.36% of GMV","Razorpay 2% + 18% GST"]
+    ].map(function(r){ return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'; }).join("")+'</tbody>';
+}
+
+/* ===================== export ===================== */
+function plain(v){ return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function cur1(){ return S.currency==="INR" ? "INR" : "CAD"; }
+function raw(vCad){ return Math.round(toDisp(vCad)); }
+
+function summaryModel(res){
+  var p=S.p, r=res[S.sel], sc=S.scen.filter(function(x){return x.id===S.sel;})[0];
+  var n=Math.min(12,r.rows.length), y1=r.rows.slice(0,n), a={rev:0,gmv:0,eb:0,mkt:0,bk:0};
+  y1.forEach(function(x){ a.rev+=x.netRev; a.gmv+=x.gmv; a.eb+=x.ebitda; a.mkt+=x.budget; a.bk+=x.bookings; });
+  var last=r.rows[r.rows.length-1];
+  return {p:p, r:r, sc:sc, y1:a, last:last,
+    preset:(PRESETS[S.preset]||PRESETS.planA), cur:cur1(),
+    headline:[
+      ["Scenario", sc.name],
+      ["Marketing budget floor, per month", money(sc.minBudget)],
+      ["Planning horizon", p.horizon+" months (from Sep 2026)"],
+      ["Operating break-even", r.s.be===null ? "not reached in horizon" : "month "+r.s.be+" ("+calMonth(r.s.be)+")"],
+      ["Cash payback", r.s.pb===null ? "not reached in horizon" : "month "+r.s.pb+" ("+calMonth(r.s.pb)+")"],
+      ["Peak funding need", r.s.peak>0 ? money(r.s.peak)+" (deepest month "+r.s.peakM+")" : "none"],
+      ["Total marketing over horizon", money(r.s.totMkt)],
+      ["Net revenue, final month", money(r.s.revEnd)],
+      ["Active users, final month", intf(r.s.mauEnd)],
+      ["Cumulative cash at month "+p.horizon, money(r.s.cashEnd)],
+      ["Cash returned per 1 of marketing", r.s.totMkt>0 ? (r.s.cashEnd/r.s.totMkt).toFixed(2)+"x" : "n/a"]
+    ],
+    year1:[
+      ["Year 1 gross bookings (GMV)", money(a.gmv)],
+      ["Year 1 net revenue", money(a.rev)],
+      ["Year 1 marketing spend", money(a.mkt)],
+      ["Year 1 EBITDA", money(a.eb)],
+      ["Year 1 EBITDA margin", (a.rev>0?(a.eb/a.rev*100).toFixed(0):"0")+"%"],
+      ["Year 1 bookings", intf(a.bk)],
+      ["Blended take rate", (a.gmv>0?(a.rev/a.gmv*100).toFixed(1):"0")+"%"]
+    ]};
+}
+function assumptionRows(){
+  var p=S.p, out=[];
+  MAIN.concat(ADV).forEach(function(g){ g.items.forEach(function(fd){
+    var v=p[fd.id], unit=fd.t==="pct"?"%":(fd.suf||"");
+    if(fd.t==="money") v=money(v)+"";
+    out.push([g.g, fd.l, (typeof v==="number"? v : v), unit]);
+  });});
+  p.streams.forEach(function(st){
+    out.push(["Revenue streams", st.name+" — average booking value", Math.round(st.abv), "INR"]);
+    out.push(["Revenue streams", st.name+" — take rate", st.take, "%"]);
+    out.push(["Revenue streams", st.name+" — conversion of views", st.conv, "%"]);
+  });
+  COST_ROWS.forEach(function(rw){
+    for(var y=0;y<3;y++) out.push(["Cost base (annual, CAD)", rw.l.replace(/&amp;/g,"&")+" — year "+(y+1), Math.round(p.cost[rw.k][y]), "CAD"]);
+  });
+  S.scen.forEach(function(sc){
+    out.push(["Scenarios", sc.name+" — budget floor", Math.round(sc.minBudget), "CAD/month"]);
+    out.push(["Scenarios", sc.name+" — reinvestment of net revenue", sc.reinvest, "%"]);
+  });
+  return out;
+}
+function ledgerRows(res){
+  var r=res[S.sel], c=cur1();
+  var head=["Month","Calendar","Marketing ("+c+")","Paid visitors","Active users","Bookings",
+            "GMV ("+c+")","Net revenue ("+c+")","Total cost ("+c+")","EBITDA ("+c+")","Cumulative cash ("+c+")"];
+  var rows=r.rows.map(function(x){
+    return [x.m, calMonth(x.m), raw(x.budget), Math.round(x.paid), Math.round(x.mau), Math.round(x.bookings),
+            raw(x.gmv), raw(x.netRev), raw(x.opex), raw(x.ebitda), raw(x.cash)];
+  });
+  return [head].concat(rows);
+}
+function comparisonRows(res){
+  var c=cur1();
+  var head=["Metric"].concat(S.scen.map(function(s){ return s.name; }));
+  var defs=[
+    ["Budget floor ("+c+"/month)", function(s){return raw(s.budget1);}],
+    ["Total marketing ("+c+")", function(s){return raw(s.totMkt);}],
+    ["Operating break-even (month)", function(s){return s.be===null?"not reached":s.be;}],
+    ["Cash payback (month)", function(s){return s.pb===null?"not reached":s.pb;}],
+    ["Peak funding need ("+c+")", function(s){return raw(s.peak);}],
+    ["Active users, final month", function(s){return Math.round(s.mauEnd);}],
+    ["Net revenue, final month ("+c+")", function(s){return raw(s.revEnd);}],
+    ["Cumulative cash ("+c+")", function(s){return raw(s.cashEnd);}],
+    ["Marketing as % of revenue", function(s){return +(s.mktRatio*100).toFixed(1);}],
+    ["Cash returned per 1 of marketing", function(s){return s.totMkt>0?+(s.cashEnd/s.totMkt).toFixed(2):0;}]
+  ];
+  return [head].concat(defs.map(function(d){
+    return [d[0]].concat(S.scen.map(function(sc){ return d[1](res[sc.id].s); }));
+  }));
+}
+function checkRows(res){
+  return [["Check","Status","Value","Benchmark","What it means"]].concat(
+    tractionChecks(res).map(function(x){
+      return [x.t, x.st==="ok"?"OK":(x.st==="warn"?"Review":"Outside range"), x.v, x.note, x.d];
+    }));
+}
+
+function dl(blob, name){
+  try{
+    var url=URL.createObjectURL(blob), a=document.createElement("a");
+    a.href=url; a.download=name; a.rel="noopener";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1500);
+    msg("Preparing "+name+". If nothing arrives, this viewer blocks downloads — use the copy buttons, or open index.html from the repository.");
+  }catch(e){ msg("This viewer blocked the download. Use the copy buttons instead, or open index.html from the repository."); }
+}
+function msg(t){ var e=$("dlmsg"); if(e) e.textContent=t; }
+function copy(text, what){
+  function ok(){ msg(what+" copied to the clipboard."); }
+  function no(){ msg("Could not reach the clipboard. Select the preview below and copy manually."); }
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok,no);
+  else no();
+}
+
+
+/* ---- minimal xlsx writer: a zip of SpreadsheetML, no dependencies ---- */
+var CRCT=(function(){var t=[],c,n,k;for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(u8){ var c=0xFFFFFFFF; for(var i=0;i<u8.length;i++) c=CRCT[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function u8(str){ return new TextEncoder().encode(str); }
+function xmle(t){ return String(t).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,"")
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function colRef(i){ var s="", n=i+1; while(n>0){ var m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; }
+function sheetXml(aoa){
+  var body=aoa.map(function(r,ri){
+    var cells=(r||[]).map(function(v,ci){
+      var ref=colRef(ci)+(ri+1);
+      if(typeof v==="number" && isFinite(v)) return '<c r="'+ref+'"><v>'+v+'</v></c>';
+      if(v===null||v===undefined||v==="") return "";
+      return '<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+xmle(v)+'</t></is></c>';
+    }).join("");
+    return '<row r="'+(ri+1)+'">'+cells+'</row>';
+  }).join("");
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+body+'</sheetData></worksheet>';
+}
+function zipStore(files){
+  var parts=[], cd=[], off=0;
+  files.forEach(function(f){
+    var data=f.data, crc=crc32(data), nm=u8(f.name);
+    var lh=new Uint8Array(30+nm.length), d1=new DataView(lh.buffer);
+    d1.setUint32(0,0x04034b50,true); d1.setUint16(4,20,true); d1.setUint16(6,0,true);
+    d1.setUint16(8,0,true); d1.setUint16(10,0,true); d1.setUint16(12,0,true);
+    d1.setUint32(14,crc,true); d1.setUint32(18,data.length,true); d1.setUint32(22,data.length,true);
+    d1.setUint16(26,nm.length,true); d1.setUint16(28,0,true); lh.set(nm,30);
+    parts.push(lh,data);
+    var ch=new Uint8Array(46+nm.length), d2=new DataView(ch.buffer);
+    d2.setUint32(0,0x02014b50,true); d2.setUint16(4,20,true); d2.setUint16(6,20,true);
+    d2.setUint16(8,0,true); d2.setUint16(10,0,true); d2.setUint16(12,0,true); d2.setUint16(14,0,true);
+    d2.setUint32(16,crc,true); d2.setUint32(20,data.length,true); d2.setUint32(24,data.length,true);
+    d2.setUint16(28,nm.length,true); d2.setUint16(30,0,true); d2.setUint16(32,0,true);
+    d2.setUint16(34,0,true); d2.setUint16(36,0,true); d2.setUint32(38,0,true);
+    d2.setUint32(42,off,true); ch.set(nm,46);
+    cd.push(ch); off += lh.length + data.length;
+  });
+  var cdSize=cd.reduce(function(a,b){ return a+b.length; },0);
+  var eo=new Uint8Array(22), d3=new DataView(eo.buffer);
+  d3.setUint32(0,0x06054b50,true); d3.setUint16(4,0,true); d3.setUint16(6,0,true);
+  d3.setUint16(8,files.length,true); d3.setUint16(10,files.length,true);
+  d3.setUint32(12,cdSize,true); d3.setUint32(16,off,true); d3.setUint16(20,0,true);
+  return new Blob(parts.concat(cd,[eo]),
+    {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function makeXlsx(sheets){
+  var names=sheets.map(function(s,i){ return (s.name||("Sheet"+(i+1))).replace(/[\[\]\*\?\/\\:]/g,"-").slice(0,31); });
+  var files=[];
+  files.push({name:"[Content_Types].xml", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+    '<Default Extension="xml" ContentType="application/xml"/>'+
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+    sheets.map(function(s,i){ return '<Override PartName="/xl/worksheets/sheet'+(i+1)+
+      '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join("")+
+    '</Types>')});
+  files.push({name:"_rels/.rels", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'+
+    '</Relationships>')});
+  files.push({name:"xl/workbook.xml", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '+
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+
+    names.map(function(n,i){ return '<sheet name="'+xmle(n)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>'; }).join("")+
+    '</sheets></workbook>')});
+  files.push({name:"xl/_rels/workbook.xml.rels", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    sheets.map(function(s,i){ return '<Relationship Id="rId'+(i+1)+
+      '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>'; }).join("")+
+    '</Relationships>')});
+  sheets.forEach(function(s,i){ files.push({name:"xl/worksheets/sheet"+(i+1)+".xml", data:u8(sheetXml(s.rows))}); });
+  return zipStore(files);
+}
+
+function exportXlsx(res){
+  var M=summaryModel(res), c=cur1();
+  var sum=[["Vacario — Budget Model Summary"],
+           [M.preset.label+" · "+M.sc.name+" · all figures in "+c],[],["Headline",""]]
+    .concat(M.headline.map(function(r){ return [r[0],r[1]]; }))
+    .concat([[],["Year 1",""]]).concat(M.year1.map(function(r){ return [r[0],r[1]]; }))
+    .concat([[],["Decision",""],[($("verdict")?$("verdict").textContent:"")],
+             [],["Source",M.preset.src],["Generated",new Date().toISOString().slice(0,10)]]);
+  try{
+    var blob=makeXlsx([
+      {name:"Summary",             rows:sum},
+      {name:"Assumptions",         rows:[["Group","Assumption","Value","Unit"]].concat(assumptionRows())},
+      {name:"Monthly ledger",      rows:ledgerRows(res)},
+      {name:"Scenario comparison", rows:comparisonRows(res)},
+      {name:"Traction check",      rows:checkRows(res)}
+    ]);
+    dl(blob, "Vacario-Budget-Model.xlsx");
+  }catch(e){ msg("Could not build the workbook ("+e.message+"). Use “Copy ledger as CSV” instead."); }
+}
+
+function docHtml(res){
+  var M=summaryModel(res), r=M.r, p=M.p, c=cur1();
+  var chk=tractionChecks(res), flagged=chk.filter(function(x){return x.st!=="ok";});
+  function tbl(rows, w1){
+    return '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:10.5pt">'+
+      rows.map(function(r2,i){
+        return '<tr>'+r2.map(function(cell,j){
+          var st='border:1px solid #c9cec4;'+(j>0?'text-align:right;':'width:'+(w1||"58%")+';');
+          return i===0 ? '<td style="'+st+'background:#e8eae2"><b>'+plain(cell)+'</b></td>'
+                       : '<td style="'+st+'">'+plain(cell)+'</td>';
+        }).join("")+'</tr>';
+      }).join("")+'</table>';
+  }
+  var verdict=$("verdict")?$("verdict").textContent:"";
+  var h='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" '+
+    'xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8">'+
+    '<title>Vacario budget summary</title>'+
+    '<style>@page{size:A4;margin:2cm} body{font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.45;color:#15191a}'+
+    'h1{font-size:20pt;margin:0 0 4pt} h2{font-size:13pt;margin:18pt 0 6pt;color:#0e5b5e}'+
+    '.sub{color:#565d59;font-size:10pt;margin:0 0 14pt} p{margin:0 0 9pt}'+
+    '.kb{background:#d6e7e6;padding:10pt;margin:10pt 0}</style></head><body>';
+  h+='<h1>Vacario — marketing budget and break-even</h1>';
+  h+='<p class="sub">'+plain(M.preset.label)+' &middot; '+plain(M.sc.name)+' scenario &middot; all figures in '+c+
+     ' &middot; prepared '+new Date().toDateString()+'</p>';
+
+  h+='<h2>In one paragraph</h2><p>'+
+    'The '+plain(M.sc.name)+' scenario commits '+plain(money(M.sc.minBudget))+' a month to marketing. '+
+    (r.s.be===null ? 'It does not reach operating break-even inside '+p.horizon+' months. '
+                   : 'It turns profitable month to month from month '+r.s.be+' ('+calMonth(r.s.be)+'). ')+
+    (r.s.peak>0 ? 'Before that it needs '+plain(money(r.s.peak))+' of funding, deepest in month '+r.s.peakM+', '+
+                  (r.s.pb===null?'and does not repay that within the horizon. '
+                                :'and repays it by month '+r.s.pb+' ('+calMonth(r.s.pb)+'). ')
+                : 'It never goes cash-negative, so no external funding is required. ')+
+    'By month '+p.horizon+' it is running '+plain(money(r.s.revEnd))+' of net revenue a month from '+
+    plain(intf(r.s.mauEnd))+' monthly active users, with '+plain(money(r.s.cashEnd))+' of cumulative cash.</p>';
+
+  h+='<h2>The decision</h2><div class="kb"><p>'+plain(verdict)+'</p></div>';
+  h+='<h2>Headline numbers</h2>'+tbl([["Measure","Value"]].concat(M.headline));
+  h+='<h2>Year 1</h2>'+tbl([["Measure","Value"]].concat(M.year1));
+  h+='<h2>Scenario comparison</h2>'+tbl(comparisonRows(res),"40%");
+
+  h+='<h2>Assumptions that carry the risk</h2>';
+  if(flagged.length===0) h+='<p>Every traction assumption sits inside the benchmark ranges drawn from the plan’s own sources.</p>';
+  else {
+    h+='<p>'+flagged.length+' of '+chk.length+' checks need a decision before this goes to a board or a lender. '+
+       'Each one below moves the break-even month if it is wrong.</p>';
+    h+=tbl([["Assumption","Value","Benchmark","Why it matters"]].concat(flagged.map(function(x){
+      return [x.t, x.v, x.note, x.d]; })),"22%");
+  }
+  h+='<h2>How to read the three dates</h2>'+
+     '<p><b>Operating break-even</b> is the first month the business earns more than it spends that month. '+
+     '<b>Cash payback</b> is the later month when the accumulated losses have been earned back — this is the one '+
+     'that decides how much money has to be raised. <b>Peak funding need</b> is the deepest the bank balance goes '+
+     'before it recovers, and it is the number to put in a funding ask.</p>';
+  h+='<p style="color:#565d59;font-size:9.5pt;margin-top:18pt">Source: '+plain(M.preset.src)+
+     '. A planning model, not a forecast — treat break-even months as ranges and re-run against real cost per '+
+     'visitor and booking conversion once live cohorts land.</p>';
+  h+='</body></html>';
+  return h;
+}
+function exportDoc(res){
+  dl(new Blob(["﻿"+docHtml(res)],{type:"application/msword"}), "Vacario-Budget-Summary.doc");
+}
+function summaryText(res){
+  var M=summaryModel(res);
+  var t="VACARIO — MARKETING BUDGET AND BREAK-EVEN\n"+M.preset.label+" | "+M.sc.name+" | figures in "+cur1()+"\n\n";
+  t+="HEADLINE\n"+M.headline.map(function(r){return "  "+r[0]+": "+r[1];}).join("\n");
+  t+="\n\nYEAR 1\n"+M.year1.map(function(r){return "  "+r[0]+": "+r[1];}).join("\n");
+  t+="\n\nDECISION\n  "+($("verdict")?$("verdict").textContent:"");
+  var fl=tractionChecks(res).filter(function(x){return x.st!=="ok";});
+  if(fl.length) t+="\n\nASSUMPTIONS TO REVIEW\n"+fl.map(function(x){return "  ["+x.v+" vs "+x.note+"] "+x.t+" — "+x.d;}).join("\n");
+  t+="\n\nSource: "+M.preset.src;
+  return t;
+}
+function toCsv(rows){
+  return rows.map(function(r){ return r.map(function(c){
+    var v=String(c==null?"":c);
+    return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+  }).join(","); }).join("\n");
+}
+function paintExport(res){
+  var M=summaryModel(res);
+  $("exp-note").textContent=M.preset.label+" · "+M.sc.name+" · "+cur1();
+  function block(title, rows){
+    return '<div class="sec2"><h4>'+title+'</h4>'+rows.map(function(r){
+      return '<div class="l"><span>'+plain(r[0])+'</span><b>'+plain(r[1])+'</b></div>'; }).join("")+'</div>';
+  }
+  var fl=tractionChecks(res).filter(function(x){return x.st!=="ok";});
+  $("preview").innerHTML=block("Headline",M.headline)+block("Year 1",M.year1)+
+    (fl.length? block("Assumptions to review", fl.map(function(x){ return [x.t, x.v+"  (vs "+x.note+")"]; })) : "");
+}
+
 /* ===================== orchestration ===================== */
 var LAST=null;
 function render(){
@@ -1121,20 +1647,45 @@ function render(){
   syncChrome(); paintScenarios(res); paintTiles(res[S.sel]);
   paintJ(res); paintCross(res); paintVerdict(res); paintSolve();
   paintFunnel(res); paintCompare(res); paintLedger(res); paintFoot();
+  paintChecks(res); paintExport(res);
 }
-function boot(){
-  resetAll(); load();
+function rebuildAll(){
   $("currency").value=S.currency;
+  if($("preset")) $("preset").value=S.preset;
   buildFields($("fields"),MAIN); buildFields($("fields-adv"),ADV);
   buildStreams(); buildCosts(); buildScenarios();
   render();
+}
+function setView(v){
+  S.view=v;
+  ["model","traction","export"].forEach(function(k){
+    var el2=$("view-"+k); if(el2) el2.hidden = (k!==v);
+    var tb=$("tab-"+k); if(tb) tb.setAttribute("aria-selected", k===v ? "true":"false");
+  });
+  if(v==="model" && LAST){ paintJ(LAST); paintCross(LAST); }
+}
+function boot(){
+  resetAll(); load();
+  rebuildAll();
+  setView("model");
+
+  $("preset").addEventListener("change",function(){
+    applyPreset($("preset").value);
+    try{ localStorage.removeItem("vbe.v2"); }catch(e){}
+    save(); rebuildAll();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){
+    b.addEventListener("click",function(){ setView(b.getAttribute("data-v")); });
+  });
+  $("dl-xlsx").addEventListener("click",function(){ if(LAST) exportXlsx(LAST); });
+  $("dl-doc").addEventListener("click",function(){ if(LAST) exportDoc(LAST); });
+  $("dl-csv").addEventListener("click",function(){ if(LAST) copy(toCsv(ledgerRows(LAST)),"Monthly ledger"); });
+  $("dl-text").addEventListener("click",function(){ if(LAST) copy(summaryText(LAST),"Summary"); });
 
   $("currency").addEventListener("change",function(){ S.currency=$("currency").value; save(); render(); });
   $("reset").addEventListener("click",function(){
-    resetAll(); try{ localStorage.removeItem("vbe.v2"); }catch(e){}
-    $("currency").value=S.currency;
-    buildFields($("fields"),MAIN); buildFields($("fields-adv"),ADV);
-    buildStreams(); buildCosts(); buildScenarios(); render();
+    applyPreset(S.preset); try{ localStorage.removeItem("vbe.v2"); }catch(e){}
+    rebuildAll();
   });
   $("apply-solve").addEventListener("click",function(){
     if(SOLVED===null) return;

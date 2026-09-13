@@ -14,6 +14,18 @@ No dependencies, no build tooling, no network calls except the Google Fonts styl
 
 ---
 
+## Two models, three tabs
+
+The **preset selector** switches between the two plans on file:
+
+| Preset | Horizon | Budget | Traffic | Conversion |
+|---|---|---|---|---|
+| **Growth Plan A** | 36 months | CAD 15,000 floor, 25% reinvestment from year 2 | cost per visitor with learning + saturation | ramps 40% → 100% over 12 months |
+| **Year 1 lean** | 12 months | CAD 15,000 flat | fixed 93,750 paid visitors/month | full from month 1 |
+
+Three tabs: **Model** (scenarios, J-curve, ledger), **Traction check** (assumption audit against
+benchmarks), **Export** (Excel workbook and Word brief).
+
 ## What it answers
 
 1. **What does a given marketing budget buy?** Paid visitors → active users → bookings → commission.
@@ -104,6 +116,42 @@ every month's revenue and expense to four decimal places — during development.
 - The 12-month workbook's dashboard reports **peak cumulative investment of CAD 31,510**. That is
   month 1 alone. Its own cash flow sums to **CAD 116,177**, which is the figure that plan has to fund.
   This tool computes the true running minimum.
+
+## Traction check
+
+The Traction check tab audits whichever assumption set is loaded against benchmarks drawn from the
+plan's own sources — blended cost per visitor, conversion at launch, Year-1 EBITDA margin, blended
+take rate, marketing as a share of GMV, funding requirement, returning-user share, bookings per
+active user and the saturation exponent. Each check reports the observed value, the benchmark and
+what it means, marked OK / Review / Outside range with an icon and label, never colour alone.
+
+Running it over the **Year 1 lean** criteria as supplied produces four flags:
+
+| Check | Value | Benchmark |
+|---|---|---|
+| Cost per paid visitor | 10.9 INR | 15.6–17.4 INR |
+| Booking conversion at launch | 100% of steady | 40% of steady |
+| Year-1 EBITDA margin | 42% | −8% (Scenario A) |
+| Spend saturation | none | 0.5 exponent |
+
+Those assumptions make the Year 1 model EBITDA-positive from month 1 with **zero funding need**,
+which contradicts its own dashboard note ("break-even by Month 12", plus a funding line and a 15%
+buffer) and Scenario A's −8% for the same year. At a cost per visitor of 0.45 CAD with full
+conversion, the Year 1 plan turns positive in month 11 and needs about CAD 31,000 including the
+stated buffer — the shape its note describes.
+
+## Export
+
+The Export tab writes two files, both built in the browser with no dependencies:
+
+- **`.xlsx`** — five sheets: summary, assumptions, monthly ledger, scenario comparison, traction
+  check. Written by a small ZIP + SpreadsheetML writer in `src/app.html`, so there is no CDN to fail.
+- **`.doc`** — a plain-language brief for someone who will not open the model.
+
+Copy-to-clipboard fallbacks (ledger as CSV, summary as text) are provided because some embedded
+viewers block page-initiated downloads. Opening `index.html` directly always downloads normally.
+
+Pre-generated examples live in [`deliverables/`](deliverables/).
 
 ## Editing assumptions
 
