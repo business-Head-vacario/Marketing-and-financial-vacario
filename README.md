@@ -146,10 +146,13 @@ The Export tab writes two files, both built in the browser with no dependencies:
 
 - **`.xlsx`** — five sheets: summary, assumptions, monthly ledger, scenario comparison, traction
   check. Written by a small ZIP + SpreadsheetML writer in `src/app.html`, so there is no CDN to fail.
-- **`.doc`** — a plain-language brief for someone who will not open the model.
+- **`.docx`** — a plain-language brief for someone who will not open the model: what the plan is,
+  the three break-even dates and why they differ, the scenario comparison, and the assumptions that
+  carry the risk. Written by a matching WordprocessingML writer on the same ZIP code.
 
-Copy-to-clipboard fallbacks (ledger as CSV, summary as text) are provided because some embedded
-viewers block page-initiated downloads. Opening `index.html` directly always downloads normally.
+In the published Artifact, saves go through the viewer's `downloads` capability (it asks before
+writing). Opened as a local `index.html` the page falls back to an ordinary download link.
+Copy-to-clipboard fallbacks (ledger as CSV, summary as text) cover either case.
 
 Pre-generated examples live in [`deliverables/`](deliverables/).
 

@@ -385,7 +385,7 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
                 <h3>Word summary</h3>
                 <p>A plain-language brief: what the plan is, what it costs, when it breaks even, what has to be funded and which assumptions carry the risk. Written to be read by someone who will not open the model.</p>
                 <div class="row">
-                  <button class="act" id="dl-doc" type="button">Download .doc</button>
+                  <button class="act" id="dl-doc" type="button">Download .docx</button>
                   <button class="sec" id="dl-text" type="button">Copy as text</button>
                 </div>
               </div>
@@ -1428,15 +1428,32 @@ function checkRows(res){
     }));
 }
 
-function dl(blob, name){
+function anchorSave(name, blob){
   try{
     var url=URL.createObjectURL(blob), a=document.createElement("a");
     a.href=url; a.download=name; a.rel="noopener";
     document.body.appendChild(a); a.click();
     setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1500);
-    msg("Preparing "+name+". If nothing arrives, this viewer blocks downloads — use the copy buttons, or open index.html from the repository.");
-  }catch(e){ msg("This viewer blocked the download. Use the copy buttons instead, or open index.html from the repository."); }
+    msg("Preparing "+name+"\u2026 if nothing arrives, use the copy buttons below.");
+  }catch(e){ msg("This viewer blocked the download. Use the copy buttons instead."); }
 }
+function saveFile(name, blob){
+  msg("Preparing "+name+"\u2026");
+  var u=(window.claude && window.claude.use) ? window.claude.use("downloads") : Promise.resolve(null);
+  u.then(function(d){
+    if(!d || !d.save){ anchorSave(name, blob); return; }
+    d.save({filename:name, data:blob}).then(
+      function(r){ msg(r && r.status==="delivered" ? name+" sent on." : "Saved "+name+"."); },
+      function(err){
+        var c=err && err.code;
+        if(c==="declined") msg("Save cancelled.");
+        else if(c==="rate_limited") msg("A save prompt is already open \u2014 finish that one, then try again.");
+        else if(c==="too_large") msg(name+" is too large for the chosen destination.");
+        else msg("Could not save "+name+" here ("+(c||"unknown")+"). Use the copy buttons instead.");
+      });
+  }, function(){ anchorSave(name, blob); });
+}
+function dl(blob, name){ saveFile(name, blob); }
 function msg(t){ var e=$("dlmsg"); if(e) e.textContent=t; }
 function copy(text, what){
   function ok(){ msg(what+" copied to the clipboard."); }
@@ -1542,69 +1559,144 @@ function exportXlsx(res){
   }catch(e){ msg("Could not build the workbook ("+e.message+"). Use “Copy ledger as CSV” instead."); }
 }
 
-function docHtml(res){
-  var M=summaryModel(res), r=M.r, p=M.p, c=cur1();
-  var chk=tractionChecks(res), flagged=chk.filter(function(x){return x.st!=="ok";});
-  function tbl(rows, w1){
-    return '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:10.5pt">'+
-      rows.map(function(r2,i){
-        return '<tr>'+r2.map(function(cell,j){
-          var st='border:1px solid #c9cec4;'+(j>0?'text-align:right;':'width:'+(w1||"58%")+';');
-          return i===0 ? '<td style="'+st+'background:#e8eae2"><b>'+plain(cell)+'</b></td>'
-                       : '<td style="'+st+'">'+plain(cell)+'</td>';
-        }).join("")+'</tr>';
-      }).join("")+'</table>';
+function docBlocks(res){
+  var M=summaryModel(res), r=M.r, p=M.p, c=cur1(), B=[];
+  var chk=tractionChecks(res), flagged=chk.filter(function(x){ return x.st!=="ok"; });
+  var cmp=comparisonRows(res);
+  B.push({h1:"Vacario — marketing budget and break-even"});
+  B.push({p:M.preset.label+" · "+M.sc.name+" scenario · all figures in "+c+" · prepared "+new Date().toDateString(), small:true});
+
+  B.push({h2:"In one paragraph"});
+  B.push({p:"The "+M.sc.name+" budget commits "+money(M.sc.minBudget)+" a month to marketing"+
+    (M.sc.reinvest>0 ? ", rising from month "+p.reinvestFrom+" as "+M.sc.reinvest+"% of the previous month's net revenue is ploughed back" : "")+". "+
+    (r.s.be===null ? "It does not reach operating break-even inside "+p.horizon+" months. "
+                   : "It turns profitable month to month from month "+r.s.be+" ("+calMonth(r.s.be)+"). ")+
+    (r.s.peak>0 ? "Before that it needs "+money(r.s.peak)+" of funding, deepest in month "+r.s.peakM+", "+
+        (r.s.pb===null ? "and does not repay that within the horizon. " : "and repays it by month "+r.s.pb+" ("+calMonth(r.s.pb)+"). ")
+      : "It never goes cash-negative, so no external funding is required. ")+
+    "By month "+p.horizon+" it is running "+money(r.s.revEnd)+" of net revenue a month from "+intf(r.s.mauEnd)+
+    " monthly active users, with "+money(r.s.cashEnd)+" of cumulative cash."});
+
+  B.push({h2:"The three dates that matter"});
+  B.push({p:"These are different numbers and are often confused. Operating break-even is the first month the business "+
+    "earns more than it spends that month. Cash payback is the later month when the accumulated losses have been "+
+    "earned back. Peak funding need is the deepest the bank balance goes before it recovers — that is the number "+
+    "to put in a funding ask, not the monthly loss."});
+  B.push({table:{cols:["Measure","Value","When"], widths:[42,29,29], rows:[
+    ["Operating break-even", r.s.be===null?"not reached":"month "+r.s.be, r.s.be===null?"—":calMonth(r.s.be)],
+    ["Cash payback",         r.s.pb===null?"not reached":"month "+r.s.pb, r.s.pb===null?"—":calMonth(r.s.pb)],
+    ["Peak funding need",    r.s.peak>0?money(r.s.peak):"none", r.s.peakM?("month "+r.s.peakM+" ("+calMonth(r.s.peakM)+")"):"—"]]}});
+
+  B.push({h2:"Headline numbers"});
+  B.push({table:{cols:["Measure","Value"], widths:[58,42], rows:M.headline}});
+  B.push({h2:"Year 1"});
+  B.push({table:{cols:["Measure","Value"], widths:[58,42], rows:M.year1}});
+
+  B.push({h2:"What a bigger or smaller budget does"});
+  B.push({p:"The same model run at three budgets. The heaviest plan usually reaches the highest revenue but not "+
+    "always the most cash, because it keeps buying the next cohort rather than banking the return. Read the last "+
+    "row first — it is the return on every unit of marketing."});
+  B.push({table:{cols:cmp[0], widths:[40,20,20,20], rows:cmp.slice(1).map(function(row){
+    return row.map(function(v,i){ return i===0 ? v : (typeof v==="number" ? v.toLocaleString("en-US") : v); }); })}});
+
+  B.push({h2:"Assumptions that carry the risk"});
+  if(flagged.length===0){
+    B.push({p:"Every traction assumption sits inside the benchmark ranges drawn from the plan's own sources."});
+  } else {
+    B.push({p:flagged.length+" of "+chk.length+" checks need a decision before this goes to a board or a lender. "+
+      "Each one moves the break-even month if it is wrong."});
+    B.push({table:{cols:["Assumption","Value","Benchmark","Why it matters"], widths:[22,14,17,47],
+      rows:flagged.map(function(x){ return [x.t, x.v, x.note, x.d]; })}});
   }
-  var verdict=$("verdict")?$("verdict").textContent:"";
-  var h='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" '+
-    'xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8">'+
-    '<title>Vacario budget summary</title>'+
-    '<style>@page{size:A4;margin:2cm} body{font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.45;color:#15191a}'+
-    'h1{font-size:20pt;margin:0 0 4pt} h2{font-size:13pt;margin:18pt 0 6pt;color:#0e5b5e}'+
-    '.sub{color:#565d59;font-size:10pt;margin:0 0 14pt} p{margin:0 0 9pt}'+
-    '.kb{background:#d6e7e6;padding:10pt;margin:10pt 0}</style></head><body>';
-  h+='<h1>Vacario — marketing budget and break-even</h1>';
-  h+='<p class="sub">'+plain(M.preset.label)+' &middot; '+plain(M.sc.name)+' scenario &middot; all figures in '+c+
-     ' &middot; prepared '+new Date().toDateString()+'</p>';
 
-  h+='<h2>In one paragraph</h2><p>'+
-    'The '+plain(M.sc.name)+' scenario commits '+plain(money(M.sc.minBudget))+' a month to marketing. '+
-    (r.s.be===null ? 'It does not reach operating break-even inside '+p.horizon+' months. '
-                   : 'It turns profitable month to month from month '+r.s.be+' ('+calMonth(r.s.be)+'). ')+
-    (r.s.peak>0 ? 'Before that it needs '+plain(money(r.s.peak))+' of funding, deepest in month '+r.s.peakM+', '+
-                  (r.s.pb===null?'and does not repay that within the horizon. '
-                                :'and repays it by month '+r.s.pb+' ('+calMonth(r.s.pb)+'). ')
-                : 'It never goes cash-negative, so no external funding is required. ')+
-    'By month '+p.horizon+' it is running '+plain(money(r.s.revEnd))+' of net revenue a month from '+
-    plain(intf(r.s.mauEnd))+' monthly active users, with '+plain(money(r.s.cashEnd))+' of cumulative cash.</p>';
+  B.push({h2:"What to decide"});
+  B.push({bullets:[
+    "Which cost per paid visitor to plan on — everything else follows from it.",
+    "Whether to model a conversion ramp at launch, or book mature conversion from month 1.",
+    "The funding ask: "+(r.s.peak>0 ? money(r.s.peak)+" on this scenario." : "this scenario needs none, which is worth confirming."),
+    "Growth or cash — the heaviest budget rarely wins on both."]});
 
-  h+='<h2>The decision</h2><div class="kb"><p>'+plain(verdict)+'</p></div>';
-  h+='<h2>Headline numbers</h2>'+tbl([["Measure","Value"]].concat(M.headline));
-  h+='<h2>Year 1</h2>'+tbl([["Measure","Value"]].concat(M.year1));
-  h+='<h2>Scenario comparison</h2>'+tbl(comparisonRows(res),"40%");
+  B.push({p:"Source: "+M.preset.src+". A planning model, not a forecast — treat break-even months as ranges and "+
+    "re-run against real cost per visitor and booking conversion once live cohorts land.", small:true});
+  return B;
+}
 
-  h+='<h2>Assumptions that carry the risk</h2>';
-  if(flagged.length===0) h+='<p>Every traction assumption sits inside the benchmark ranges drawn from the plan’s own sources.</p>';
-  else {
-    h+='<p>'+flagged.length+' of '+chk.length+' checks need a decision before this goes to a board or a lender. '+
-       'Each one below moves the break-even month if it is wrong.</p>';
-    h+=tbl([["Assumption","Value","Benchmark","Why it matters"]].concat(flagged.map(function(x){
-      return [x.t, x.v, x.note, x.d]; })),"22%");
+/* ---- minimal .docx writer, on the same zip ---- */
+function wRun(t,o){
+  o=o||{};
+  var rpr='<w:rPr>'+(o.b?'<w:b/>':'')+(o.i?'<w:i/>':'')+
+    '<w:color w:val="'+(o.color||"15191A")+'"/><w:sz w:val="'+(o.sz||22)+'"/>'+
+    '<w:szCs w:val="'+(o.sz||22)+'"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>';
+  return '<w:r>'+rpr+'<w:t xml:space="preserve">'+xmle(t)+'</w:t></w:r>';
+}
+function wPara(t,o){
+  o=o||{};
+  var pr='<w:pPr><w:spacing w:before="'+(o.before||0)+'" w:after="'+(o.after||140)+'" w:line="276" w:lineRule="auto"/>'+
+    (o.bullet?'<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>':'')+'</w:pPr>';
+  return '<w:p>'+pr+wRun(t,o)+'</w:p>';
+}
+function wTable(t){
+  var W=9638, grid=t.widths||t.cols.map(function(){ return Math.round(100/t.cols.length); });
+  var bd='<w:tblBorders>'+["top","left","bottom","right","insideH","insideV"].map(function(k){
+    return '<w:'+k+' w:val="single" w:sz="4" w:space="0" w:color="C9CEC4"/>'; }).join("")+'</w:tblBorders>';
+  var x='<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>'+bd+'</w:tblPr><w:tblGrid>'+
+    grid.map(function(g){ return '<w:gridCol w:w="'+Math.round(W*g/100)+'"/>'; }).join("")+'</w:tblGrid>';
+  function row(cells,hdr){
+    return '<w:tr>'+cells.map(function(v,i){
+      return '<w:tc><w:tcPr><w:tcW w:w="'+Math.round(W*grid[i]/100)+'" w:type="dxa"/>'+
+        (hdr?'<w:shd w:val="clear" w:fill="E8EAE2"/>':'')+'</w:tcPr>'+
+        '<w:p><w:pPr><w:spacing w:before="20" w:after="20"/>'+
+        (i>0?'<w:jc w:val="right"/>':'')+'</w:pPr>'+
+        wRun(v===null||v===undefined?"":String(v),{b:!!hdr,sz:19})+'</w:p></w:tc>';
+    }).join("")+'</w:tr>';
   }
-  h+='<h2>How to read the three dates</h2>'+
-     '<p><b>Operating break-even</b> is the first month the business earns more than it spends that month. '+
-     '<b>Cash payback</b> is the later month when the accumulated losses have been earned back — this is the one '+
-     'that decides how much money has to be raised. <b>Peak funding need</b> is the deepest the bank balance goes '+
-     'before it recovers, and it is the number to put in a funding ask.</p>';
-  h+='<p style="color:#565d59;font-size:9.5pt;margin-top:18pt">Source: '+plain(M.preset.src)+
-     '. A planning model, not a forecast — treat break-even months as ranges and re-run against real cost per '+
-     'visitor and booking conversion once live cohorts land.</p>';
-  h+='</body></html>';
-  return h;
+  x+=row(t.cols,true);
+  t.rows.forEach(function(r){ x+=row(r,false); });
+  return x+'</w:tbl><w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
+}
+function makeDocx(blocks){
+  var body=blocks.map(function(b){
+    if(b.h1) return wPara(b.h1,{b:true,sz:40,after:60});
+    if(b.h2) return wPara(b.h2,{b:true,sz:26,color:"0E5B5E",before:280,after:100});
+    if(b.table) return wTable(b.table);
+    if(b.bullets) return b.bullets.map(function(t){ return wPara(t,{bullet:true,after:60}); }).join("");
+    return wPara(b.p, b.small?{sz:19,color:"565D59"}:{});
+  }).join("");
+  var doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+
+    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'+
+    '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708"/></w:sectPr>'+
+    '</w:body></w:document>';
+  var numbering='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+    '<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/>'+
+    '<w:lvlText w:val="•"/><w:pPr><w:ind w:left="360" w:hanging="240"/></w:pPr></w:lvl></w:abstractNum>'+
+    '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>';
+  return zipStore([
+    {name:"[Content_Types].xml", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+      '<Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+      '<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>'+
+      '</Types>')},
+    {name:"_rels/.rels", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+      '</Relationships>')},
+    {name:"word/_rels/document.xml.rels", data:u8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>'+
+      '</Relationships>')},
+    {name:"word/numbering.xml", data:u8(numbering)},
+    {name:"word/document.xml", data:u8(doc)}
+  ]);
 }
 function exportDoc(res){
-  dl(new Blob(["﻿"+docHtml(res)],{type:"application/msword"}), "Vacario-Budget-Summary.doc");
+  try{ saveFile("Vacario-Budget-Summary.docx", makeDocx(docBlocks(res))); }
+  catch(e){ msg("Could not build the document ("+e.message+"). Use “Copy as text” instead."); }
 }
+
 function summaryText(res){
   var M=summaryModel(res);
   var t="VACARIO — MARKETING BUDGET AND BREAK-EVEN\n"+M.preset.label+" | "+M.sc.name+" | figures in "+cur1()+"\n\n";
