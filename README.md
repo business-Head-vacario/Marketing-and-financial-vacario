@@ -180,10 +180,13 @@ stated buffer — the shape its note describes.
 
 ## Export
 
-The Export tab writes two files, both built in the browser with no dependencies:
+**Download Excel** sits in the masthead on every tab — one click, no navigation. It writes the whole
+model, both files built in the browser with no dependencies:
 
-- **`.xlsx`** — five sheets: summary, assumptions, monthly ledger, scenario comparison, traction
-  check. Written by a small ZIP + SpreadsheetML writer in `src/app.html`, so there is no CDN to fail.
+- **`.xlsx`** — ten sheets: a read-me for stakeholders, summary, month-by-month P&L, traffic and
+  funnel build, revenue split by stream, all three scenarios side by side, scenario comparison,
+  channel mix, every assumption with its unit, and the traction check. Written by a small ZIP +
+  SpreadsheetML writer in `src/app.html`, so there is no CDN to fail.
 - **`.docx`** — a plain-language brief for someone who will not open the model: what the plan is,
   the three break-even dates and why they differ, the scenario comparison, and the assumptions that
   carry the risk. Written by a matching WordprocessingML writer on the same ZIP code.
@@ -193,6 +196,19 @@ writing). Opened as a local `index.html` the page falls back to an ordinary down
 Copy-to-clipboard fallbacks (ledger as CSV, summary as text) cover either case.
 
 Pre-generated examples live in [`deliverables/`](deliverables/).
+
+| Sheet | Holds |
+|---|---|
+| Read me | What the workbook is, which preset and scenario, how to read the three dates |
+| Summary | Break-even, funding need, revenue, cash, the decision paragraph |
+| P&L monthly | Every revenue and cost line, month by month, down to cumulative cash |
+| Traffic & funnel | Sessions by source, members, followers, searches, views, bookings, cost per booking |
+| Revenue by stream | Bookings, GMV and commission for each of the five streams |
+| All scenarios | Marketing, net revenue, EBITDA and cash for all three budgets side by side |
+| Scenario comparison | The three budgets summarised |
+| Channel mix | Every channel, its type, share, unit cost and output |
+| Assumptions | Every input with its unit |
+| Traction check | Each assumption against its benchmark |
 
 ## Editing assumptions
 

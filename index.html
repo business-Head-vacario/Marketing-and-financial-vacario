@@ -208,6 +208,11 @@ tr.-yr td{background:var(--well); font-weight:600}
 .foot code{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-2); background:var(--well); padding:1px 4px; border-radius:2px}
 .foot b{color:var(--ink-2)}
 .stack{display:flex; flex-direction:column; gap:18px; min-width:0}
+.toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(10px);
+  background:var(--ink); color:var(--ground); font-size:12.5px; line-height:1.4; padding:11px 16px;
+  border-radius:4px; box-shadow:var(--shadow); max-width:min(560px,calc(100vw - 32px)); z-index:60;
+  opacity:0; pointer-events:none; transition:opacity .16s, transform .16s}
+.toast[data-on="1"]{opacity:1; transform:translateX(-50%) translateY(0)}
 .tabs{display:flex; gap:2px; margin-bottom:18px; border-bottom:1px solid var(--rule); flex-wrap:wrap}
 .tabs button{font:500 12px 'IBM Plex Mono',monospace; letter-spacing:.05em; background:none; border:0;
   border-bottom:2px solid transparent; color:var(--ink-3); padding:9px 13px; cursor:pointer; margin-bottom:-1px}
@@ -260,6 +265,7 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
         <option value="CAD">CA$ CAD</option>
         <option value="INR">&#8377; INR</option>
       </select>
+      <button class="act" id="dl-top" type="button" style="padding:7px 12px">&#8595; Download Excel</button>
       <button class="ghost" id="reset" type="button">Reset assumptions</button>
     </div>
   </header>
@@ -399,8 +405,8 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
           <div class="panel-bd">
             <div class="exp-grid">
               <div class="exp">
-                <h3>Excel workbook</h3>
-                <p>Five sheets: headline summary, every assumption with its value, the month-by-month ledger, the scenario comparison and the traction check. Figures as numbers, ready to chart.</p>
+                <h3>Excel workbook &mdash; projections &amp; assumptions</h3>
+                <p>Ten sheets covering the whole model: a read-me for stakeholders, the summary, a month-by-month P&amp;L, the traffic and funnel build, revenue split by stream, all three scenarios side by side, the channel mix, every assumption with its unit, and the traction check. Figures are real numbers, ready to chart.</p>
                 <div class="row">
                   <button class="act" id="dl-xlsx" type="button">Download .xlsx</button>
                   <button class="sec" id="dl-csv" type="button">Copy ledger as CSV</button>
@@ -426,6 +432,7 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
     </main>
   </div>
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -669,7 +676,7 @@ function simulate(p, sc, N){
       var st=p.streams[s], b = views * (st.conv/100) * mat;
       var g = b*st.abv, r = g*(st.take/100);
       gmvI+=g; revI+=r; bk+=b;
-      per.push({name:st.name, bookings:b, rev:r/p.fx});
+      per.push({name:st.name, bookings:b, gmv:g/p.fx, rev:r/p.fx});
     }
     var gmv = gmvI/p.fx, mkt = revI/p.fx;
     var group = groupRev(p, m), netRev = mkt + group;
@@ -1631,7 +1638,7 @@ function summaryModel(res){
 function assumptionRows(){
   var p=S.p, out=[];
   MAIN.concat(ADV).forEach(function(g){ g.items.forEach(function(fd){
-    var v=p[fd.id], unit=fd.t==="pct"?"%":(fd.suf||"");
+    var v=fd.own ? (p.owned||{})[fd.own] : p[fd.id], unit=fd.t==="pct"?"%":(fd.suf||"");
     if(fd.t==="money") v=money(v)+"";
     out.push([g.g, fd.l, (typeof v==="number"? v : v), unit]);
   });});
@@ -1721,8 +1728,8 @@ function anchorSave(name, blob){
     a.href=url; a.download=name; a.rel="noopener";
     document.body.appendChild(a); a.click();
     setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1500);
-    msg("Preparing "+name+"\u2026 if nothing arrives, use the copy buttons below.");
-  }catch(e){ msg("This viewer blocked the download. Use the copy buttons instead."); }
+    msg("Preparing "+name+"\u2026 if nothing arrives, your browser blocked the download \u2014 the Export tab has copy-to-clipboard fallbacks.");
+  }catch(e){ msg("This viewer blocked the download. The Export tab has copy-to-clipboard fallbacks."); }
 }
 function saveFile(name, blob){
   msg("Preparing "+name+"\u2026");
@@ -1736,12 +1743,18 @@ function saveFile(name, blob){
         if(c==="declined") msg("Save cancelled.");
         else if(c==="rate_limited") msg("A save prompt is already open \u2014 finish that one, then try again.");
         else if(c==="too_large") msg(name+" is too large for the chosen destination.");
-        else msg("Could not save "+name+" here ("+(c||"unknown")+"). Use the copy buttons instead.");
+        else msg("Could not save "+name+" here ("+(c||"unknown")+"). The Export tab has copy-to-clipboard fallbacks.");
       });
   }, function(){ anchorSave(name, blob); });
 }
 function dl(blob, name){ saveFile(name, blob); }
-function msg(t){ var e=$("dlmsg"); if(e) e.textContent=t; }
+var TOASTT=null;
+function msg(t){
+  var e=$("dlmsg"); if(e) e.textContent=t;
+  var k=$("toast"); if(!k) return;
+  k.textContent=t; k.setAttribute("data-on","1");
+  clearTimeout(TOASTT); TOASTT=setTimeout(function(){ k.setAttribute("data-on","0"); },5200);
+}
 function copy(text, what){
   function ok(){ msg(what+" copied to the clipboard."); }
   function no(){ msg("Could not reach the clipboard. Select the preview below and copy manually."); }
@@ -1826,25 +1839,106 @@ function makeXlsx(sheets){
   return zipStore(files);
 }
 
+function fullWorkbook(res){
+  var p=S.p, M=summaryModel(res), c=cur1(), r=res[S.sel], rows=r.rows, sheets=[];
+  var when=new Date().toISOString().slice(0,10);
+
+  /* 1. Read me */
+  sheets.push({name:"Read me", rows:[
+    ["Vacario — marketing budget, projections and assumptions"],[],
+    ["Model preset", M.preset.label],
+    ["Scenario shown in the detail sheets", M.sc.name],
+    ["Marketing budget floor", money(M.sc.minBudget)+" a month"],
+    ["Reinvestment of net revenue", M.sc.reinvest+"% from month "+p.reinvestFrom],
+    ["Planning horizon", p.horizon+" months from Sep 2026"],
+    ["Currency", c+(c==="INR"?" (converted at "+p.fx+" INR per CAD)":"")],
+    ["Source", M.preset.src],
+    ["Generated", when],[],
+    ["What is in this workbook"],
+    ["Summary","The headline numbers: break-even, funding need, revenue and cash."],
+    ["P&L monthly","Every month's revenue and cost line for the scenario above."],
+    ["Traffic & funnel","How many people arrive each month, where from, and what it costs."],
+    ["Revenue by stream","Bookings, gross bookings and commission for each of the five streams."],
+    ["All scenarios","Monthly revenue, profit and cash for all three budget scenarios side by side."],
+    ["Scenario comparison","The three budgets summarised on one page."],
+    ["Channel mix","Every marketing channel, what it costs and what it buys."],
+    ["Assumptions","Every input behind the model, with its unit."],
+    ["Traction check","Each assumption against an external benchmark."],[],
+    ["How to read the three dates"],
+    ["Operating break-even","First month the business earns more than it spends that month."],
+    ["Cash payback","The later month when accumulated losses have been earned back."],
+    ["Peak funding need","The deepest the bank balance goes. This is the number to fund."],[],
+    ["A planning model, not a forecast. Treat break-even months as ranges and re-run against real cost per visitor and booking conversion once live cohorts land."]
+  ]});
+
+  /* 2. Summary */
+  sheets.push({name:"Summary", rows:[["Summary"],[M.preset.label+" · "+M.sc.name+" · figures in "+c],[],
+    ["Headline",""]].concat(M.headline.map(function(x){return [x[0],x[1]];}))
+    .concat([[],["Year 1",""]]).concat(M.year1.map(function(x){return [x[0],x[1]];}))
+    .concat([[],["Decision",""],[($("verdict")?$("verdict").textContent:"")]])});
+
+  /* 3. P&L monthly */
+  var pl=[["Month","Calendar","Marketing ("+c+")","Commission revenue","Group sales","Net revenue",
+           "Gross bookings (GMV)","Payment gateway","Promotions","Salaries","Subscriptions","Office & admin",
+           "Group enablement","Total cost","EBITDA","Depreciation","Tax","Profit after tax","Capex","Cumulative cash"]];
+  rows.forEach(function(x){ pl.push([x.m,calMonth(x.m),raw(x.budget),raw(x.mkt),raw(x.group),raw(x.netRev),
+    raw(x.gmv),raw(x.pg),raw(x.promo),raw(x.sal),raw(x.subs),raw(x.off),raw(x.gen),raw(x.opex),
+    raw(x.ebitda),raw(x.dep),raw(x.tax),raw(x.pat),raw(x.capex),raw(x.cash)]); });
+  sheets.push({name:"P&L monthly", rows:pl});
+
+  /* 4. Traffic & funnel */
+  var tf=[["Month","Calendar","Marketing ("+c+")","Cost per paid session (INR)","Paid sessions",
+           "Community + referral + follower sessions","Returning","Organic SEO + halo","Monthly active users",
+           "Community members","Social followers","Owned share of traffic %","Searches","Listing views",
+           "Bookings","Conversion uplift","Cost per booking ("+c+")"]];
+  rows.forEach(function(x){ tf.push([x.m,calMonth(x.m),raw(x.budget),+x.cpv.toFixed(2),Math.round(x.paid),
+    Math.round(x.ownedSess),Math.round(x.ret),Math.round(x.organic+x.halo),Math.round(x.mau),
+    Math.round(x.members),Math.round(x.followers),+(x.ownedShare*100).toFixed(1),
+    Math.round(x.mau*(p.searchPct/100)),Math.round(x.views),Math.round(x.bookings),
+    +x.lift.toFixed(3),+toDisp(x.cac).toFixed(2)]); });
+  sheets.push({name:"Traffic & funnel", rows:tf});
+
+  /* 5. Revenue by stream */
+  var names=(rows[0].per||[]).map(function(q){ return q.name; });
+  var rs=[["Month","Calendar"]
+    .concat(names.map(function(n){ return n+" bookings"; }))
+    .concat(names.map(function(n){ return n+" GMV ("+c+")"; }))
+    .concat(names.map(function(n){ return n+" commission ("+c+")"; }))
+    .concat(["Group sales ("+c+")","Total net revenue ("+c+")"])];
+  rows.forEach(function(x){
+    rs.push([x.m,calMonth(x.m)]
+      .concat(x.per.map(function(q){ return Math.round(q.bookings); }))
+      .concat(x.per.map(function(q){ return raw(q.gmv); }))
+      .concat(x.per.map(function(q){ return raw(q.rev); }))
+      .concat([raw(x.group),raw(x.netRev)]));
+  });
+  sheets.push({name:"Revenue by stream", rows:rs});
+
+  /* 6. All scenarios, month by month */
+  var sc=S.scen, all=[["Month","Calendar"]];
+  sc.forEach(function(x){ all[0].push(x.name+" marketing"); });
+  sc.forEach(function(x){ all[0].push(x.name+" net revenue"); });
+  sc.forEach(function(x){ all[0].push(x.name+" EBITDA"); });
+  sc.forEach(function(x){ all[0].push(x.name+" cumulative cash"); });
+  for(var i=0;i<rows.length;i++){
+    var line=[i+1,calMonth(i+1)];
+    sc.forEach(function(x){ line.push(raw(res[x.id].rows[i].budget)); });
+    sc.forEach(function(x){ line.push(raw(res[x.id].rows[i].netRev)); });
+    sc.forEach(function(x){ line.push(raw(res[x.id].rows[i].ebitda)); });
+    sc.forEach(function(x){ line.push(raw(res[x.id].rows[i].cash)); });
+    all.push(line);
+  }
+  sheets.push({name:"All scenarios", rows:all});
+
+  sheets.push({name:"Scenario comparison", rows:comparisonRows(res)});
+  sheets.push({name:"Channel mix",         rows:channelRows(res)});
+  sheets.push({name:"Assumptions",         rows:[["Group","Assumption","Value","Unit"]].concat(assumptionRows())});
+  sheets.push({name:"Traction check",      rows:checkRows(res)});
+  return sheets;
+}
 function exportXlsx(res){
-  var M=summaryModel(res), c=cur1();
-  var sum=[["Vacario — Budget Model Summary"],
-           [M.preset.label+" · "+M.sc.name+" · all figures in "+c],[],["Headline",""]]
-    .concat(M.headline.map(function(r){ return [r[0],r[1]]; }))
-    .concat([[],["Year 1",""]]).concat(M.year1.map(function(r){ return [r[0],r[1]]; }))
-    .concat([[],["Decision",""],[($("verdict")?$("verdict").textContent:"")],
-             [],["Source",M.preset.src],["Generated",new Date().toISOString().slice(0,10)]]);
-  try{
-    var blob=makeXlsx([
-      {name:"Summary",             rows:sum},
-      {name:"Assumptions",         rows:[["Group","Assumption","Value","Unit"]].concat(assumptionRows())},
-      {name:"Monthly ledger",      rows:ledgerRows(res)},
-      {name:"Scenario comparison", rows:comparisonRows(res)},
-      {name:"Traction check",      rows:checkRows(res)},
-      {name:"Channel mix",         rows:channelRows(res)}
-    ]);
-    dl(blob, "Vacario-Budget-Model.xlsx");
-  }catch(e){ msg("Could not build the workbook ("+e.message+"). Use “Copy ledger as CSV” instead."); }
+  try{ saveFile("Vacario-Projections-and-Assumptions.xlsx", makeXlsx(fullWorkbook(res))); }
+  catch(e){ msg("Could not build the workbook ("+e.message+"). Use “Copy ledger as CSV” instead."); }
 }
 
 function docBlocks(res){
@@ -2058,6 +2152,7 @@ function boot(){
     b.addEventListener("click",function(){ setView(b.getAttribute("data-v")); });
   });
   $("dl-xlsx").addEventListener("click",function(){ if(LAST) exportXlsx(LAST); });
+  $("dl-top").addEventListener("click",function(){ if(LAST) exportXlsx(LAST); });
   $("dl-doc").addEventListener("click",function(){ if(LAST) exportDoc(LAST); });
   $("dl-csv").addEventListener("click",function(){ if(LAST) copy(toCsv(ledgerRows(LAST)),"Monthly ledger"); });
   $("dl-text").addEventListener("click",function(){ if(LAST) copy(summaryText(LAST),"Summary"); });
