@@ -244,6 +244,7 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
       <span class="badge" id="parity"><i></i><span id="parity-t">Scenario A parity</span></span>
       <select class="cur" id="preset" aria-label="Model preset">
         <option value="planA">Growth Plan A &middot; 36 mo</option>
+        <option value="community">Community-led &middot; 36 mo</option>
         <option value="y1">Year 1 lean &middot; 12 mo</option>
       </select>
       <select class="cur" id="currency" aria-label="Display currency">
@@ -279,6 +280,7 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
     <main>
       <nav class="tabs" role="tablist">
         <button type="button" role="tab" id="tab-model"    data-v="model"    aria-selected="true">Model</button>
+        <button type="button" role="tab" id="tab-channels" data-v="channels" aria-selected="false">Channels &amp; CAC</button>
         <button type="button" role="tab" id="tab-traction" data-v="traction" aria-selected="false">Traction check</button>
         <button type="button" role="tab" id="tab-export"   data-v="export"   aria-selected="false">Export</button>
       </nav>
@@ -346,6 +348,29 @@ button.sec:hover{border-color:var(--accent); color:var(--accent)}
       </section>
 
       <footer class="foot" id="foot"></footer>
+      </div>
+
+      <div id="view-channels" class="stack" hidden>
+        <section class="tiles" id="ch-tiles"></section>
+        <section class="panel">
+          <div class="panel-hd"><h2>Marketing channel mix</h2><span class="note" id="ch-note"></span></div>
+          <div class="panel-bd" style="padding:0 0 2px"><div class="tw"><table class="dt" id="chtab"></table></div></div>
+          <div class="panel-bd" style="padding-top:0"><p id="ch-legend" style="margin:0;font-size:11.5px;color:var(--ink-3);line-height:1.5"></p></div>
+        </section>
+        <section class="panel">
+          <div class="panel-hd"><h2>Where the traffic comes from</h2><span class="note">owned sessions cost nothing after the month they were bought</span></div>
+          <div class="panel-bd">
+            <div class="legend" id="legend-t"></div>
+            <div class="chart-host" id="chart-t"><div class="tip" id="tip-t"></div></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-hd"><h2 id="cac-title">Cost per booking</h2><span class="note">total marketing that month &divide; bookings that month</span></div>
+          <div class="panel-bd">
+            <div class="legend" id="legend-cac"></div>
+            <div class="chart-host" id="chart-cac"><div class="tip" id="tip-cac"></div></div>
+          </div>
+        </section>
       </div>
 
       <div id="view-traction" class="stack" hidden>
@@ -429,6 +454,11 @@ function money(vCad, dp){
   }
   return (neg?"−":"") + c.sym + Math.round(a).toLocaleString(c.loc);
 }
+function money2(vCad){
+  if(!isFinite(vCad)) return "\u2014";
+  var v=toDisp(vCad);
+  return (Math.abs(v)<100) ? cc().sym+v.toFixed(2) : money(vCad);
+}
 function moneyFull(vCad){
   if (!isFinite(vCad)) return "—";
   var v = toDisp(vCad);
@@ -449,9 +479,22 @@ function baseParams(){
     haloStart:15, haloSteady:40, haloMonths:24,
     searchPct:50, viewPct:60, mat1:40, matMonths:12,
     pgPct:2.36, promo1:1.5, promo2:1.25, promo3:1.0,
-    taxPct:25.17, capexM1:11250,
+    taxPct:25.17, capexM1:11250, audienceCap:0,
     targetRev:1200000, targetMonth:24,
     cities:"1,4,10,18,25",
+    channels:[
+      {name:"Performance ads (Search & Meta)", share:45, cpv:16, kind:"paid"},
+      {name:"Influencer & creator marketing", share:15, cpv:20, kind:"paid"},
+      {name:"App install campaigns",          share:10, cpv:25, kind:"paid"},
+      {name:"Content, SEO & video",           share:8,  cpv:10, kind:"paid"},
+      {name:"Affiliates & partnerships",      share:8,  cpv:12, kind:"paid"},
+      {name:"Events & on-ground activation",  share:5,  cpv:60, kind:"paid"},
+      {name:"Referral & loyalty credits",     share:5,  cpv:35, kind:"paid"},
+      {name:"PR & media",                     share:4,  cpv:40, kind:"paid"},
+      {name:"Brand media (OTT, masthead)",    share:0,  cpv:30, kind:"paid"}
+    ],
+    owned:{memberCost:25, memberChurn:5, memberSessions:0, memberRefer:0,
+           followerCost:6, followerChurn:3, followerSessions:0, ownedLift:0, returnLift:0},
     streams:[
       {name:"Homestays",       abv:13600, take:12,  conv:3},
       {name:"Hotels",          abv:9000,  take:10,  conv:2},
@@ -497,6 +540,13 @@ function load(){
       o.p.streams.forEach(function(s,i){ ["abv","take","conv"].forEach(function(k){
         if (typeof s[k]==="number" && isFinite(s[k])) S.p.streams[i][k]=s[k]; }); });
     }
+    if (o.p.owned) Object.keys(S.p.owned).forEach(function(k){
+      if (typeof o.p.owned[k]==="number" && isFinite(o.p.owned[k])) S.p.owned[k]=o.p.owned[k]; });
+    if (Array.isArray(o.p.channels) && o.p.channels.length===S.p.channels.length){
+      o.p.channels.forEach(function(c,i){
+        if (typeof c.share==="number") S.p.channels[i].share=c.share;
+        if (typeof c.cpv==="number") S.p.channels[i].cpv=c.cpv;
+        if (typeof c.kind==="string") S.p.channels[i].kind=c.kind; }); }
     if (o.p.cost) Object.keys(S.p.cost).forEach(function(k){
       if (Array.isArray(o.p.cost[k])) o.p.cost[k].forEach(function(v,i){
         if (typeof v==="number" && isFinite(v)) S.p.cost[k][i]=v; }); });
@@ -510,7 +560,7 @@ function load(){
 function isParity(){
   var d = (PRESETS[S.preset]||PRESETS.planA).params(), p = S.p, same = true;
   Object.keys(d).forEach(function(k){
-    if (k==="streams"||k==="cost"||k==="targetRev"||k==="targetMonth") return;
+    if (k==="streams"||k==="cost"||k==="targetRev"||k==="targetMonth"||k==="channels"||k==="owned") return;
     if (typeof d[k]==="number"){ if (Math.abs(d[k]-p[k]) > 1e-9) same=false; }
     else if (d[k] !== p[k]) same=false;
   });
@@ -518,6 +568,11 @@ function isParity(){
     if (Math.abs(s[k]-p.streams[i][k])>1e-9) same=false; }); });
   Object.keys(d.cost).forEach(function(k){ d.cost[k].forEach(function(v,i){
     if (Math.abs(v-p.cost[k][i])>0.01) same=false; }); });
+  if(d.owned) Object.keys(d.owned).forEach(function(k){
+    if (Math.abs(d.owned[k]-(p.owned||{})[k])>1e-9) same=false; });
+  if(d.channels) d.channels.forEach(function(c,i){
+    var q=(p.channels||[])[i]||{};
+    if (c.share!==q.share || c.cpv!==q.cpv || c.kind!==q.kind) same=false; });
   return same;
 }
 
@@ -540,6 +595,7 @@ function simulate(p, sc, N){
   N = N || p.horizon;
   var cities = cityList(p);
   var rows=[], mau=0, prevMau=0, prevRev=0, cum=0, cumCash=0, trough=0, troughM=null, totMkt=0;
+  var members=0, followers=0, totBk=0;
 
   for (var m=1; m<=N; m++){
     var budget = sc.minBudget;
@@ -550,17 +606,54 @@ function simulate(p, sc, N){
 
     var learn = Math.max(p.cpvFloor/100, Math.pow(Math.max(0,1 - p.cpvImp/100), m-1));
     var sat   = Math.pow(Math.max(1, (budget/live) / Math.max(1,p.refPerCity)), p.satExp);
-    var cpv   = Math.max(0.01, p.cpv * learn * sat);
-    var paid  = (budget * p.fx) / cpv;
+    var k     = Math.max(0.0001, learn * sat);
+
+    /* channel mix: paid channels buy sessions now, owned channels buy members
+       and followers who keep returning at no further cost */
+    var CH = (p.channels && p.channels.length) ? p.channels
+           : [{name:"Blended paid", share:100, cpv:p.cpv, kind:"paid"}];
+    var invSum=0, paidShare=0, commShare=0, contShare=0, perCh=[];
+    CH.forEach(function(ch){
+      var sh=(ch.share||0)/100;
+      if(ch.kind==="community") commShare+=sh;
+      else if(ch.kind==="content") contShare+=sh;
+      else { paidShare+=sh; if(ch.cpv>0) invSum += sh/ch.cpv; }
+    });
+    /* a finite market: new acquisition gets harder as the serviceable audience fills */
+    var cap = p.audienceCap||0;
+    var reach = cap>0 ? Math.max(0.02, 1 - Math.min(1, prevMau/cap)) : 1;
+    var paid = budget * p.fx * invSum / k * reach;
+    var cpv  = paid>0 ? (budget*paidShare*p.fx)/paid : (p.cpv||1)*k;
+    CH.forEach(function(ch){
+      var sh=(ch.share||0)/100, spend=budget*sh, got=0, unit=(ch.cpv||0)*k;
+      if(ch.kind==="paid") got = unit>0 ? spend*p.fx/unit : 0;
+      else got = unit>0 ? spend*p.fx/unit : 0;   /* members or followers */
+      perCh.push({name:ch.name, kind:ch.kind, share:ch.share, spend:spend, unitCost:unit, added:got});
+    });
+
+    var O = p.owned || {};
+    var memCap = cap>0 ? cap*0.45 : Infinity, folCap = cap>0 ? cap*2.0 : Infinity;
+    var memAdd = (O.memberCost>0   ? budget*commShare*p.fx/O.memberCost   : 0) * reach *
+                 (cap>0 ? Math.max(0, 1-members/memCap) : 1);
+    var folAdd = (O.followerCost>0 ? budget*contShare*p.fx/O.followerCost : 0) * reach *
+                 (cap>0 ? Math.max(0, 1-followers/folCap) : 1);
+    members   = Math.min(memCap, members   * (1 - (O.memberChurn||0)/100)   + memAdd);
+    followers = Math.min(folCap, followers * (1 - (O.followerChurn||0)/100) + folAdd);
+    var memSess = members*(O.memberSessions||0), memRef = members*(O.memberRefer||0);
+    var folSess = followers*(O.followerSessions||0);
+    var ownedSess = memSess + memRef + folSess;
 
     var organic = p.organic1 * Math.pow(1 + p.organicG/100, m-1);
     var haloR   = (p.haloStart + (p.haloSteady-p.haloStart) * Math.min(1,(m-1)/Math.max(1,p.haloMonths-1)))/100;
     var halo    = paid * haloR;
     var ret     = prevMau * p.returning/100;
-    mau = paid + organic + halo + ret;
+    mau = paid + organic + halo + ret + ownedSess;
+
+    /* owned and returning sessions convert better than cold paid traffic */
+    var lift = mau>0 ? 1 + (ownedSess*(O.ownedLift||0)/100 + ret*(O.returnLift||0)/100)/mau : 1;
 
     var views = mau * (p.searchPct/100) * (p.viewPct/100);
-    var mat   = (p.mat1 + (100-p.mat1) * Math.min(1,(m-1)/Math.max(1,p.matMonths-1)))/100;
+    var mat   = ((p.mat1 + (100-p.mat1) * Math.min(1,(m-1)/Math.max(1,p.matMonths-1)))/100) * lift;
 
     var gmvI=0, revI=0, bk=0, per=[];
     for (var s=0;s<p.streams.length;s++){
@@ -587,7 +680,11 @@ function simulate(p, sc, N){
     cum += ebitda; cumCash += netCash; totMkt += budget;
     if (cumCash < trough){ trough=cumCash; troughM=m; }
 
+    totBk += bk;
     rows.push({m:m, budget:budget, live:live, cpv:cpv, paid:paid, organic:organic, halo:halo, ret:ret,
+      members:members, followers:followers, memSess:memSess, memRef:memRef, folSess:folSess,
+      ownedSess:ownedSess, ownedShare: mau>0 ? ownedSess/mau : 0, lift:lift, perCh:perCh,
+      cac: bk>0 ? budget/bk : 0, reach:reach, paidShare:paidShare, commShare:commShare, contShare:contShare,
       mau:mau, views:views, bookings:bk, gmv:gmv, mkt:mkt, group:group, netRev:netRev,
       pg:pg, promo:promo, sal:sal, subs:subs, off:off, gen:gen, opex:opex,
       ebitda:ebitda, dep:dep, tax:tax, pat:pbt-tax, capex:capex, cum:cum, cash:cumCash, per:per});
@@ -600,6 +697,8 @@ function simulate(p, sc, N){
   var last = rows[rows.length-1] || {};
   var hit=null; for (var k=0;k<rows.length;k++){ if (rows[k].netRev >= p.targetRev){ hit=rows[k].m; break; } }
   var totRev=0, totEb=0; rows.forEach(function(r){ totRev+=r.netRev; totEb+=r.ebitda; });
+  var n12=Math.min(12,rows.length), bk12=0, mk12=0;
+  for(var z=0;z<n12;z++){ bk12+=rows[z].bookings; mk12+=rows[z].budget; }
 
   return {rows:rows, s:{
     be:sustained("ebitda"), pb:sustained("cash"),
@@ -607,6 +706,9 @@ function simulate(p, sc, N){
     targetHit:hit, totMkt:totMkt, totRev:totRev, totEb:totEb,
     mktRatio: totRev>0 ? totMkt/totRev : 0,
     revEnd:last.netRev||0, mauEnd:last.mau||0, cumEnd:last.cum||0, cashEnd:last.cash||0,
+    totBk:totBk, cacAll: totBk>0 ? totMkt/totBk : 0, cacY1: bk12>0 ? mk12/bk12 : 0,
+    cacEnd:last.cac||0, ownedShareEnd:last.ownedShare||0,
+    membersEnd:last.members||0, followersEnd:last.followers||0,
     budget1:rows[0]?rows[0].budget:0, budgetEnd:last.budget||0
   }};
 }
@@ -745,9 +847,20 @@ var MAIN = [
       h:"0 = every dollar buys visitors at the same price · 0.5 = doubling spend in a city buys ~1.4× the visitors · 1 = spend stops working"},
     {id:"refPerCity", l:"Reference spend per live city", t:"money", suf:"/mo",
       h:"below this, no saturation penalty; above it, visitors get dearer"},
-    {id:"cpv",        l:"Cost per paid visitor", t:"num", step:.5, suf:"INR"},
     {id:"cpvImp",     l:"Cost improvement",    t:"pct", step:.5, suf:"%/mo"},
     {id:"cpvFloor",   l:"Cost floor",          t:"pct", h:"of the starting cost per visitor"}
+  ]},
+  {g:"Owned audience", items:[
+    {id:"audienceCap", l:"Serviceable audience ceiling", t:"int", step:100000,
+      h:"maximum reachable monthly active users \u2014 0 turns the ceiling off"},
+    {id:"o_memberSessions", l:"Sessions per community member", t:"num", step:.05, own:"memberSessions", suf:"/mo"},
+    {id:"o_memberChurn",    l:"Community member churn", t:"pct", step:.5, own:"memberChurn"},
+    {id:"o_memberRefer",    l:"Referrals per member",   t:"num", step:.01, own:"memberRefer", suf:"/mo"},
+    {id:"o_followerSessions",l:"Sessions per follower", t:"num", step:.01, own:"followerSessions", suf:"/mo"},
+    {id:"o_followerChurn",  l:"Follower churn", t:"pct", step:.5, own:"followerChurn"},
+    {id:"o_ownedLift",      l:"Owned conversion uplift", t:"pct", step:5, own:"ownedLift",
+      h:"community and referral sessions book better than cold paid traffic"},
+    {id:"o_returnLift",     l:"Returning conversion uplift", t:"pct", step:5, own:"returnLift"}
   ]},
   {g:"Audience build", items:[
     {id:"returning", l:"Returning next month", t:"pct", h:"of last month's active users"},
@@ -806,8 +919,9 @@ function buildFields(host, cfg){
       if(f.t==="money"){ var pre=document.createElement("span"); pre.className="pre"; pre.id="pre-"+f.id; box.appendChild(pre); }
       var inp=document.createElement("input");
       inp.id="f-"+f.id;
-      if(f.t==="list"){ inp.type="text"; inp.value=S.p[f.id]; inp.style.textAlign="right"; }
-      else { inp.type="number"; inp.value=S.p[f.id]; inp.step=f.step||(f.t==="money"?100:1);
+      var cur0 = f.own ? (S.p.owned||{})[f.own] : S.p[f.id];
+      if(f.t==="list"){ inp.type="text"; inp.value=cur0; inp.style.textAlign="right"; }
+      else { inp.type="number"; inp.value=cur0; inp.step=f.step||(f.t==="money"?100:1);
              if(f.min!==undefined) inp.min=f.min; if(f.max!==undefined) inp.max=f.max; }
       box.appendChild(inp);
       if(f.t==="pct" && !f.suf){ var pc=document.createElement("span"); pc.className="suf"; pc.textContent="%"; box.appendChild(pc); }
@@ -821,7 +935,8 @@ function buildFields(host, cfg){
         var v=parseFloat(inp.value); if(!isFinite(v)) return;
         if(f.min!==undefined) v=Math.max(f.min,v);
         if(f.max!==undefined) v=Math.min(f.max,v);
-        S.p[f.id]=v; save(); render();
+        if(f.own){ if(!S.p.owned) S.p.owned={}; S.p.owned[f.own]=v; } else S.p[f.id]=v;
+        save(); render();
       });
     });
     host.appendChild(wrap);
@@ -1107,7 +1222,9 @@ function paintCompare(res){
     {l:"Cumulative EBITDA",    f:function(s){return money(s.cumEnd);},   v:function(s){return s.cumEnd;},  d:1},
     {l:"Cumulative cash",      f:function(s){return money(s.cashEnd);},  v:function(s){return s.cashEnd;}, d:1},
     {l:"Marketing as % of revenue", f:function(s){return (s.mktRatio*100).toFixed(1)+"%";}, v:function(s){return s.mktRatio;}, d:-1},
-    {l:"Cash returned per 1 of marketing", f:function(s){return s.totMkt>0?(s.cashEnd/s.totMkt).toFixed(2)+"\u00D7":"\u2014";}, v:function(s){return s.totMkt>0?s.cashEnd/s.totMkt:-1e9;}, d:1}
+    {l:"Cash returned per 1 of marketing", f:function(s){return s.totMkt>0?(s.cashEnd/s.totMkt).toFixed(2)+"\u00D7":"\u2014";}, v:function(s){return s.totMkt>0?s.cashEnd/s.totMkt:-1e9;}, d:1},
+    {l:"Cost per booking", f:function(s){return money2(s.cacAll);}, v:function(s){return s.cacAll;}, d:-1},
+    {l:"Owned share of traffic", f:function(s){return ((s.ownedShareEnd||0)*100).toFixed(0)+"%";}, v:function(s){return s.ownedShareEnd||0;}, d:1}
   ];
   var head='<thead><tr><th>Metric</th>'+S.scen.map(function(sc){
     return '<th style="--c:'+cssVal(sc.sv)+'"><span class="sw"></span>'+sc.name+'</th>'; }).join("")+'</tr></thead>';
@@ -1174,6 +1291,16 @@ function paintFoot(){
     'conversion from launch. Each preset loads its own assumptions, cost base and scenario floors. The '+
     '<b>Traction check</b> tab audits whichever set is loaded against benchmarks drawn from the plan\u2019s own sources, '+
     'and the <b>Export</b> tab writes the whole thing out as a workbook or a stakeholder brief.</p>'+
+    '<h3>Channels, community and CAC</h3>'+
+    '<p>The <b>Channels &amp; CAC</b> tab holds the marketing mix. A <b>paid</b> channel buys a session that is gone '+
+    'next month. A <b>community</b> channel buys a member who returns every month and refers others until they lapse. '+
+    'A <b>content</b> channel buys a follower whose reach compounds. That is the whole reason an owned audience lowers '+
+    'cost per booking: you pay once and keep the traffic, and warm traffic converts better than cold.</p>'+
+    '<p>An owned audience cannot grow forever, so the <b>serviceable audience ceiling</b> makes new acquisition harder '+
+    'as the base fills. <b>Growth Plan A and Year 1 lean carry no ceiling</b>, because that is how those documents were '+
+    'written; the Community-led preset sets one at 3 million monthly users, roughly ixigo\u2019s reported monthly '+
+    'transacting base for all of India. Comparing presets straight across therefore flatters the uncapped ones \u2014 '+
+    'put the same ceiling on both before reading anything into the difference.</p>'+
     '<h3>Where the numbers come from</h3>'+
     '<p>Defaults are the Vacario India Growth Plan, Scenario A (36 months from Sep-2026): commission rates, average booking '+
     'values and conversion by stream, the CAD 15,000 monthly floor with 25% reinvestment from year 2, saturation exponent 0.5, '+
@@ -1200,9 +1327,12 @@ function y1Params(){
     haloStart:0, haloSteady:0, haloMonths:24,
     searchPct:50, viewPct:60, mat1:100, matMonths:1,
     pgPct:2.36, promo1:0, promo2:0, promo3:0,
-    taxPct:0, capexM1:0,
+    taxPct:0, capexM1:0, audienceCap:0,
     targetRev:100000, targetMonth:12,
     cities:"1",
+    channels:[{name:"Blended paid (as stated)", share:100, cpv:10.928, kind:"paid"}],
+    owned:{memberCost:25, memberChurn:5, memberSessions:0, memberRefer:0,
+           followerCost:6, followerChurn:3, followerSessions:0, ownedLift:0, returnLift:0},
     streams:[
       {name:"Homestays",       abv:C(199), take:10, conv:3},
       {name:"Hotels",          abv:C(132), take:10, conv:2},
@@ -1216,12 +1346,36 @@ function y1Params(){
     }
   };
 }
+function communityParams(){
+  var b=baseParams();
+  b.channels=[
+    {name:"Travel community (WhatsApp, Discord, in-app)", share:22, cpv:60, kind:"community"},
+    {name:"Performance ads (Search & Meta)",              share:18, cpv:16, kind:"paid"},
+    {name:"Creator & UGC partnerships",                   share:16, cpv:14, kind:"paid"},
+    {name:"Content, SEO & video",                         share:12, cpv:12, kind:"content"},
+    {name:"Organic social & short-form",                  share:10, cpv:12, kind:"content"},
+    {name:"Referral & loyalty credits",                   share:10, cpv:35, kind:"paid"},
+    {name:"Affiliates & OTA partnerships",                share:7,  cpv:12, kind:"paid"},
+    {name:"App install campaigns",                        share:3,  cpv:25, kind:"paid"},
+    {name:"PR & media",                                   share:2,  cpv:40, kind:"paid"}
+  ];
+  b.owned={memberCost:60, memberChurn:5, memberSessions:0.55, memberRefer:0.04,
+           followerCost:12, followerChurn:3, followerSessions:0.10,
+           ownedLift:60, returnLift:30};
+  b.audienceCap=3000000;
+  return b;
+}
 var PRESETS={
   planA:{label:"Growth Plan A", params:baseParams,
          scen:[{name:"Hold",minBudget:7500,reinvest:10,tag:"defend"},
                {name:"Scenario A",minBudget:15000,reinvest:25,tag:"plan"},
                {name:"Push",minBudget:30000,reinvest:45,tag:"land"}],
          src:"Vacario India Growth Plan — Scenario A"},
+  community:{label:"Community-led", params:communityParams,
+      scen:[{name:"Hold",minBudget:7500,reinvest:10,tag:"defend"},
+            {name:"Community-led",minBudget:15000,reinvest:25,tag:"plan"},
+            {name:"Push",minBudget:30000,reinvest:45,tag:"land"}],
+      src:"Community-led channel mix over the Growth Plan A cost base"},
   y1:{label:"Year 1 lean", params:y1Params,
       scen:[{name:"Half budget",minBudget:7500,reinvest:0,tag:"lean"},
             {name:"Base plan",minBudget:15000,reinvest:0,tag:"stated"},
@@ -1296,6 +1450,36 @@ function tractionChecks(res){
     "Share of monthly active users who complete a booking. Scenario A runs 1.8% in Year 1 and 2.5% by Year 2.",
     bpu.toFixed(2)+"%", "Scenario A 1.8–2.5%");
 
+  var O=p.owned||{}, CH=p.channels||[];
+  var ownBudget=0, paidBudget=0;
+  CH.forEach(function(ch){ if(ch.kind==="paid") paidBudget+=ch.share||0; else ownBudget+=ch.share||0; });
+  if(ownBudget>0){
+    var memLife=100/Math.max(0.01,O.memberChurn||1), memSess=(O.memberSessions||0)*memLife;
+    var costPerOwned = memSess>0 ? (O.memberCost||0)/memSess : Infinity;
+    var adv = costPerOwned>0 ? m1.cpv/costPerOwned : 0;
+    add(adv>10?"bad":(adv<1.2?"warn":"ok"), "Owned cost advantage",
+      adv>10 ? "A community session works out more than ten times cheaper than a paid one. That implies members stay "+
+               "and keep booking for years. Real communities decay; hold this to evidence from your own groups."
+      : adv<1.2 ? "Community sessions cost about the same as paid ones, so the owned investment is not earning its place. "+
+               "Either members must engage more, cost less to recruit, or the budget belongs in paid."
+      : "A community session works out "+adv.toFixed(1)+"x cheaper than a paid one over a member's life \u2014 a real but "+
+               "not fantastical advantage.",
+      adv.toFixed(1)+"\u00D7 cheaper", "aim 2\u20136\u00D7");
+    add((O.ownedLift||0)>100?"warn":"ok", "Owned conversion uplift",
+      (O.ownedLift||0)>100 ? "Community traffic is assumed to convert more than twice as well as cold traffic. Warm "+
+        "traffic does convert better, but a multiple this high needs cohort evidence."
+        : "Community and referral sessions convert "+(O.ownedLift||0)+"% better than cold paid traffic, which warm traffic usually does.",
+      "+"+(O.ownedLift||0)+"%", "typical +30\u201380%");
+  }
+  var capV=p.audienceCap||0;
+  add(capV<=0 ? "warn" : (r.s.mauEnd>capV*0.98 ? "warn":"ok"), "Market ceiling",
+    capV<=0 ? "No serviceable audience ceiling is set, so acquisition never gets harder however large the base grows. "+
+      "For reference, ixigo reports about 3.34 million monthly transacting users across all of India."
+    : r.s.mauEnd>capV*0.98 ? "The plan finishes pressed against its own ceiling, so later months are ceiling-bound rather "+
+      "than budget-bound. Raise the ceiling only with a market argument for it."
+    : "Ends at "+(r.s.mauEnd/capV*100).toFixed(0)+"% of the serviceable audience, so growth is still budget-led rather than ceiling-bound.",
+    capV>0 ? intf(capV)+" cap" : "none", capV>0 ? intf(r.s.mauEnd)+" reached" : "ixigo \u2248 3.34M");
+
   add(p.satExp<=0?"warn":"ok", "Spend saturation",
     p.satExp<=0 ? "Spend never saturates, so the model implies unlimited budget buys visitors at a constant price. Every marketing channel gets dearer as you scale it."
                 : "Visitors get dearer as spend per city rises above the reference level.",
@@ -1327,6 +1511,77 @@ function paintChecks(res){
     ].map(function(r){ return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'; }).join("")+'</tbody>';
 }
 
+/* ===================== channels & CAC ===================== */
+var KIND={paid:{l:"Paid",buys:"sessions",note:"bought this month, gone next month"},
+          community:{l:"Community",buys:"members",note:"join once, return every month"},
+          content:{l:"Content",buys:"followers",note:"compounding owned reach"}};
+function paintChannels(res){
+  var p=S.p, r=res[S.sel], m1=r.rows[0], last=r.rows[r.rows.length-1];
+  var CH=p.channels||[], alloc=0, paidS=0, ownS=0;
+  CH.forEach(function(c){ alloc+=c.share||0; if(c.kind==="paid") paidS+=c.share||0; else ownS+=c.share||0; });
+
+  $("ch-tiles").innerHTML=[
+    {k:"Blended paid cost",v:m1.cpv.toFixed(1)+" INR",sub:"per paid session in month 1 · "+paidS.toFixed(0)+"% of budget is paid media"},
+    {k:"Owned share of budget",v:ownS.toFixed(0)+"%",sub:ownS>0?"builds community members and followers who keep returning":"no owned-audience investment in this mix"},
+    {k:"Owned share of traffic",v:((last.ownedShare||0)*100).toFixed(0)+"%",
+      sub:"by month "+last.m+" · "+intf(last.members)+" members, "+intf(last.followers)+" followers"},
+    {k:"Cost per booking",v:money2(r.s.cacAll),
+      sub:"across the horizon · year 1 "+money2(r.s.cacY1)+" · final month "+money2(r.s.cacEnd)}
+  ].map(function(t){ return '<div class="tile"><div class="k">'+t.k+'</div><div class="v num">'+t.v+
+      '</div><div class="sub">'+t.sub+'</div></div>'; }).join("");
+
+  $("ch-note").innerHTML = Math.abs(alloc-100)<0.01
+    ? "100% of the monthly budget allocated"
+    : '<span style="color:var(--crit)">'+alloc.toFixed(0)+"% allocated — shares should total 100%</span>";
+
+  var totSess=0; m1.perCh.forEach(function(c){ if(c.kind==="paid") totSess+=c.added; });
+  var head='<thead><tr><th>Channel</th><th>Type</th><th>Share</th><th>Unit cost</th><th>Buys</th>'+
+           '<th>Month 1</th><th>Budget M1</th></tr></thead>';
+  var body=CH.map(function(c,i){
+    var pc=m1.perCh[i]||{added:0,spend:0,unitCost:0}, K=KIND[c.kind]||KIND.paid;
+    return '<tr><td>'+c.name+'</td>'+
+      '<td style="text-align:left"><select id="ck-'+i+'" style="font:500 11px \'IBM Plex Mono\',monospace;background:var(--well);border:1px solid transparent;border-radius:3px;color:var(--ink);padding:4px 5px">'+
+        ["paid","community","content"].map(function(k){
+          return '<option value="'+k+'"'+(k===c.kind?' selected':'')+'>'+KIND[k].l+'</option>'; }).join("")+'</select></td>'+
+      '<td><div class="in" style="display:inline-flex;width:74px"><input type="number" step="1" min="0" max="100" id="cs-'+i+'"><span class="suf">%</span></div></td>'+
+      '<td><div class="in" style="display:inline-flex;width:86px"><input type="number" step="1" min="0" id="cc-'+i+'"><span class="suf">INR</span></div></td>'+
+      '<td>'+K.buys+'</td><td>'+intf(pc.added)+'</td><td>'+money(pc.spend)+'</td></tr>';
+  }).join("");
+  $("chtab").innerHTML=head+'<tbody>'+body+'</tbody>';
+  CH.forEach(function(c,i){
+    var sh=$("cs-"+i), cc=$("cc-"+i), kk=$("ck-"+i);
+    sh.value=c.share; cc.value=c.cpv;
+    sh.addEventListener("input",function(){ var v=parseFloat(sh.value); if(!isFinite(v)||v<0) return; c.share=v; save(); render(); });
+    cc.addEventListener("input",function(){ var v=parseFloat(cc.value); if(!isFinite(v)||v<=0) return; c.cpv=v; save(); render(); });
+    kk.addEventListener("change",function(){ c.kind=kk.value; save(); render(); });
+  });
+  var O=p.owned||{};
+  $("ch-legend").innerHTML="<b>Paid</b> buys a session that is gone next month. "+
+    "<b>Community</b> buys a member at "+(O.memberCost||0)+" INR who returns "+(O.memberSessions||0)+
+    " times a month and refers "+(O.memberRefer||0)+" visitors a month, losing "+(O.memberChurn||0)+
+    "% of members monthly — about "+Math.round(100/Math.max(0.01,O.memberChurn||1))+" months of life, so roughly "+
+    ((O.memberSessions||0)*100/Math.max(0.01,O.memberChurn||1)).toFixed(0)+" sessions for "+(O.memberCost||0)+
+    " INR. <b>Content</b> buys a follower at "+(O.followerCost||0)+" INR worth "+(O.followerSessions||0)+
+    " sessions a month. Community and referral sessions also convert "+(O.ownedLift||0)+"% better than cold paid traffic.";
+
+  var xs=r.rows.map(function(x){ return x.m; });
+  legend("legend-t",[{name:"Paid sessions",color:"var(--s1)"},{name:"Owned — community, referral, followers",color:"var(--s3)"},
+                     {name:"Returning",color:"var(--s2)"}]);
+  drawChart($("chart-t"),$("tip-t"),{xs:xs, zero:true, series:[
+      {name:"Paid",    color:"var(--s1)", pts:r.rows.map(function(x){ return x.paid; })},
+      {name:"Owned",   color:"var(--s3)", pts:r.rows.map(function(x){ return x.ownedSess; })},
+      {name:"Returning",color:"var(--s2)",pts:r.rows.map(function(x){ return x.ret; })}],
+    yFmt:function(v,full){ return full? intf(v) : (Math.abs(v)>=1e6?(v/1e6).toFixed(1)+"M":Math.abs(v)>=1e3?Math.round(v/1e3)+"K":Math.round(v)); },
+    ariaLabel:"Monthly sessions by source. Figures are in the monthly ledger table."});
+
+  $("cac-title").textContent="Cost per booking — "+S.scen.filter(function(x){return x.id===S.sel;})[0].name;
+  legend("legend-cac",[{name:"Marketing cost per booking",color:"var(--s1)"}]);
+  drawChart($("chart-cac"),$("tip-cac"),{xs:xs, zero:true, series:[
+      {name:"Cost per booking", color:"var(--s1)", fill:true, pts:r.rows.map(function(x){ return x.cac; })}],
+    yFmt:function(v){ return money2(v); },
+    ariaLabel:"Marketing cost per booking by month."});
+}
+
 /* ===================== export ===================== */
 function plain(v){ return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function cur1(){ return S.currency==="INR" ? "INR" : "CAD"; }
@@ -1350,7 +1605,9 @@ function summaryModel(res){
       ["Net revenue, final month", money(r.s.revEnd)],
       ["Active users, final month", intf(r.s.mauEnd)],
       ["Cumulative cash at month "+p.horizon, money(r.s.cashEnd)],
-      ["Cash returned per 1 of marketing", r.s.totMkt>0 ? (r.s.cashEnd/r.s.totMkt).toFixed(2)+"x" : "n/a"]
+      ["Cash returned per 1 of marketing", r.s.totMkt>0 ? (r.s.cashEnd/r.s.totMkt).toFixed(2)+"x" : "n/a"],
+      ["Cost per booking (blended)", money2(r.s.cacAll)],
+      ["Owned share of traffic, final month", ((r.s.ownedShareEnd||0)*100).toFixed(0)+"%"]
     ],
     year1:[
       ["Year 1 gross bookings (GMV)", money(a.gmv)],
@@ -1369,6 +1626,13 @@ function assumptionRows(){
     if(fd.t==="money") v=money(v)+"";
     out.push([g.g, fd.l, (typeof v==="number"? v : v), unit]);
   });});
+  (p.channels||[]).forEach(function(ch){
+    out.push(["Marketing channels", ch.name+" \u2014 share of budget", ch.share, "%"]);
+    out.push(["Marketing channels", ch.name+" \u2014 unit cost", ch.cpv, "INR per "+((KIND[ch.kind]||KIND.paid).buys)]);
+  });
+  if(p.owned) Object.keys(p.owned).forEach(function(k){
+    out.push(["Owned audience", k.replace(/([A-Z])/g," $1").toLowerCase(), p.owned[k], ""]); });
+  out.push(["Owned audience","serviceable audience ceiling", p.audienceCap||0, "monthly active users"]);
   p.streams.forEach(function(st){
     out.push(["Revenue streams", st.name+" — average booking value", Math.round(st.abv), "INR"]);
     out.push(["Revenue streams", st.name+" — take rate", st.take, "%"]);
@@ -1411,6 +1675,29 @@ function comparisonRows(res){
   return [head].concat(defs.map(function(d){
     return [d[0]].concat(S.scen.map(function(sc){ return d[1](res[sc.id].s); }));
   }));
+}
+function channelRows(res){
+  var p=S.p, r=res[S.sel], m1=r.rows[0], last=r.rows[r.rows.length-1], c=cur1();
+  var out=[["Channel","Type","Share of budget %","Unit cost (INR)","Buys","Month 1 output","Month 1 budget ("+c+")"]];
+  (p.channels||[]).forEach(function(ch,i){
+    var pc=m1.perCh[i]||{added:0,spend:0};
+    out.push([ch.name,(KIND[ch.kind]||KIND.paid).l,ch.share,ch.cpv,(KIND[ch.kind]||KIND.paid).buys,
+              Math.round(pc.added),raw(pc.spend)]);
+  });
+  out.push([]);
+  out.push(["Traffic by source","Month 1","Month "+last.m]);
+  out.push(["Paid sessions",Math.round(m1.paid),Math.round(last.paid)]);
+  out.push(["Owned sessions (community, referral, followers)",Math.round(m1.ownedSess),Math.round(last.ownedSess)]);
+  out.push(["Returning",Math.round(m1.ret),Math.round(last.ret)]);
+  out.push(["Organic SEO + brand halo",Math.round(m1.organic+m1.halo),Math.round(last.organic+last.halo)]);
+  out.push(["Total monthly active users",Math.round(m1.mau),Math.round(last.mau)]);
+  out.push(["Owned share of traffic %",+(m1.ownedShare*100).toFixed(1),+(last.ownedShare*100).toFixed(1)]);
+  out.push([]);
+  out.push(["Community members",Math.round(m1.members),Math.round(last.members)]);
+  out.push(["Social followers",Math.round(m1.followers),Math.round(last.followers)]);
+  out.push(["Cost per booking ("+c+")",+raw(m1.cac),+raw(last.cac)]);
+  out.push(["Blended paid cost per session (INR)",+m1.cpv.toFixed(2),+last.cpv.toFixed(2)]);
+  return out;
 }
 function checkRows(res){
   return [["Check","Status","Value","Benchmark","What it means"]].concat(
@@ -1544,7 +1831,8 @@ function exportXlsx(res){
       {name:"Assumptions",         rows:[["Group","Assumption","Value","Unit"]].concat(assumptionRows())},
       {name:"Monthly ledger",      rows:ledgerRows(res)},
       {name:"Scenario comparison", rows:comparisonRows(res)},
-      {name:"Traction check",      rows:checkRows(res)}
+      {name:"Traction check",      rows:checkRows(res)},
+      {name:"Channel mix",         rows:channelRows(res)}
     ]);
     dl(blob, "Vacario-Budget-Model.xlsx");
   }catch(e){ msg("Could not build the workbook ("+e.message+"). Use “Copy ledger as CSV” instead."); }
@@ -1730,7 +2018,7 @@ function render(){
   syncChrome(); paintScenarios(res); paintTiles(res[S.sel]);
   paintJ(res); paintCross(res); paintVerdict(res); paintSolve();
   paintFunnel(res); paintCompare(res); paintLedger(res); paintFoot();
-  paintChecks(res); paintExport(res);
+  paintChannels(res); paintChecks(res); paintExport(res);
 }
 function rebuildAll(){
   $("currency").value=S.currency;
@@ -1741,11 +2029,11 @@ function rebuildAll(){
 }
 function setView(v){
   S.view=v;
-  ["model","traction","export"].forEach(function(k){
+  ["model","channels","traction","export"].forEach(function(k){
     var el2=$("view-"+k); if(el2) el2.hidden = (k!==v);
     var tb=$("tab-"+k); if(tb) tb.setAttribute("aria-selected", k===v ? "true":"false");
   });
-  if(v==="model" && LAST){ paintJ(LAST); paintCross(LAST); }
+  if(LAST){ if(v==="model"){ paintJ(LAST); paintCross(LAST); } else if(v==="channels"){ paintChannels(LAST); } }
 }
 function boot(){
   resetAll(); load();

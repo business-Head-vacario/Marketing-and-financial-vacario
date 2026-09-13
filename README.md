@@ -20,11 +20,49 @@ The **preset selector** switches between the two plans on file:
 
 | Preset | Horizon | Budget | Traffic | Conversion |
 |---|---|---|---|---|
-| **Growth Plan A** | 36 months | CAD 15,000 floor, 25% reinvestment from year 2 | cost per visitor with learning + saturation | ramps 40% → 100% over 12 months |
-| **Year 1 lean** | 12 months | CAD 15,000 flat | fixed 93,750 paid visitors/month | full from month 1 |
+| **Growth Plan A** | 36 months | CAD 15,000 floor, 25% reinvestment from year 2 | 9 paid channels, blended 17.4 INR | ramps 40% → 100% over 12 months |
+| **Community-led** | 36 months | same budget rule | 44% of budget into community + content | same, plus owned-traffic uplift |
+| **Year 1 lean** | 12 months | CAD 15,000 flat | single stated rate, 10.9 INR | full from month 1 |
 
-Three tabs: **Model** (scenarios, J-curve, ledger), **Traction check** (assumption audit against
-benchmarks), **Export** (Excel workbook and Word brief).
+Four tabs: **Model** (scenarios, J-curve, ledger), **Channels & CAC** (the marketing mix and where
+traffic comes from), **Traction check** (assumption audit), **Export** (Excel workbook, Word brief).
+
+## Marketing channels and the owned audience
+
+Every channel has a type, and the type decides what the money buys:
+
+| Type | Buys | Behaviour |
+|---|---|---|
+| **Paid** | a session | gone next month; pay again for the next one |
+| **Community** | a member | returns `sessionsPerMember` times a month and refers others until they lapse |
+| **Content** | a follower | compounding owned reach at a lower monthly yield |
+
+That is the whole mechanism behind a falling CAC: an owned audience is paid for once and keeps
+returning, and warm traffic converts better than cold (the *owned conversion uplift*). The
+community-led default mix:
+
+| Channel | Type | Share | Unit cost |
+|---|---|---|---|
+| Travel community (WhatsApp, Discord, in-app) | Community | 22% | 60 INR / member |
+| Performance ads (Search & Meta) | Paid | 18% | 16 INR / session |
+| Creator & UGC partnerships | Paid | 16% | 14 INR / session |
+| Content, SEO & video | Content | 12% | 12 INR / follower |
+| Organic social & short-form | Content | 10% | 12 INR / follower |
+| Referral & loyalty credits | Paid | 10% | 35 INR / session |
+| Affiliates & OTA partnerships | Paid | 7% | 12 INR / session |
+| App install campaigns | Paid | 3% | 25 INR / session |
+| PR & media | Paid | 2% | 40 INR / session |
+
+A member at 60 INR who returns 0.55 times a month and churns at 5% lives about 20 months, so roughly
+11 sessions for 60 INR — about 3× cheaper than a paid session, which is a real but not fantastical
+advantage. The traction check flags any configuration claiming more than 10×.
+
+**The serviceable audience ceiling** stops the model running away. Owned stocks compound and the
+reinvestment rule feeds them, so without a ceiling the plan reaches implausible scale. Acquisition
+efficiency degrades as the base fills toward the ceiling. Growth Plan A and Year 1 lean carry **no**
+ceiling because that is how those documents were written; Community-led sets one at 3,000,000 monthly
+users, roughly ixigo's reported monthly transacting base for all of India. Comparing presets straight
+across flatters the uncapped ones — set the same ceiling on both first.
 
 ## What it answers
 
