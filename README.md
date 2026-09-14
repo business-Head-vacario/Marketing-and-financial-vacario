@@ -24,8 +24,32 @@ The **preset selector** switches between the two plans on file:
 | **Community-led** | 36 months | same budget rule | 44% of budget into community + content | same, plus owned-traffic uplift |
 | **Year 1 lean** | 12 months | CAD 15,000 flat | single stated rate, 10.9 INR | full from month 1 |
 
-Four tabs: **Model** (scenarios, J-curve, ledger), **Channels & CAC** (the marketing mix and where
-traffic comes from), **Traction check** (assumption audit), **Export** (Excel workbook, Word brief).
+Five tabs: **Model** (scenarios, J-curve, ledger, top suggestions), **Channels & CAC** (the marketing
+mix, budget by family, channel contribution, revenue by stream, sensitivity), **Suggestions**,
+**Traction check** (assumption audit), **Export** (Excel workbook, Word brief).
+
+## Visuals
+
+| Chart | Shows |
+|---|---|
+| Cumulative cash J-curve | three budgets against the published plan, with payback markers |
+| Net revenue vs total cost | the crossing point, with the burn window shaded |
+| Budget by channel family | one 100% bar over six families, ordinal ramp, every slice labelled |
+| Channels punching above their weight | budget share against share of paid sessions, per channel |
+| Where the traffic comes from | paid / owned / returning sessions over the horizon |
+| Cost per booking | blended CAC by month |
+| Revenue by stream | six sparkline tiles, one per revenue line |
+| What moves the answer most | tornado: ±20% on each assumption against cumulative cash |
+
+## Suggestions
+
+The **Suggestions** tab reads the current model and ranks what to do about it — high priority for
+anything that changes a number a stakeholder would quote, amber for allocation calls, the rest
+housekeeping. Where an impact figure is shown the change was *actually simulated*: the assumption is
+moved, the full horizon re-run, and the difference in cumulative cash reported. Where a suggestion
+needs a channel the current mix does not contain, it says so rather than showing a misleading zero.
+The top three also appear under the finding on the Model tab, and the full list ships in both the
+workbook and the Word brief.
 
 ## Marketing channels and the owned audience
 
@@ -41,17 +65,19 @@ That is the whole mechanism behind a falling CAC: an owned audience is paid for 
 returning, and warm traffic converts better than cold (the *owned conversion uplift*). The
 community-led default mix:
 
-| Channel | Type | Share | Unit cost |
-|---|---|---|---|
-| Travel community (WhatsApp, Discord, in-app) | Community | 22% | 60 INR / member |
-| Performance ads (Search & Meta) | Paid | 18% | 16 INR / session |
-| Creator & UGC partnerships | Paid | 16% | 14 INR / session |
-| Content, SEO & video | Content | 12% | 12 INR / follower |
-| Organic social & short-form | Content | 10% | 12 INR / follower |
-| Referral & loyalty credits | Paid | 10% | 35 INR / session |
-| Affiliates & OTA partnerships | Paid | 7% | 12 INR / session |
-| App install campaigns | Paid | 3% | 25 INR / session |
-| PR & media | Paid | 2% | 40 INR / session |
+**32 channels across six families**, the ones travel and tourism actually use. Community-led shares:
+
+| Family | Share | Channels |
+|---|---|---|
+| Paid search & shopping | 20% | Google Search brand / non-brand, Google Hotel Ads & Things to do, Performance Max / Demand Gen |
+| Paid social & video | 15% | Meta prospecting, Meta retargeting, YouTube & short-form ads, app install (UAC/Meta), programmatic display & retargeting, native & discovery, OTT & connected TV |
+| Metasearch & partnerships | 14% | Metasearch (Skyscanner, Kayak, Trivago, Wego), affiliates & cashback, bank & credit-card, telco & wallet (Paytm, PhonePe), airline & hotel co-marketing, travel agent / B2B2C |
+| Community & owned | 31% | Travel community (WhatsApp, Telegram, Discord), in-app community & UGC feed, loyalty & membership, referral credits, email & CRM lifecycle, push & WhatsApp broadcast |
+| Content & creators | 19% | SEO destination guides & itineraries, short-form video (Reels, Shorts), YouTube long-form, creator & UGC partnerships, campus ambassadors |
+| Offline & brand | 1% | PR & media, events & travel fairs, OOH & transit, regional print & radio |
+
+Channels at 0% stay in the table greyed out, so the full menu is visible and one edit away. Growth
+Plan A keeps its own nine documented channels untouched — that is the plan of record.
 
 A member at 60 INR who returns 0.55 times a month and churns at 5% lives about 20 months, so roughly
 11 sessions for 60 INR — about 3× cheaper than a paid session, which is a real but not fantastical
