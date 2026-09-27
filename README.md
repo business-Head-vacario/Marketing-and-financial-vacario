@@ -12,6 +12,17 @@ Set a marketing budget, watch traction, break-even, funding need and cumulative 
 
 No dependencies, no build tooling, no network calls except the Google Fonts stylesheet.
 
+
+## Communication workflows
+
+`workflows.html` (source: `src/workflows.html`) turns the seven communication channels in the
+Fall 2026 Integrated Sales, Marketing and Promotions Plan into step-by-step workflows: Consumer,
+Supply, Creator, Destination & Merchant, Corporate, Lifecycle and Internal. Each channel shows the
+flow quoted from the plan, then numbered steps with owner, trigger, touchpoints and output, plus
+objectives, KPIs, cadence and the channels it hands off to. Lifecycle adds a stage-by-audience
+matrix; Internal adds the twelve internal streams, the crisis and escalation path with severity
+levels, and Canada / India / Philippines handoff times. `./build.sh` builds both pages.
+
 ---
 
 ## Two models, three tabs

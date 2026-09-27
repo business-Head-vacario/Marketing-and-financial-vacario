@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Step-by-step workflows for the seven Vacario India communication channels.">
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif;background:#f1f2ee}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Vacario Communication Workflows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+
+<style>
+:root{
+  color-scheme: light;
+  --ground:#f1f2ee; --surface:#fbfbf8; --well:#e8eae2;
+  --ink:#15191a; --ink-2:#565d59; --ink-3:#868d88;
+  --rule:#d8dcd2; --rule-2:#c4c9bc;
+  --accent:#0e5b5e; --accent-ink:#0a4446; --accent-soft:#d6e7e6;
+  --warm:#eb6834; --warm-soft:#fbe3d8;
+  --crit:#d03b3b; --crit-soft:#f7dcdc; --warn:#b77f06; --warn-soft:#fbefcf;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#101210; --surface:#1a1c19; --well:#23261f;
+    --ink:#f0f2ec; --ink-2:#a7aea3; --ink-3:#7b827a;
+    --rule:#31352d; --rule-2:#404539;
+    --accent:#4fb3ac; --accent-ink:#8fd6d0; --accent-soft:#123634;
+    --warm:#f08a5d; --warm-soft:#3a2219;
+    --crit:#f07a7a; --crit-soft:#3b1b1b; --warn:#f2c14e; --warn-soft:#352b12;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#101210; --surface:#1a1c19; --well:#23261f;
+  --ink:#f0f2ec; --ink-2:#a7aea3; --ink-3:#7b827a;
+  --rule:#31352d; --rule-2:#404539;
+  --accent:#4fb3ac; --accent-ink:#8fd6d0; --accent-soft:#123634;
+  --warm:#f08a5d; --warm-soft:#3a2219;
+  --crit:#f07a7a; --crit-soft:#3b1b1b; --warn:#f2c14e; --warn-soft:#352b12;
+}
+
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font:400 14px/1.55 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased}
+.mono{font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums}
+.shell{max-width:1180px; margin:0 auto; padding-inline:20px; padding-block:22px 64px}
+@media (max-width:520px){ .shell{padding-inline:16px} }
+
+.masthead{padding-bottom:16px; border-bottom:2px solid var(--ink); margin-bottom:0}
+.eyebrow{font:500 10.5px/1 'IBM Plex Mono',monospace; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:10px}
+h1{font-family:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif; font-weight:700; font-size:clamp(30px,5vw,46px); line-height:.98; letter-spacing:-.015em; margin:0; text-wrap:balance}
+.dek{margin:10px 0 0; color:var(--ink-2); font-size:14px; max-width:70ch}
+.motto{margin:14px 0 0; font-size:13px; color:var(--ink-2); max-width:70ch; padding-left:12px; border-left:2px solid var(--accent)}
+
+/* sticky channel index */
+.index{position:sticky; top:env(safe-area-inset-top,0px); z-index:5; background:var(--ground);
+  border-bottom:1px solid var(--rule); padding-block:10px; margin-bottom:26px}
+.index ol{list-style:none; margin:0; padding:0; display:flex; gap:6px; overflow-x:auto; scrollbar-width:thin}
+.index a{display:flex; align-items:center; gap:7px; white-space:nowrap; text-decoration:none; color:var(--ink-2);
+  font:500 12px/1 'IBM Plex Sans',sans-serif; padding:7px 10px; border:1px solid var(--rule-2); border-radius:3px; background:var(--surface)}
+.index a:hover, .index a:focus-visible{border-color:var(--accent); color:var(--accent); outline:none}
+.index a b{font:600 10.5px/1 'IBM Plex Mono',monospace; color:var(--accent)}
+
+section.block{scroll-margin-top:64px}
+section.block:not(#overview){margin-top:52px}
+.sec-hd{display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 16px; align-items:baseline; margin-bottom:16px}
+.sec-no{font:600 13px/1 'IBM Plex Mono',monospace; color:var(--accent); padding-top:6px}
+h2{font-family:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif; font-weight:700; font-size:clamp(23px,3.4vw,30px); line-height:1.05; margin:0; text-wrap:balance}
+.sec-sub{grid-column:2; color:var(--ink-2); max-width:72ch; margin:0}
+.audience{grid-column:2; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+.tag{font:500 10.5px/1 'IBM Plex Mono',monospace; letter-spacing:.05em; text-transform:uppercase; padding:5px 8px; border-radius:3px; background:var(--accent-soft); color:var(--accent-ink)}
+.tag.warm{background:var(--warm-soft); color:var(--warm)}
+@media (max-width:560px){ .sec-hd{grid-template-columns:minmax(0,1fr)} .sec-sub,.audience{grid-column:1} }
+
+/* the plan's own chain, drawn as a flow */
+.chain-wrap{overflow-x:auto; margin-bottom:18px; padding-bottom:2px}
+.chain{display:flex; align-items:stretch; gap:0; min-width:min-content}
+.node{display:flex; align-items:center; font:500 12.5px/1.25 'IBM Plex Sans',sans-serif; padding:9px 12px; background:var(--surface);
+  border:1px solid var(--rule-2); border-radius:3px; max-width:190px; min-height:40px}
+.node.start{background:var(--accent); border-color:var(--accent); color:var(--surface); font-weight:600}
+.node.end{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-soft); font-weight:600}
+.arrow{display:flex; align-items:center; padding-inline:6px; color:var(--ink-3); font:500 14px 'IBM Plex Mono',monospace}
+.chain-label{font:500 10px/1 'IBM Plex Mono',monospace; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px}
+
+.cols{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:18px; align-items:start}
+@media (max-width:920px){ .cols{grid-template-columns:minmax(0,1fr)} }
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:4px; min-width:0}
+.panel-hd{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; padding:11px 14px 9px; border-bottom:1px solid var(--rule)}
+.panel-hd h3{margin:0; font:600 11.5px/1 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase}
+.panel-hd .note{font-size:11.5px; color:var(--ink-3)}
+
+/* step list: a real sequence, so it is numbered */
+.steps{list-style:none; margin:0; padding:0}
+.step{display:grid; grid-template-columns:38px minmax(0,1fr); gap:0 12px; padding:13px 14px 14px; position:relative}
+.step + .step{border-top:1px solid var(--rule)}
+.step-n{width:28px; height:28px; border-radius:50%; border:1.5px solid var(--accent); color:var(--accent);
+  display:grid; place-items:center; font:600 11.5px/1 'IBM Plex Mono',monospace; background:var(--surface)}
+.step h4{margin:3px 0 4px; font:600 15px/1.3 'IBM Plex Sans',sans-serif}
+.step p{margin:0 0 9px; color:var(--ink-2); max-width:68ch}
+.meta{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:6px 16px; font-size:12.5px}
+.meta div{min-width:0}
+.meta dt{font:500 9.5px/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px}
+.meta dd{margin:0; color:var(--ink)}
+.meta{margin:0}
+
+.side{display:flex; flex-direction:column; gap:14px; min-width:0}
+.side .body{padding:11px 14px 13px}
+.side ul{margin:0; padding-left:17px; display:flex; flex-direction:column; gap:5px}
+.side li{color:var(--ink); font-size:13px}
+.side li::marker{color:var(--accent)}
+.handoff{display:flex; flex-direction:column; gap:8px; list-style:none; padding:0 !important}
+.handoff li{display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:baseline}
+.handoff a{font:600 11px/1 'IBM Plex Mono',monospace; color:var(--accent); text-decoration:none; white-space:nowrap}
+.handoff a:hover{text-decoration:underline}
+
+/* tables */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:13px}
+th, td{text-align:left; vertical-align:top; padding:9px 12px; border-bottom:1px solid var(--rule)}
+th{font:500 10px/1.2 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); background:var(--well); white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.k{font-weight:600; white-space:nowrap}
+.extra{margin-top:18px}
+
+.sev{display:inline-block; font:600 10.5px/1 'IBM Plex Mono',monospace; padding:4px 7px; border-radius:3px}
+.sev.s1{background:var(--crit-soft); color:var(--crit)}
+.sev.s2{background:var(--warn-soft); color:var(--warn)}
+.sev.s3{background:var(--accent-soft); color:var(--accent-ink)}
+
+/* ecosystem map */
+.map-wrap{overflow-x:auto}
+.map{display:block; width:100%; min-width:620px; height:auto}
+.map text{font-family:'IBM Plex Sans',sans-serif}
+.intro-grid{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:18px; align-items:start}
+@media (max-width:920px){ .intro-grid{grid-template-columns:minmax(0,1fr)} }
+.how{padding:13px 14px 14px; display:flex; flex-direction:column; gap:10px; font-size:13px; color:var(--ink-2)}
+.how p{margin:0}
+.how strong{color:var(--ink)}
+
+.foot{margin-top:48px; padding-top:14px; border-top:1px solid var(--rule); color:var(--ink-3); font-size:12px; max-width:80ch}
+@media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <div class="eyebrow">vacario India · Fall 2026 · Integrated Sales, Marketing &amp; Promotions Plan</div>
+    <h1>Communication Workflows</h1>
+    <p class="dek">Step-by-step workflows for the seven communication channels in the plan. Each channel starts from the flow written in the plan, then breaks it into steps with an owner, a trigger, the touchpoints used and the output that hands off to the next step.</p>
+    <p class="motto">“One company, one source of truth, and one clearly defined communications path from strategy through execution.”</p>
+  </header>
+
+  <nav class="index" aria-label="Channels">
+    <ol id="index"></ol>
+  </nav>
+
+  <section class="block" id="overview">
+    <div class="sec-hd">
+      <div class="sec-no">00</div>
+      <h2>How the seven channels connect</h2>
+      <p class="sec-sub">Four channels feed the traveller's booking directly. Lifecycle wraps around every audience after they join, Corporate earns trust and capital, and Internal runs underneath all of it.</p>
+    </div>
+    <div class="intro-grid">
+      <div class="panel">
+        <div class="panel-hd"><h3>Channel map</h3><span class="note">arrows show what each channel hands to the traveller</span></div>
+        <div class="map-wrap"><svg class="map" viewBox="0 0 640 430" role="img" aria-label="Map of the seven communication channels around the traveller and booking">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+            </marker>
+          </defs>
+          <!-- lifecycle ring -->
+          <ellipse cx="320" cy="180" rx="118" ry="78" fill="none" stroke="var(--warm)" stroke-width="1.5" stroke-dasharray="5 5"></ellipse>
+          <text x="320" y="92" text-anchor="middle" font-size="11" font-weight="600" fill="var(--warm)">6 · LIFECYCLE — retention loop</text>
+          <!-- centre -->
+          <rect x="245" y="150" width="150" height="60" rx="4" fill="var(--accent)"></rect>
+          <text x="320" y="176" text-anchor="middle" font-size="14" font-weight="600" fill="var(--surface)">Traveller</text>
+          <text x="320" y="194" text-anchor="middle" font-size="11.5" fill="var(--surface)">booking · trip · repeat</text>
+          <!-- four feeders -->
+          <g font-size="12.5" font-weight="600" fill="var(--ink)">
+            <rect x="14" y="30" width="170" height="54" rx="4" fill="var(--surface)" stroke="var(--rule-2)"></rect>
+            <text x="99" y="53" text-anchor="middle">1 · Consumer</text>
+            <text x="99" y="71" text-anchor="middle" font-size="11" font-weight="400" fill="var(--ink-2)">ads, social, CRM, referral</text>
+
+            <rect x="456" y="30" width="170" height="54" rx="4" fill="var(--surface)" stroke="var(--rule-2)"></rect>
+            <text x="541" y="53" text-anchor="middle">2 · Supply</text>
+            <text x="541" y="71" text-anchor="middle" font-size="11" font-weight="400" fill="var(--ink-2)">inventory, availability, price</text>
+
+            <rect x="14" y="250" width="170" height="54" rx="4" fill="var(--surface)" stroke="var(--rule-2)"></rect>
+            <text x="99" y="273" text-anchor="middle">3 · Creator</text>
+            <text x="99" y="291" text-anchor="middle" font-size="11" font-weight="400" fill="var(--ink-2)">content to followers</text>
+
+            <rect x="456" y="250" width="170" height="54" rx="4" fill="var(--surface)" stroke="var(--rule-2)"></rect>
+            <text x="541" y="273" text-anchor="middle">4 · Destination &amp; Merchant</text>
+            <text x="541" y="291" text-anchor="middle" font-size="11" font-weight="400" fill="var(--ink-2)">in-trip offers, local content</text>
+          </g>
+          <g stroke="var(--accent)" stroke-width="1.6" fill="none" marker-end="url(#ah)">
+            <path d="M184,70 L243,152"></path>
+            <path d="M456,70 L397,152"></path>
+            <path d="M184,272 L243,208"></path>
+            <path d="M456,272 L397,208"></path>
+          </g>
+          <!-- corporate -->
+          <rect x="235" y="275" width="170" height="44" rx="4" fill="var(--surface)" stroke="var(--rule-2)"></rect>
+          <text x="320" y="294" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">5 · Corporate</text>
+          <text x="320" y="310" text-anchor="middle" font-size="11" fill="var(--ink-2)">investors, media, government</text>
+          <!-- internal foundation -->
+          <rect x="14" y="352" width="612" height="62" rx="4" fill="var(--well)" stroke="var(--rule-2)"></rect>
+          <text x="320" y="377" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">7 · Internal — one source of truth</text>
+          <text x="320" y="397" text-anchor="middle" font-size="11" fill="var(--ink-2)">Canada ↔ India ↔ Philippines · meetings · dashboards · knowledge base · escalation</text>
+        </svg></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><h3>Reading each workflow</h3></div>
+        <div class="how">
+          <p><strong>The flow</strong> at the top of each channel is the chain written in the plan, word for word.</p>
+          <p><strong>The steps</strong> turn that chain into work. Each step lists who owns it, what starts it, the touchpoints used and what it produces for the next step.</p>
+          <p><strong>Objectives and KPIs</strong> answer the plan's requirement that every channel has clear, measurable objectives. Targets are left for the team to set against the budget model.</p>
+          <p><strong>Hands off to</strong> shows where one channel's output becomes another channel's input, so nothing is dropped between teams.</p>
+          <p>Owners are proposed roles. Rename them to the people who hold each role.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="channels"></div>
+
+  <p class="foot">Built from <em>vacario India, Fall 2026 Integrated Sales, Marketing and Promotions Plan</em>, section “Communications Channels”. The channel flows are quoted from the plan; the steps, owners, cadences, KPIs and severity levels are a proposed operating version of it for the team to adjust.</p>
+</div>
+
+<script>
+const CH = [
+{
+  id:'consumer', n:'01', name:'Consumer Communications',
+  sub:'Paid advertising, earned media, creator content, social channels, CRM/email, WhatsApp/SMS, push notifications, referral programmes and loyalty communications.',
+  who:['Travellers','Prospects','Past guests'],
+  chain:['Vacario','Traveler','App engagement','Booking','Trip','Review / content','Repeat booking'],
+  steps:[
+    {t:'Attract', d:'Run paid search and social, earn press, and push creator content to bring travellers to the app or a landing page.', o:'Performance marketing', tr:'Campaign calendar', tp:'Google, Meta, YouTube, PR, creator posts', out:'App install or sign-up'},
+    {t:'Welcome and profile', d:'Send a welcome series and collect preferences: destinations, budget, who they travel with, language. Ask for WhatsApp and push opt-in.', o:'CRM lead', tr:'Sign-up', tp:'Email, push, WhatsApp, in-app', out:'Opted-in, profiled user'},
+    {t:'Engage and nudge', d:'Show deals and destination content that match the profile. Remind anyone who searched or left a booking unfinished.', o:'CRM lead', tr:'Search or cart with no booking in 24 h', tp:'Push, WhatsApp, email, in-app feed', out:'Return visit'},
+    {t:'Book and confirm', d:'Confirm instantly with itinerary, receipt and support contact in one message.', o:'Product / customer service', tr:'Payment success', tp:'Email, WhatsApp, in-app', out:'Confirmed booking'},
+    {t:'Prepare the trip', d:'Send pre-trip reminders with check-in details, weather and local tips, and offer experiences at the destination.', o:'CRM lead', tr:'7 days and 1 day before arrival', tp:'Push, WhatsApp, email', out:'Add-on bookings, fewer support calls'},
+    {t:'Support during the trip', d:'Hand the traveller to the Destination & Merchant channel for in-trip offers. Keep a live support line open.', o:'Customer service', tr:'Check-in date', tp:'WhatsApp, in-app chat, phone', out:'Issues solved on the trip'},
+    {t:'Review and share', d:'Ask for a rating and a review, invite photos and short video for the in-app feed, and send a referral link.', o:'Community / social', tr:'1 day after checkout', tp:'Push, email, in-app', out:'Reviews, UGC, referrals'},
+    {t:'Book again', d:'Move the guest into the Lifecycle channel: loyalty points, next-trip ideas and festival offers.', o:'CRM lead', tr:'Review received or 30 days after trip', tp:'Email, push, WhatsApp', out:'Repeat booking'}
+  ],
+  obj:['Grow app users and first bookings at a falling cost per booking','Turn every trip into a review and a piece of content','Make repeat and referral bookings a growing share of the total'],
+  kpi:['Installs and sign-ups','Cost per install and per booking','Sign-up → first booking conversion','Opt-in rate (WhatsApp, push)','Review and UGC rate per trip','Referral bookings','12-month repeat booking rate'],
+  cad:['Daily: paid campaign pacing','Weekly: CRM send plan and results','Monthly: channel mix vs. budget model'],
+  hand:[['creator','Creator content is reused in paid ads and the app feed'],['destination','In-trip offers go to the traveller during the stay'],['lifecycle','Guests move to loyalty and win-back after the trip']]
+},
+{
+  id:'supply', n:'02', name:'Supply Communications',
+  sub:'A B2B acquisition and relationship-management channel. Its messaging is quite different from consumer advertising: commission, reach, payout reliability and ease of listing.',
+  who:['Property owners','Property managers','Hotels','Travel suppliers'],
+  chain:['Vacario','Property owners + managers + hotels + suppliers','Inventory','Availability / pricing','Booking'],
+  steps:[
+    {t:'Target the gaps', d:'Use search and booking data to list destinations and property types where demand is higher than the inventory on offer.', o:'Supply lead', tr:'Monthly demand review', tp:'Search data, market research', out:'Prioritised target list'},
+    {t:'Reach out', d:'Pitch the value to the partner: new demand from India, commission terms, payout speed and marketing support.', o:'Business development', tr:'Target list approved', tp:'Calls, email, LinkedIn, hotel associations, trade events', out:'Qualified lead'},
+    {t:'Agree terms and contract', d:'Agree commission, cancellation policy and rate parity. Collect registration and GST documents. Sign the agreement.', o:'Business development + finance', tr:'Partner says yes', tp:'Proposal, e-signature', out:'Signed supplier'},
+    {t:'Onboard the listing', d:'Build the listing with photos and descriptions, connect the channel manager or API, and load rates, availability and policies.', o:'Supply operations', tr:'Contract signed', tp:'Onboarding call, partner portal, API', out:'Listing ready for QA'},
+    {t:'Check and go live', d:'Check content, pricing and a test booking end to end before switching the listing on.', o:'Supply operations', tr:'Listing complete', tp:'QA checklist', out:'Live, bookable inventory'},
+    {t:'Keep availability and price right', d:'Monitor sync errors, rate parity and stale calendars. Invite partners into seasonal promotions.', o:'Supply operations', tr:'Daily sync report, promotion calendar', tp:'Partner portal, email, WhatsApp', out:'Accurate inventory'},
+    {t:'Report and grow', d:'Send each partner a monthly performance statement. Hold quarterly reviews with top partners to add rooms, dates and properties.', o:'Account manager', tr:'Month end, quarter end', tp:'Statement, review meeting', out:'More inventory from existing partners'}
+  ],
+  obj:['Build bookable inventory in the priority destinations','Shorten the time from first contact to live listing','Keep availability and pricing accurate so bookings do not fail'],
+  kpi:['Suppliers signed and live','Days from contract to live','Live inventory by destination','Sync and availability error rate','Supplier-caused cancellations','Bookings per live listing','Supplier satisfaction score'],
+  cad:['Daily: sync and parity exceptions','Weekly: pipeline review','Monthly: partner statements','Quarterly: top-partner reviews'],
+  hand:[['consumer','New inventory feeds consumer campaigns and destination pages'],['destination','Hotels and properties introduce local merchants'],['internal','Contract and inventory status goes to Travel Supply updates']]
+},
+{
+  id:'creator', n:'03', name:'Creator Communications',
+  sub:'The creator is not only an advertising medium. Creators become part of the Vacario distribution system, with their own links, content and bookings.',
+  who:['Influencers','Creators','Campus ambassadors'],
+  chain:['Vacario','Influencers / creators','Content','Followers','Vacario','Booking'],
+  steps:[
+    {t:'Scout', d:'Find creators by travel niche, region and language (Telugu, Hindi, Tamil, English and others). Check audience fit and real engagement.', o:'Creator partnerships', tr:'Quarterly creator plan', tp:'Instagram, YouTube, creator platforms', out:'Shortlist by tier'},
+    {t:'Recruit into the programme', d:'Invite them into the Vacario creator programme with clear tiers: commission per booking, hosted trips or a fixed fee.', o:'Creator partnerships', tr:'Shortlist approved', tp:'DM, email, call', out:'Signed creator'},
+    {t:'Onboard', d:'Give each creator brand guidelines, a unique link and code, and the ASCI disclosure rules for paid and gifted content.', o:'Creator partnerships', tr:'Agreement signed', tp:'Creator kit, onboarding call', out:'Creator ready to post'},
+    {t:'Brief the trip or story', d:'Agree destination, property, dates, deliverables and a content calendar. Book the stay through Vacario supply.', o:'Content lead', tr:'Campaign or destination launch', tp:'Brief document, WhatsApp group', out:'Approved brief'},
+    {t:'Review content', d:'Check brand fit, facts, prices and disclosure before anything goes live.', o:'Content lead', tr:'Draft received', tp:'Shared folder, review form', out:'Approved content'},
+    {t:'Publish and amplify', d:'The creator posts. Vacario reshares, adds the content to the app feed and boosts the best pieces with paid media.', o:'Social + performance marketing', tr:'Content approved', tp:'Instagram, YouTube, in-app feed, paid boost', out:'Reach and clicks'},
+    {t:'Track and pay', d:'Attribute bookings to links and codes. Send creators a monthly statement and pay on time.', o:'Creator partnerships + finance', tr:'Month end', tp:'Dashboard, statement', out:'Paid, attributed bookings'},
+    {t:'Grow the best', d:'Move top performers to long-term ambassador deals and bring them into product and destination launches.', o:'Creator partnerships', tr:'Quarterly review', tp:'Ambassador agreement', out:'Always-on creator network'}
+  ],
+  obj:['Build a creator network that drives bookings, not only reach','Keep content supply steady for the app feed and paid ads','Pay creators on results they can see'],
+  kpi:['Active creators by tier','Content pieces published','Reach and clicks','Bookings attributed to creators','Cost per attributed booking','Creator retention quarter to quarter'],
+  cad:['Weekly: content calendar and approvals','Monthly: attribution and payouts','Quarterly: tier review and scouting'],
+  hand:[['consumer','Best content becomes paid ads and CRM creative'],['supply','Hosted stays are booked with supply partners'],['lifecycle','Creators get their own onboarding and renewal track']]
+},
+{
+  id:'destination', n:'04', name:'Destination & Merchant Communications',
+  sub:'This lets Vacario talk to the traveller through the whole trip, instead of disappearing once the stay or flight is booked.',
+  who:['Tourism boards','Attractions','Restaurants','Experiences','Local merchants'],
+  chain:['Vacario','Tourism boards + attractions + restaurants + experiences + merchants','Offers / content','Traveler'],
+  steps:[
+    {t:'Map each destination', d:'For every priority destination, list the tourism board, top attractions, restaurants, experience operators and useful local merchants.', o:'Destination partnerships', tr:'Destination added to plan', tp:'Research, supply partner referrals', out:'Destination partner map'},
+    {t:'Approach partners', d:'Offer tourism boards co-marketing and data on Vacario travellers. Offer merchants a way to reach visitors already in town.', o:'Destination partnerships', tr:'Partner map ready', tp:'Meetings, email, local visits', out:'Interested partners'},
+    {t:'Agree the offer', d:'Set the offer, validity dates, how it is redeemed (code or QR) and the commercial model: commission, sponsorship or co-funding.', o:'Destination partnerships', tr:'Partner agrees', tp:'Offer form, agreement', out:'Signed offer'},
+    {t:'Build the content', d:'Create destination guides, itineraries and offer cards in the app, tagged by place and season.', o:'Content lead', tr:'Offer signed', tp:'App CMS, guides', out:'Offers live in the app'},
+    {t:'Deliver before and during the trip', d:'Suggest offers in the pre-trip message, then send timely ones while the traveller is at the destination.', o:'CRM lead', tr:'Booking made, check-in date, arrival in destination', tp:'Push, WhatsApp, in-app', out:'Offer views and saves'},
+    {t:'Redeem and record', d:'Record each redemption so the merchant and Vacario see the same number.', o:'Product', tr:'Code or QR scanned', tp:'Redemption tool', out:'Logged redemptions'},
+    {t:'Settle and report', d:'Settle commissions monthly. Send tourism boards a campaign report with traveller numbers and engagement.', o:'Finance + destination partnerships', tr:'Month end, campaign end', tp:'Statement, report', out:'Paid partners, renewal case'},
+    {t:'Refresh by season', d:'Renew and refresh offers for festivals and seasons: Diwali, Dussehra, winter holidays, monsoon getaways.', o:'Destination partnerships', tr:'Season calendar', tp:'Partner calls', out:'Current offers every season'}
+  ],
+  obj:['Stay in contact with the traveller through the whole trip','Add revenue per trip from experiences and local offers','Win tourism board co-marketing and sponsorship'],
+  kpi:['Partners live per destination','Active offers','In-trip engagement rate','Redemptions per trip','Ancillary revenue per trip','Sponsorship and co-marketing revenue'],
+  cad:['Weekly: offer performance','Monthly: settlement and partner reports','Seasonal: offer refresh'],
+  hand:[['consumer','Offers appear in pre-trip and in-trip consumer messages'],['corporate','Tourism board and government partnerships feed the corporate story'],['lifecycle','Merchants and sponsors get renewal and reporting tracks']]
+},
+{
+  id:'corporate', n:'05', name:'Corporate Communications',
+  sub:'The message changes from “book your next trip” to the corporate story: what Vacario is building, growth, technology, partnerships, milestones and market expansion.',
+  who:['Investors','Media','Governments','Strategic partners','Employees'],
+  chain:['Vacario','Investors + media + governments + strategic partners + employees'],
+  steps:[
+    {t:'Set the story', d:'Write one message house: what Vacario is building, why India first, the technology, growth and the next milestones. Leadership approves it.', o:'CEO + communications lead', tr:'Start of each half-year', tp:'Message house document', out:'Approved narrative'},
+    {t:'Plan the milestones', d:'Keep a calendar of launches, city expansion, partnerships, funding and awards, with the date each can be announced.', o:'Communications lead', tr:'Monthly business review', tp:'Milestone calendar', out:'Announcement calendar'},
+    {t:'Prepare the materials', d:'Write the press release, fact sheet, investor update, partner brief and internal note for each milestone.', o:'Communications lead', tr:'Milestone confirmed', tp:'Templates in the knowledge base', out:'Draft pack'},
+    {t:'Check and approve', d:'Finance checks every number. Legal checks claims and partner names. The CEO signs off.', o:'Finance, legal, CEO', tr:'Draft pack ready', tp:'Approval workflow', out:'Approved pack'},
+    {t:'Tell employees first', d:'Brief the team in Canada, India and the Philippines before anything goes out.', o:'CEO', tr:'Pack approved', tp:'All-hands, internal channel', out:'Team briefed'},
+    {t:'Release by audience', d:'Investors get the update. Media get the release and interviews. Government and tourism departments get a meeting or letter. Partners get a direct brief.', o:'Communications lead', tr:'Release date', tp:'Email, newswire, meetings, LinkedIn', out:'Announcement out'},
+    {t:'Answer questions', d:'Route every media and investor question to one named spokesperson with a prepared Q&A.', o:'Spokesperson', tr:'Inbound enquiry', tp:'Q&A document', out:'Consistent answers'},
+    {t:'Measure and log', d:'Track coverage, investor responses and partner interest. File everything in the knowledge base.', o:'Communications lead', tr:'1 week after release', tp:'Coverage log, dashboard', out:'Lessons for the next milestone'}
+  ],
+  obj:['Build trust with investors, media, government and partners','Announce every milestone with one consistent story','Make sure employees always hear news first'],
+  kpi:['Media mentions and tier-1 coverage','Investor update engagement and meetings','Partnership and government MoU announcements','Inbound partner enquiries','Share of voice against competitors'],
+  cad:['Monthly: investor update','Per milestone: release pack','Quarterly: story and message review'],
+  hand:[['internal','Employees are briefed before any release'],['destination','Tourism board partnerships become announcements'],['supply','Large hotel partnerships become announcements']]
+},
+{
+  id:'lifecycle', n:'06', name:'Lifecycle Communications',
+  sub:'Directly tied to guest and partner retention. Communication should not stop once someone joins, spends, sells or sponsors. This is where Vacario should shine.',
+  who:['Guests','Suppliers','Creators','Merchants & sponsors'],
+  chain:['Join','Activate','Engage','Reward','Retain or win back'],
+  steps:[
+    {t:'Welcome', d:'Every new traveller, supplier, creator or sponsor gets a welcome in their own track, with the one next action that matters for them.', o:'CRM lead (guests), account managers (partners)', tr:'Sign-up, contract signed', tp:'Email, WhatsApp, in-app', out:'First action started'},
+    {t:'Activate', d:'Help them reach the first result: first booking, first listing live, first post published, first offer redeemed.', o:'Track owner', tr:'Days 1–14 with no first result', tp:'Reminders, onboarding call', out:'Activated member or partner'},
+    {t:'Give value every month', d:'Send useful, personal updates: trip ideas for guests, performance statements for partners, earnings for creators.', o:'Track owner', tr:'Monthly', tp:'Email, dashboard, WhatsApp', out:'Ongoing engagement'},
+    {t:'Mark milestones', d:'Recognise first trip, fifth booking, 100th night sold, first sponsored campaign. Tie rewards to them.', o:'CRM lead', tr:'Milestone reached', tp:'Push, email, loyalty points', out:'Loyalty'},
+    {t:'Ask for feedback', d:'Ask a short satisfaction question at key moments and act on the answers.', o:'Customer service + track owner', tr:'After trip, quarterly for partners', tp:'Survey, NPS', out:'Satisfaction score, fixes'},
+    {t:'Spot risk early', d:'Flag anyone going quiet: no app visit in 60 days, a supplier with falling availability, a creator not posting.', o:'CRM lead', tr:'Inactivity rules', tp:'Dashboard alerts', out:'At-risk list'},
+    {t:'Win back or renew', d:'Send a personal offer or call. Renew partner and sponsor agreements before they lapse.', o:'Track owner', tr:'At-risk flag, 60 days before renewal', tp:'Offer, call, review meeting', out:'Retained member or partner'}
+  ],
+  obj:['Keep guests booking again','Keep suppliers, creators and sponsors active and renewing','Make every message relevant to where the person is in their journey'],
+  kpi:['Activation rate by track','90-day retention','Repeat booking rate','Partner and creator churn','Renewal rate for sponsors','NPS by audience','Win-back rate'],
+  cad:['Always-on: triggered messages','Monthly: statements and value updates','Quarterly: retention review by track'],
+  hand:[['consumer','Guests come in from the consumer flow after their trip'],['supply','Suppliers come in after go-live'],['creator','Creators come in after onboarding']]
+},
+{
+  id:'internal', n:'07', name:'Internal Communications',
+  sub:'The systems and routines that keep the organisation aligned, informed, accountable and moving quickly across Canada, India, technology, operations, marketing and leadership.',
+  who:['Leadership','Canada team','India team','Philippines team','All functions'],
+  chain:['Strategy','Priorities & budgets','Weekly reviews','Daily execution','Reporting','Knowledge base'],
+  steps:[
+    {t:'Set strategy and decisions', d:'Leadership sets priorities, major decisions, budgets and approvals, and records each decision in the knowledge base.', o:'Executive team', tr:'Monthly strategic / business review', tp:'Board-style review, decision log', out:'Monthly priorities'},
+    {t:'Turn them into budgets and plans', d:'Finance confirms the budget, cash need and approvals for each function’s plan.', o:'Finance', tr:'Priorities set', tp:'Budget model, approval form', out:'Approved function plans'},
+    {t:'Run the weekly management review', d:'Function heads report progress, blockers and KPIs against plan. Decisions and owners are written down.', o:'COO / general manager', tr:'Weekly', tp:'Video call, dashboard', out:'Weekly actions with owners'},
+    {t:'Run weekly functional meetings', d:'Technology, product, supply, marketing and social, finance, customer service and business development each plan their week.', o:'Each function head', tr:'Weekly', tp:'Team meetings, task board', out:'Team work plans'},
+    {t:'Hand off across time zones', d:'Each region closes its day with a short handoff note so the next region starts with context, not questions.', o:'Region leads', tr:'End of each region’s day', tp:'Shared channel, handoff template', out:'No waiting overnight'},
+    {t:'Run daily check-ins where needed', d:'Operations and customer service cover priorities, staffing, open issues, vendors and compliance.', o:'Operations lead', tr:'Daily', tp:'Short stand-up', out:'Issues assigned'},
+    {t:'Report performance', d:'Publish one dashboard: users, bookings, engagement, conversion, inventory, creator activity, revenue and marketing results.', o:'Finance + analytics', tr:'Weekly and monthly', tp:'Dashboard', out:'One set of numbers'},
+    {t:'Keep the knowledge base current', d:'Store contracts, presentations, brand assets, product specs, SOPs, research, meeting notes and decisions in one place.', o:'Each function, owned by operations', tr:'After every meeting or decision', tp:'Knowledge base', out:'One source of truth'},
+    {t:'Escalate and handle crises', d:'Follow the escalation path below for outages, customer incidents, supplier problems, reputation and legal matters.', o:'Incident owner on call', tr:'Incident detected', tp:'Escalation channel, phone', out:'Contained, logged incident'}
+  ],
+  obj:['Everyone works from the same priorities and numbers','Decisions are made fast and written down','Nothing waits overnight because of time zones'],
+  kpi:['Decisions logged vs. made','Action items closed on time','Dashboard published on schedule','Handoff notes sent per region per day','Incident response and resolution time'],
+  cad:['Daily: operational check-ins where required','Weekly: functional meetings','Weekly: management review','Monthly: strategic / business review'],
+  hand:[['corporate','Employees are briefed before external news'],['supply','Supply status is reported in Travel Supply updates'],['consumer','Campaign calendar and results go into Sales & Marketing updates']]
+}
+];
+
+const EXTRA = {
+lifecycle: `
+  <div class="panel extra">
+    <div class="panel-hd"><h3>Lifecycle by audience</h3><span class="note">the same five stages, one track per audience</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Stage</th><th>Guest (joins, spends)</th><th>Supplier (sells)</th><th>Creator</th><th>Merchant / sponsor</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Join</td><td>Welcome series, preference capture</td><td>Welcome pack, portal login</td><td>Creator kit, link and code</td><td>Partner welcome, offer setup</td></tr>
+        <tr><td class="k">Activate</td><td>First booking offer</td><td>Listing live in 14 days</td><td>First post published</td><td>First offer redeemed</td></tr>
+        <tr><td class="k">Engage</td><td>Trip ideas, festival deals</td><td>Monthly performance statement</td><td>Monthly earnings, new briefs</td><td>Redemption and reach report</td></tr>
+        <tr><td class="k">Reward</td><td>Loyalty points, member prices</td><td>Top-partner badge, featured placement</td><td>Tier upgrade, hosted trips</td><td>Featured placement, case study</td></tr>
+        <tr><td class="k">Retain / win back</td><td>60-day inactive offer</td><td>Quarterly review, falling-availability call</td><td>Re-brief if not posting</td><td>Renewal 60 days before end</td></tr>
+      </tbody>
+    </table></div>
+  </div>`,
+internal: `
+  <div class="panel extra">
+    <div class="panel-hd"><h3>What each internal stream covers</h3><span class="note">the twelve streams named in the plan</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Stream</th><th>Covers</th><th>Where it happens</th><th>Cadence</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Executive &amp; leadership</td><td>Strategy, priorities, major decisions, budgets, approvals, investor and shareholder matters</td><td>Strategic review, decision log</td><td>Monthly</td></tr>
+        <tr><td class="k">Cross-functional</td><td>Technology, product, inventory, marketing, social, finance, customer service, BD</td><td>Management review, shared task board</td><td>Weekly</td></tr>
+        <tr><td class="k">Canada ↔ India ↔ Philippines</td><td>Reporting lines, decision authority, handoffs, time zones, escalation</td><td>Handoff notes, overlap call</td><td>Daily</td></tr>
+        <tr><td class="k">Product &amp; technology</td><td>App progress, bugs, releases, API integrations, AI tools, testing, launch readiness</td><td>Tech meeting, release notes</td><td>Weekly + each release</td></tr>
+        <tr><td class="k">Sales &amp; marketing</td><td>Campaign calendar, promotions, partnerships, influencers, earned media, content, results</td><td>Marketing meeting, campaign calendar</td><td>Weekly</td></tr>
+        <tr><td class="k">Travel supply</td><td>Hotels, vacation properties, airlines, API suppliers, availability, pricing, contracting</td><td>Supply pipeline review</td><td>Weekly</td></tr>
+        <tr><td class="k">Operational</td><td>Priorities, staffing, customer-service issues, vendors, compliance, admin</td><td>Daily check-in</td><td>Daily where required</td></tr>
+        <tr><td class="k">Financial</td><td>Budgets, spend approvals, cash needs, forecasts, KPIs, department performance</td><td>Finance review, approval form</td><td>Weekly + monthly</td></tr>
+        <tr><td class="k">Policies &amp; procedures</td><td>Company policies, brand standards, approvals, data and security, employee guidelines</td><td>Knowledge base</td><td>On change</td></tr>
+        <tr><td class="k">Performance reporting</td><td>Users, bookings, engagement, conversion, inventory, creator activity, revenue, marketing</td><td>Dashboard</td><td>Weekly + monthly</td></tr>
+        <tr><td class="k">Meeting structure</td><td>Daily check-ins, weekly functional, weekly management, monthly strategic</td><td>Shared calendar</td><td>As listed</td></tr>
+        <tr><td class="k">Knowledge base</td><td>Contracts, presentations, brand assets, specs, SOPs, research, notes, decisions</td><td>One central repository</td><td>After every meeting</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="cols extra">
+    <div class="panel">
+      <div class="panel-hd"><h3>Crisis &amp; escalation path</h3><span class="note">outages, customer incidents, supplier problems, reputation, legal, urgent decisions</span></div>
+      <div class="chain-wrap" style="padding:14px 14px 4px; margin:0">
+        <div class="chain">
+          <div class="node start">Detect</div><div class="arrow">→</div>
+          <div class="node">Log in escalation channel</div><div class="arrow">→</div>
+          <div class="node">Set severity</div><div class="arrow">→</div>
+          <div class="node">Escalate to owner</div><div class="arrow">→</div>
+          <div class="node">Contain</div><div class="arrow">→</div>
+          <div class="node">Communicate</div><div class="arrow">→</div>
+          <div class="node">Resolve</div><div class="arrow">→</div>
+          <div class="node end">Review &amp; file</div>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Severity</th><th>Example</th><th>Escalate to</th><th>Who is told</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sev s1">SEV 1</span></td><td>App or payments down, travellers stranded, safety incident, legal threat, press story</td><td>CEO and function head at once, any hour</td><td>Affected customers and partners; media only through the spokesperson</td></tr>
+          <tr><td><span class="sev s2">SEV 2</span></td><td>Supplier overbooking, API sync failure, complaint going public on social</td><td>Function head within the same working day</td><td>Affected customers and partners</td></tr>
+          <tr><td><span class="sev s3">SEV 3</span></td><td>Single customer issue, minor bug, vendor delay</td><td>Team lead in the next check-in</td><td>The customer involved</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <div class="panel-hd"><h3>Handoff times</h3></div>
+        <div class="body">
+          <ul>
+            <li>India closes its day, Canada (Eastern) picks up: 6:00 pm IST is 8:30 am EDT, 8:30 pm in Manila.</li>
+            <li>From 1 Nov 2026, when Canada leaves daylight time, 8:30 am EST is 7:00 pm IST and 9:30 pm in Manila.</li>
+            <li>Canada closes, India and the Philippines pick up next morning from the handoff note.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>`
+};
+
+const byId = Object.fromEntries(CH.map(c => [c.id, c]));
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const li = arr => arr.map(x => `<li>${esc(x)}</li>`).join('');
+
+document.getElementById('index').innerHTML =
+  `<li><a href="#overview"><b>00</b>Overview</a></li>` +
+  CH.map(c => `<li><a href="#${c.id}"><b>${c.n}</b>${esc(c.name.replace(' Communications',''))}</a></li>`).join('');
+
+document.getElementById('channels').innerHTML = CH.map(c => {
+  const chain = c.chain.map((x, i) =>
+    `${i ? '<div class="arrow" aria-hidden="true">→</div>' : ''}<div class="node${i === 0 ? ' start' : ''}${i === c.chain.length - 1 && i > 0 ? ' end' : ''}">${esc(x)}</div>`
+  ).join('');
+  const steps = c.steps.map((s, i) => `
+    <li class="step">
+      <div class="step-n">${i + 1}</div>
+      <div>
+        <h4>${esc(s.t)}</h4>
+        <p>${esc(s.d)}</p>
+        <dl class="meta">
+          <div><dt>Owner</dt><dd>${esc(s.o)}</dd></div>
+          <div><dt>Trigger</dt><dd>${esc(s.tr)}</dd></div>
+          <div><dt>Touchpoints</dt><dd>${esc(s.tp)}</dd></div>
+          <div><dt>Output</dt><dd>${esc(s.out)}</dd></div>
+        </dl>
+      </div>
+    </li>`).join('');
+  const hand = c.hand.map(([id, why]) =>
+    `<li><a href="#${id}">→ ${byId[id].n}</a><span>${esc(why)}</span></li>`).join('');
+  const chainLabel = c.id === 'lifecycle' ? 'Lifecycle stages' : c.id === 'internal' ? 'Path from strategy to execution' : 'Flow from the plan';
+  return `
+  <section class="block" id="${c.id}">
+    <div class="sec-hd">
+      <div class="sec-no">${c.n}</div>
+      <h2>${esc(c.name)}</h2>
+      <p class="sec-sub">${esc(c.sub)}</p>
+      <div class="audience">${c.who.map(w => `<span class="tag">${esc(w)}</span>`).join('')}</div>
+    </div>
+    <div class="chain-label">${chainLabel}</div>
+    <div class="chain-wrap"><div class="chain">${chain}</div></div>
+    <div class="cols">
+      <div class="panel">
+        <div class="panel-hd"><h3>Workflow steps</h3><span class="note">${c.steps.length} steps</span></div>
+        <ol class="steps">${steps}</ol>
+      </div>
+      <aside class="side">
+        <div class="panel"><div class="panel-hd"><h3>Objectives</h3></div><div class="body"><ul>${li(c.obj)}</ul></div></div>
+        <div class="panel"><div class="panel-hd"><h3>KPIs to track</h3></div><div class="body"><ul>${li(c.kpi)}</ul></div></div>
+        <div class="panel"><div class="panel-hd"><h3>Cadence</h3></div><div class="body"><ul>${li(c.cad)}</ul></div></div>
+        <div class="panel"><div class="panel-hd"><h3>Hands off to</h3></div><div class="body"><ul class="handoff">${hand}</ul></div></div>
+      </aside>
+    </div>
+    ${EXTRA[c.id] || ''}
+  </section>`;
+}).join('');
+</script>
+
+</body>
+</html>
