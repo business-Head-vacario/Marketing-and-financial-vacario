@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vacario Communication Workflows</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Print document: A4 landscape. Open in Chrome and print, or render headless, to get the PDF. */
+@page{size:297mm 210mm; margin:0}
+:root{
+  --ground:#ffffff; --paper:#f6f7f3; --well:#eceee7;
+  --ink:#15191a; --ink-2:#4f5652; --ink-3:#858c87;
+  --rule:#d8dcd2; --rule-2:#bfc5b8;
+  --accent:#0e5b5e; --accent-2:#2f8a86; --accent-soft:#dcebea; --accent-ink:#0a4446;
+  --warm:#d9602e; --warm-soft:#fbe6dc;
+  --gold:#b98309; --gold-soft:#fbf0d2;
+  --crit:#c23434; --crit-soft:#f8dddd;
+  --l1:#e3efee; --l2:#f3efe4; --l3:#e8edf5; --l4:#f2e8ee; --l5:#eaf1e4;
+}
+*{box-sizing:border-box}
+html,body{margin:0; background:#8a8f8a}
+body{font:400 8.6pt/1.42 'IBM Plex Sans', 'Liberation Sans', Arial, sans-serif; color:var(--ink); -webkit-print-color-adjust:exact; print-color-adjust:exact}
+.mono{font-family:'IBM Plex Mono','Liberation Mono',monospace; font-variant-numeric:tabular-nums}
+.cond{font-family:'IBM Plex Sans Condensed','IBM Plex Sans','Liberation Sans Narrow',sans-serif}
+
+.page{width:297mm; height:210mm; background:var(--ground); position:relative; overflow:hidden;
+  padding:11mm 13mm 12mm; display:flex; flex-direction:column; gap:4.2mm; page-break-after:always; break-after:page; margin:0 auto 6mm}
+@media print{ html,body{background:none} .page{margin:0} }
+.page:last-child{page-break-after:auto; break-after:auto}
+
+/* running header / footer */
+.run{display:flex; justify-content:space-between; align-items:baseline; font:500 6.8pt/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); border-bottom:.3mm solid var(--rule); padding-bottom:2.2mm}
+.run b{color:var(--accent); font-weight:600}
+.foot{position:absolute; left:13mm; right:13mm; bottom:5.5mm; display:flex; justify-content:space-between; font:500 6.4pt/1 'IBM Plex Mono',monospace; color:var(--ink-3); letter-spacing:.06em}
+
+h1,h2,h3{margin:0; font-family:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif; text-wrap:balance}
+h2{font-size:21pt; font-weight:700; line-height:1; letter-spacing:-.01em}
+h3{font:600 7pt/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2)}
+p{margin:0}
+.lead{font-size:9.6pt; color:var(--ink-2); max-width:150mm}
+.eyebrow{font:600 7pt/1 'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+
+/* channel header band */
+.band{display:grid; grid-template-columns:22mm minmax(0,1fr) auto; gap:0 5mm; align-items:end}
+.bigno{font:700 38pt/0.8 'IBM Plex Sans Condensed',sans-serif; color:var(--accent); letter-spacing:-.02em}
+.band .sub{font-size:9pt; color:var(--ink-2); margin-top:1.6mm; max-width:175mm}
+.tags{display:flex; flex-wrap:wrap; gap:1.4mm; justify-content:flex-end; max-width:78mm}
+.tag{font:500 6.4pt/1 'IBM Plex Mono',monospace; letter-spacing:.05em; text-transform:uppercase; padding:1.3mm 1.9mm; border-radius:.8mm; background:var(--accent-soft); color:var(--accent-ink); white-space:nowrap}
+.pageno{font:600 7pt/1 'IBM Plex Mono',monospace; color:var(--ink-3)}
+
+/* plan chain */
+.chain{display:flex; align-items:stretch; flex-wrap:nowrap}
+.cn{display:flex; align-items:center; padding:1.8mm 3mm; font-size:7.6pt; font-weight:500; background:var(--paper); border:.3mm solid var(--rule-2);
+  clip-path:polygon(0 0, calc(100% - 2.4mm) 0, 100% 50%, calc(100% - 2.4mm) 100%, 0 100%, 2.4mm 50%); padding-inline:4.2mm; margin-right:-1.2mm; line-height:1.2}
+.cn:first-child{clip-path:polygon(0 0, calc(100% - 2.4mm) 0, 100% 50%, calc(100% - 2.4mm) 100%, 0 100%); background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600}
+.cn:last-child{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+.chain-row{display:flex; align-items:center; gap:3mm}
+.chain-row .lbl{font:600 6.4pt/1.2 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); width:22mm; flex:none}
+
+/* swimlane */
+.swim{position:relative; border:.3mm solid var(--rule-2); border-radius:1mm; flex:1 1 auto; min-height:0; display:grid; overflow:hidden; row-gap:0}
+.swim .box{margin-block:2mm}
+.swim .lane-bg{grid-column:1 / -1; border-top:.3mm solid var(--rule)}
+.swim .lane-bg:first-of-type{border-top:0}
+.lane-name{display:flex; align-items:center; padding:0 2.6mm; font:600 7pt/1.2 'IBM Plex Sans',sans-serif; color:var(--ink); border-right:.3mm solid var(--rule-2); z-index:1}
+.box{z-index:2; align-self:center; margin:0 1.6mm; background:#fff; border:.35mm solid var(--accent); border-radius:1.2mm; padding:1.6mm 1.9mm 1.8mm; min-height:11mm; display:flex; flex-direction:column; gap:.8mm; box-shadow:0 .4mm 0 rgba(14,91,94,.12)}
+.box .n{display:flex; align-items:flex-start; gap:1.3mm; color:var(--accent)}
+.box .s{font:500 5.9pt/1.25 'IBM Plex Mono',monospace; color:var(--ink-3); border-top:.25mm dotted var(--rule-2); padding-top:.8mm; margin-top:auto}
+.box.first .s{color:#bfe1de; border-top-color:#5d9a98}
+.box .n i{flex:none; font:600 6pt/1 'IBM Plex Mono',monospace; font-style:normal; width:4.2mm; height:4.2mm; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:6pt}
+.box .t{font:600 7.8pt/1.18 'IBM Plex Sans',sans-serif}
+.box .o{font-size:6.3pt; line-height:1.25; color:var(--ink-2)}
+.box.first{background:var(--accent); color:#fff} .box.first .n{color:#fff} .box.first .n i{background:#fff; color:var(--accent)} .box.first .o{color:#d8ecea}
+.box.last{border-color:var(--warm); box-shadow:0 .4mm 0 rgba(217,96,46,.18)} .box.last .n i{background:var(--warm)}
+.box .loop{font:500 6pt/1.2 'IBM Plex Mono',monospace; color:var(--warm)}
+svg.wires{position:absolute; inset:0; width:100%; height:100%; z-index:1; overflow:visible; pointer-events:none}
+.gate{position:absolute; z-index:3; transform:translate(-50%,-50%); font:600 5.8pt/1 'IBM Plex Mono',monospace; background:var(--gold-soft); color:var(--gold); border:.3mm solid var(--gold); padding:1mm 1.4mm; border-radius:.8mm; white-space:nowrap}
+
+.io{display:grid; grid-template-columns:1fr 1fr 1fr; gap:4mm}
+.io > div{border-top:.6mm solid var(--accent); padding-top:1.8mm}
+.io > div.w{border-top-color:var(--warm)}
+.io > div.g{border-top-color:var(--gold)}
+.io ul{margin:1.4mm 0 0; padding-left:3.6mm}
+.io li{margin:0 0 .5mm; font-size:7.6pt}
+.io li b{font-weight:600}
+
+/* tables */
+table{border-collapse:collapse; width:100%}
+th{font:600 6.2pt/1.2 'IBM Plex Mono',monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2); text-align:left; background:var(--well); padding:1.8mm 2mm; border-bottom:.35mm solid var(--ink)}
+td{padding:1.6mm 2mm; border-bottom:.25mm solid var(--rule); vertical-align:top; font-size:7.5pt; line-height:1.34}
+td ul{margin:0; padding-left:3.2mm}
+td li{margin:0 0 .3mm}
+td.num{width:7mm}
+.sn{width:5.2mm; height:5.2mm; border-radius:50%; border:.35mm solid var(--accent); color:var(--accent); display:grid; place-items:center; font:600 6.6pt/1 'IBM Plex Mono',monospace}
+td.step{font-weight:600; font-size:8pt; width:30mm}
+td.muted{color:var(--ink-2)}
+.sla{display:inline-block; font:500 6.4pt/1.25 'IBM Plex Mono',monospace; background:var(--accent-soft); color:var(--accent-ink); padding:.6mm 1.3mm; border-radius:.6mm}
+.pill{display:inline-block; font:600 6pt/1 'IBM Plex Mono',monospace; padding:.9mm 1.4mm; border-radius:.6mm; white-space:nowrap}
+.pill.lead{background:var(--accent-soft); color:var(--accent-ink)}
+.pill.lag{background:var(--gold-soft); color:var(--gold)}
+.dir{font:700 9pt/1 'IBM Plex Mono',monospace}
+.dir.up{color:var(--accent)} .dir.down{color:var(--warm)} .dir.hold{color:var(--gold)}
+.tgt{display:block; border-bottom:.3mm dashed var(--rule-2); height:4.6mm; min-width:16mm}
+.formula{font:500 6.7pt/1.3 'IBM Plex Mono',monospace; color:var(--accent-ink); margin-top:.6mm}
+
+/* KPI flow (stage pipeline with conversion metrics between) */
+.kflow{display:flex; align-items:stretch}
+.stage{flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:1.2mm}
+.stage .bar{width:100%; height:11mm; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font:600 7.6pt/1.1 'IBM Plex Sans',sans-serif; padding:0 3.4mm;
+  clip-path:polygon(0 0, calc(100% - 3mm) 0, 100% 50%, calc(100% - 3mm) 100%, 0 100%, 3mm 50%)}
+.stage:first-child .bar{clip-path:polygon(0 0, calc(100% - 3mm) 0, 100% 50%, calc(100% - 3mm) 100%, 0 100%)}
+.stage .m{font-size:6.6pt; color:var(--ink-2); text-align:center; line-height:1.2; padding:0 1mm}
+.conv{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:0; position:relative; z-index:2}
+.conv span{position:absolute; top:18.2mm; transform:translateX(-50%); font:600 6pt/1.15 'IBM Plex Mono',monospace; color:var(--warm); background:var(--warm-soft); border:.25mm solid var(--warm); border-radius:.6mm; padding:.8mm 1.2mm; text-align:center; white-space:nowrap}
+
+.split{display:grid; grid-template-columns:minmax(0,1fr) 68mm; gap:6mm; min-height:0}
+.card{border:.3mm solid var(--rule-2); border-radius:1mm; padding:2.6mm 3mm; background:var(--paper)}
+.card h3{margin-bottom:1.8mm}
+.card ul{margin:0; padding-left:3.6mm}
+.card li{margin-bottom:.9mm; font-size:7.8pt}
+.card + .card{margin-top:3mm}
+.note{font-size:6.8pt; color:var(--ink-3); line-height:1.35}
+
+/* cover */
+.cover{background:var(--accent); color:#fff; padding:16mm 18mm}
+.cover .eyebrow{color:#a9d6d2}
+.cover h1{font-size:52pt; line-height:.9; font-weight:700; letter-spacing:-.02em; margin-top:6mm; max-width:210mm}
+.cover .tel{font-size:12pt; margin-top:8mm; color:#d7ecea; max-width:200mm}
+.cover .tel small{display:block; font-size:9pt; color:#a9d6d2; margin-top:1.5mm}
+.cover .grid7{position:absolute; left:18mm; right:18mm; bottom:16mm; display:grid; grid-template-columns:repeat(7,1fr); gap:2.4mm}
+.cover .grid7 div{border-top:.6mm solid #7cc3bd; padding-top:2.2mm; font:600 9pt/1.2 'IBM Plex Sans Condensed',sans-serif}
+.cover .grid7 div span{display:block; font:500 7pt/1 'IBM Plex Mono',monospace; color:#a9d6d2; margin-bottom:1.4mm}
+.cover .quote{position:absolute; right:18mm; top:16mm; font:500 7pt/1.4 'IBM Plex Mono',monospace; color:#a9d6d2; text-align:right; letter-spacing:.08em; text-transform:uppercase}
+
+.cover .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:6mm; margin-top:14mm; max-width:230mm}
+.cover .stats div{font-size:9pt; color:#d7ecea; line-height:1.3}
+.cover .stats b{display:block; font:700 30pt/1 'IBM Plex Sans Condensed',sans-serif; color:#fff; margin-bottom:1.6mm}
+/* contents */
+.toc{display:grid; grid-template-columns:1fr 1fr; gap:0 10mm}
+.toc a{display:grid; grid-template-columns:12mm 1fr auto; gap:3mm; align-items:baseline; padding:2.4mm 0; border-bottom:.25mm solid var(--rule); color:var(--ink); text-decoration:none}
+.toc a b{font:600 9pt/1 'IBM Plex Mono',monospace; color:var(--accent)}
+.toc a span{font-size:10pt; font-weight:500}
+.toc a em{font:500 7.5pt/1 'IBM Plex Mono',monospace; color:var(--ink-3); font-style:normal}
+.legend{display:grid; grid-template-columns:repeat(4,1fr); gap:4mm}
+.legend .card{background:#fff}
+
+/* map */
+svg text{font-family:'IBM Plex Sans','Liberation Sans',sans-serif}
+
+/* KPI tree */
+.tree{display:flex; flex-direction:column; align-items:center; gap:9mm; position:relative}
+.tnode{border:.4mm solid var(--accent); border-radius:1.2mm; background:#fff; padding:4mm 4mm; text-align:center}
+.tnode.root{background:var(--accent); color:#fff; padding:3.4mm 8mm}
+.tnode.root .k{font:700 18pt/1.1 'IBM Plex Sans Condensed',sans-serif}
+.tnode .k{font:600 11.5pt/1.2 'IBM Plex Sans',sans-serif}
+.tnode .c{font:500 7.2pt/1.2 'IBM Plex Mono',monospace; color:var(--accent); margin-top:1mm; letter-spacing:.06em; text-transform:uppercase}
+.tnode.root .c{color:#bfe1de}
+.tnode ul{margin:2.4mm 0 0; padding:0; list-style:none; font-size:8.6pt; color:var(--ink-2); line-height:1.35}
+.trow{display:grid; gap:4mm; width:100%}
+.tnode.en{border-color:var(--gold); border-style:dashed}
+.tnode.en .c{color:var(--gold)}
+
+/* RACI */
+.raci td, .raci th{text-align:center; padding:1.9mm 1.4mm}
+.raci td:first-child, .raci th:first-child{text-align:left}
+.raci th{font-size:5.9pt; letter-spacing:.04em; vertical-align:bottom}
+.r{display:inline-grid; place-items:center; width:6mm; height:6mm; border-radius:1mm; font:700 7.6pt/1 'IBM Plex Mono',monospace}
+.r.A{background:var(--accent); color:#fff} .r.R{background:var(--accent-soft); color:var(--accent-ink)}
+.r.C{background:var(--gold-soft); color:var(--gold)} .r.I{background:var(--well); color:var(--ink-3)}
+
+/* cadence grid */
+.cad td{vertical-align:top; font-size:7.1pt}
+.cad td.on{background:var(--accent-soft)}
+.cad td ul{padding-left:3mm}
+.week{display:grid; grid-template-columns:24mm repeat(5,1fr); border:.3mm solid var(--rule-2); border-radius:1mm; overflow:hidden}
+.week > div{padding:1.6mm 2mm; border-bottom:.25mm solid var(--rule); border-right:.25mm solid var(--rule); font-size:7pt; min-height:9mm}
+.week .h{background:var(--well); font:600 6.4pt/1 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); min-height:0}
+.week .ev{background:var(--accent-soft); color:var(--accent-ink); border-radius:.6mm; padding:.8mm 1.2mm; margin-bottom:.8mm; font-weight:500}
+.week .ev.w{background:var(--warm-soft); color:var(--warm)}
+.week .ev.g{background:var(--gold-soft); color:var(--gold)}
+.sev{display:inline-block; font:700 6.6pt/1 'IBM Plex Mono',monospace; padding:1mm 1.6mm; border-radius:.6mm}
+.sev.s1{background:var(--crit-soft); color:var(--crit)} .sev.s2{background:var(--gold-soft); color:var(--gold)} .sev.s3{background:var(--accent-soft); color:var(--accent-ink)}
+</style>
+</head>
+<body>
+<div id="doc"></div>
+
+<script>
+/* ------------------------------------------------------------------ data */
+const CH = [
+{
+  id:'consumer', n:'01', name:'Consumer Communications',
+  sub:'Paid advertising, earned media, creator content, social channels, CRM/email, WhatsApp/SMS, push notifications, referral programmes and loyalty communications.',
+  who:['Travellers','Prospects','Past guests'],
+  chain:['Vacario','Traveler','App engagement','Booking','Trip','Review / content','Repeat booking'],
+  lanes:{perf:'Performance marketing', crm:'CRM & lifecycle', cx:'Product & customer service', soc:'Community & social'},
+  steps:[
+    {l:'perf', t:'Attract', out:'App install or sign-up', tr:'Monthly media plan', sla:'Always on; pacing checked daily',
+      acts:['Set monthly spend by channel from the budget model','Run search, Meta, YouTube and app-install campaigns by destination','Point PR and creator content to tagged landing pages (UTM)'], tp:'Google, Meta, YouTube, PR, creator posts'},
+    {l:'crm', t:'Welcome & profile', out:'Opted-in, profiled user', tr:'Sign-up', sla:'First message within 5 min',
+      acts:['Day 0 welcome email and push','Preference quiz: destinations, budget, travel group, language','Ask WhatsApp and push consent; day 3 first-booking offer'], tp:'Email, push, WhatsApp, in-app'},
+    {l:'crm', t:'Engage & nudge', out:'Return visit, booking', tr:'Search or cart with no booking in 24 h', sla:'Nudge at 24 h, 72 h, 7 days', gate:'Booked?', loop:'No → keep nudging, max 3',
+      acts:['Personal deals and destination content from profile','Abandoned search and cart reminders','Price-drop and festival alerts'], tp:'Push, WhatsApp, email, in-app feed'},
+    {l:'cx', t:'Book & confirm', out:'Confirmed booking', tr:'Payment success', sla:'Confirmation within 1 min',
+      acts:['One message with itinerary, GST invoice and support contact','Add trip to in-app wallet','Flag high-value bookings for a welcome call'], tp:'Email, WhatsApp, in-app'},
+    {l:'crm', t:'Prepare the trip', out:'Add-ons booked, fewer calls', tr:'7 days and 1 day before arrival', sla:'T-7 and T-1',
+      acts:['Check-in details, directions, weather','Offer experiences from Destination & Merchant','Packing and local tips content'], tp:'Push, WhatsApp, email'},
+    {l:'cx', t:'Support during trip', out:'Issues solved on the trip', tr:'Check-in date', sla:'Reply within 15 min, 24/7',
+      acts:['Live WhatsApp and in-app chat','Hand in-trip offers to Destination & Merchant','Log every issue for supplier follow-up'], tp:'WhatsApp, in-app chat, phone'},
+    {l:'soc', t:'Review & share', out:'Reviews, UGC, referrals', tr:'1 day after checkout', sla:'Reply to reviews within 48 h',
+      acts:['Rating and review request','Invite photos and short video for the in-app feed','Send referral link with credit for both sides'], tp:'Push, email, in-app, social'},
+    {l:'crm', t:'Book again', out:'Repeat booking', tr:'Review received or 30 days after trip', sla:'Hand to Lifecycle at T+30',
+      acts:['Credit loyalty points','Next-trip ideas from past trip','Festival and long-weekend offers'], tp:'Email, push, WhatsApp'}
+  ],
+  flow:[['Reach','impressions, visits'],['Install','app installs'],['Sign-up','accounts'],['First booking','new customers'],['Trip','completed stays'],['Review','reviews + UGC'],['Repeat','2nd booking']],
+  conv:['CPI','Sign-up rate','30-day conversion','Completion rate','Review rate','Repeat rate'],
+  obj:['Grow app users and first bookings at a falling cost per booking','Turn every trip into a review and a piece of content','Make repeat and referral bookings a growing share of the total'],
+  kpi:[
+    ['Cost per install (CPI)','Paid spend ÷ installs from paid','Ad platforms, attribution tool','Weekly','Performance marketing','down','Leading'],
+    ['Sign-up rate','Sign-ups ÷ installs','App analytics','Weekly','Product','up','Leading'],
+    ['Opt-in rate','Users opted into WhatsApp or push ÷ sign-ups','CRM platform','Weekly','CRM','up','Leading'],
+    ['30-day booking conversion','First bookings within 30 days ÷ sign-ups','Booking system','Monthly','CRM','up','Leading'],
+    ['Blended CAC','Total marketing spend ÷ new booking customers','Finance + booking system','Monthly','Marketing lead','down','Lagging'],
+    ['Average booking value','Gross booking value ÷ bookings','Booking system','Monthly','Marketing lead','up','Lagging'],
+    ['Review rate','Reviews ÷ completed trips','App, review platform','Monthly','Community & social','up','Leading'],
+    ['Referral share','Referral bookings ÷ all bookings','Referral tracking','Monthly','CRM','up','Lagging'],
+    ['12-month repeat rate','Customers with 2+ bookings in 12 months ÷ customers','Booking system','Quarterly','CRM','up','Lagging']
+  ],
+  cad:['Daily: paid campaign pacing','Weekly: CRM send plan and results','Monthly: channel mix vs. budget model'],
+  in:[['Creator','content for ads, feed and CRM'],['Supply','new inventory and destinations to promote']],
+  hand:[['Destination & Merchant','in-trip offers during the stay'],['Lifecycle','guests after the trip for loyalty and win-back']]
+},
+{
+  id:'supply', n:'02', name:'Supply Communications',
+  sub:'A B2B acquisition and relationship-management channel. Its messaging differs from consumer advertising: commission, reach, payout reliability and ease of listing.',
+  who:['Property owners','Property managers','Hotels','Travel suppliers'],
+  chain:['Vacario','Owners + managers + hotels + suppliers','Inventory','Availability / pricing','Booking'],
+  lanes:{lead:'Supply lead', bd:'Business development', fin:'Finance & legal', ops:'Supply operations', am:'Account management'},
+  steps:[
+    {l:'lead', t:'Target the gaps', out:'Prioritised target list', tr:'Monthly demand review', sla:'List ready by day 5 of month',
+      acts:['Compare search demand with live inventory by destination','Rank property types and price bands with gaps','Set monthly signing targets per destination'], tp:'Search data, market research'},
+    {l:'bd', t:'Reach out', out:'Qualified lead', tr:'Target list approved', sla:'First contact within 5 working days', gate:'Qualified?', loop:'No → nurture list, retry in 90 days',
+      acts:['Pitch: new Indian demand, commission, payout speed, marketing support','Calls, email, LinkedIn, hotel associations, trade fairs','Qualify on quality, location, API or channel manager'], tp:'Phone, email, LinkedIn, events'},
+    {l:'fin', t:'Agree terms & contract', out:'Signed supplier', tr:'Partner agrees in principle', sla:'Contract in 10 working days',
+      acts:['Commission, cancellation policy, rate parity','Collect registration, PAN and GST documents','E-sign agreement, set payout details'], tp:'Proposal, e-signature'},
+    {l:'ops', t:'Onboard the listing', out:'Listing ready for QA', tr:'Contract signed', sla:'Listing built in 7 days',
+      acts:['Photos, descriptions, amenities','Connect channel manager or API','Load rates, availability and policies'], tp:'Onboarding call, partner portal, API'},
+    {l:'ops', t:'QA & go live', out:'Live, bookable inventory', tr:'Listing complete', sla:'QA within 2 days', gate:'Passed QA?', loop:'No → back to onboarding',
+      acts:['Check content, prices and policies','Make a test booking end to end','Switch on and announce to marketing'], tp:'QA checklist'},
+    {l:'ops', t:'Keep it accurate', out:'Accurate availability and price', tr:'Daily sync report', sla:'Sync errors fixed same day',
+      acts:['Monitor sync errors and stale calendars','Check rate parity against other sites','Invite partners into seasonal promotions'], tp:'Partner portal, email, WhatsApp'},
+    {l:'am', t:'Report & grow', out:'More inventory from partners', tr:'Month end, quarter end', sla:'Statement by day 5; QBR each quarter',
+      acts:['Monthly performance statement per partner','Quarterly review with top partners','Ask for more rooms, dates and properties'], tp:'Statement, review meeting'}
+  ],
+  flow:[['Target','gap list'],['Contacted','first touch'],['Qualified','fit confirmed'],['Signed','contract'],['Live','bookable'],['Booked','1+ booking in 30 d'],['Expanded','more inventory']],
+  conv:['Contact rate','Qualification rate','Win rate','Time to live','Activation rate','Expansion rate'],
+  obj:['Build bookable inventory in the priority destinations','Shorten the time from first contact to live listing','Keep availability and pricing accurate so bookings do not fail'],
+  kpi:[
+    ['Pipeline coverage','Qualified leads ÷ monthly signing target','CRM pipeline','Weekly','Business development','up','Leading'],
+    ['Win rate','Signed suppliers ÷ qualified leads','CRM pipeline','Monthly','Business development','up','Leading'],
+    ['Time to live','Days from contract signed to listing live (median)','Onboarding tracker','Weekly','Supply operations','down','Leading'],
+    ['Live listings by destination','Bookable listings in each priority destination','Inventory system','Weekly','Supply lead','up','Lagging'],
+    ['Availability accuracy','1 − (bookings failed for availability or price ÷ bookings)','Booking system','Daily','Supply operations','up','Leading'],
+    ['Supplier cancellation rate','Bookings cancelled by supplier ÷ bookings','Booking system','Monthly','Account management','down','Lagging'],
+    ['Rate parity','Listings at parity with other sites ÷ listings checked','Parity check','Weekly','Supply operations','up','Leading'],
+    ['Bookings per live listing','Bookings ÷ live listings (monthly)','Booking system','Monthly','Supply lead','up','Lagging'],
+    ['Supplier satisfaction','Average score from quarterly partner survey','Survey','Quarterly','Account management','up','Lagging']
+  ],
+  cad:['Daily: sync and parity exceptions','Weekly: pipeline review','Monthly: partner statements','Quarterly: top-partner reviews'],
+  in:[['Consumer','search demand and destination interest'],['Destination & Merchant','local introductions']],
+  hand:[['Consumer','new inventory for campaigns'],['Internal','contract and inventory status in supply updates'],['Lifecycle','suppliers after go-live']]
+},
+{
+  id:'creator', n:'03', name:'Creator Communications',
+  sub:'The creator is not only an advertising medium. Creators become part of the Vacario distribution system, with their own links, content and bookings.',
+  who:['Influencers','Creators','Campus ambassadors'],
+  chain:['Vacario','Influencers / creators','Content','Followers','Vacario','Booking'],
+  lanes:{cp:'Creator partnerships', ct:'Content lead', sp:'Social & performance', fin:'Finance'},
+  steps:[
+    {l:'cp', t:'Scout', out:'Shortlist by tier', tr:'Quarterly creator plan', sla:'Shortlist in first 2 weeks of quarter',
+      acts:['Search by travel niche, region and language (Telugu, Hindi, Tamil, English)','Check audience location and real engagement','Tier: nano, micro, macro'], tp:'Instagram, YouTube, creator tools'},
+    {l:'cp', t:'Recruit', out:'Signed creator', tr:'Shortlist approved', sla:'Reply to interest within 48 h', gate:'Signed?', loop:'No → keep on watch list',
+      acts:['Invite to the creator programme','Offer: commission per booking, hosted trip or fixed fee','Agree usage rights for paid ads'], tp:'DM, email, call'},
+    {l:'cp', t:'Onboard', out:'Creator ready to post', tr:'Agreement signed', sla:'Kit sent within 2 days',
+      acts:['Brand guidelines and tone','Unique tracking link and discount code','ASCI disclosure rules for paid and gifted posts'], tp:'Creator kit, onboarding call'},
+    {l:'ct', t:'Brief the story', out:'Approved brief', tr:'Campaign or destination launch', sla:'Brief 3 weeks before travel',
+      acts:['Destination, property, dates, deliverables','Content calendar and key messages','Book the hosted stay through Supply'], tp:'Brief, WhatsApp group'},
+    {l:'ct', t:'Review content', out:'Approved content', tr:'Draft received', sla:'Approve within 48 h', gate:'Approved?', loop:'No → one round of edits',
+      acts:['Check brand fit, facts and prices','Check disclosure label is present','Confirm link and code are correct'], tp:'Shared folder, review form'},
+    {l:'sp', t:'Publish & amplify', out:'Reach and clicks', tr:'Content approved', sla:'Reshare same day',
+      acts:['Creator posts on agreed date','Reshare and add to in-app feed','Boost best posts as paid ads'], tp:'Instagram, YouTube, app feed, paid'},
+    {l:'fin', t:'Track & pay', out:'Paid, attributed bookings', tr:'Month end', sla:'Pay by day 10 of next month',
+      acts:['Attribute bookings to link and code','Monthly statement to each creator','Pay commission and fees'], tp:'Dashboard, statement'},
+    {l:'cp', t:'Grow the best', out:'Always-on creator network', tr:'Quarterly review', sla:'Tier review each quarter',
+      acts:['Move top performers to ambassador deals','Invite to launches and new destinations','Drop inactive creators'], tp:'Ambassador agreement'}
+  ],
+  flow:[['Scouted','shortlist'],['Contacted','invites'],['Signed','agreements'],['Posting','live content'],['Converting','1+ booking'],['Ambassador','long-term']],
+  conv:['Response rate','Sign rate','Activation rate','Conversion rate','Promotion rate'],
+  obj:['Build a creator network that drives bookings, not only reach','Keep content supply steady for the app feed and paid ads','Pay creators on results they can see'],
+  kpi:[
+    ['Active creators by tier','Creators with a post in the last 30 days, by tier','Creator tracker','Monthly','Creator partnerships','up','Leading'],
+    ['On-time delivery','Content delivered by agreed date ÷ content due','Content calendar','Monthly','Content lead','up','Leading'],
+    ['Approval turnaround','Hours from draft received to approved (median)','Review form','Weekly','Content lead','down','Leading'],
+    ['Engagement rate','(Likes + comments + saves + shares) ÷ reach','Platform insights','Per post','Social','up','Leading'],
+    ['Link clicks','Clicks on creator tracking links','Link tracking','Weekly','Social','up','Leading'],
+    ['Attributed bookings','Bookings through creator link or code','Booking system','Monthly','Creator partnerships','up','Lagging'],
+    ['Cost per attributed booking','Creator cost (fees + commission + trips) ÷ attributed bookings','Finance + booking system','Monthly','Creator partnerships','down','Lagging'],
+    ['Disclosure compliance','Posts with correct paid label ÷ paid posts (target 100%)','Content review','Monthly','Content lead','hold','Leading'],
+    ['Creator retention','Creators active this quarter who were active last quarter','Creator tracker','Quarterly','Creator partnerships','up','Lagging']
+  ],
+  cad:['Weekly: content calendar and approvals','Monthly: attribution and payouts','Quarterly: tier review and scouting'],
+  in:[['Supply','hosted stays'],['Consumer','campaign themes and destinations']],
+  hand:[['Consumer','content for ads, CRM and app feed'],['Lifecycle','creator onboarding and renewal track']]
+},
+{
+  id:'destination', n:'04', name:'Destination & Merchant Communications',
+  sub:'Lets Vacario talk to the traveller through the whole trip, instead of disappearing once the stay or flight is booked.',
+  who:['Tourism boards','Attractions','Restaurants','Experiences','Local merchants'],
+  chain:['Vacario','Tourism boards + attractions + restaurants + experiences + merchants','Offers / content','Traveler'],
+  lanes:{dp:'Destination partnerships', ct:'Content', crm:'CRM', pr:'Product', fin:'Finance'},
+  steps:[
+    {l:'dp', t:'Map the destination', out:'Destination partner map', tr:'Destination added to plan', sla:'Map in 2 weeks',
+      acts:['Tourism board and state tourism department','Top attractions, restaurants, experience operators','Merchants useful to visitors'], tp:'Research, supplier referrals'},
+    {l:'dp', t:'Approach partners', out:'Interested partners', tr:'Map ready', sla:'All tier-1 partners contacted in 30 days',
+      acts:['Tourism boards: co-marketing and traveller insight','Merchants: reach visitors already in town','Local visits in priority cities'], tp:'Meetings, email, visits'},
+    {l:'dp', t:'Agree the offer', out:'Signed offer', tr:'Partner agrees', sla:'Offer signed in 10 days', gate:'Terms agreed?', loop:'No → revise offer',
+      acts:['Offer, validity dates, limits','Redemption by code or QR','Commission, sponsorship or co-funding'], tp:'Offer form, agreement'},
+    {l:'ct', t:'Build the content', out:'Offers live in app', tr:'Offer signed', sla:'Live in 5 days',
+      acts:['Destination guide and itineraries','Offer cards tagged by place and season','Photos from partner and creators'], tp:'App CMS'},
+    {l:'crm', t:'Deliver pre-trip & in-trip', out:'Offer views and saves', tr:'Booking, check-in, arrival', sla:'Pre-trip at T-3; in-trip daily max 1',
+      acts:['Suggest offers in pre-trip message','Timely offer while in destination','Concierge answers on WhatsApp'], tp:'Push, WhatsApp, in-app'},
+    {l:'pr', t:'Redeem & record', out:'Logged redemptions', tr:'Code or QR scanned', sla:'Real time',
+      acts:['Record each redemption','Same number visible to merchant and Vacario','Flag failed redemptions to support'], tp:'Redemption tool'},
+    {l:'fin', t:'Settle & report', out:'Paid partners, renewal case', tr:'Month end, campaign end', sla:'Settle by day 10',
+      acts:['Monthly commission settlement','Campaign report for tourism boards','Merchant performance summary'], tp:'Statement, report'},
+    {l:'dp', t:'Refresh by season', out:'Current offers every season', tr:'Season calendar', sla:'6 weeks before each season',
+      acts:['Festive season (Oct–Nov), winter holidays, summer, monsoon getaways','Renew best offers, drop weak ones','Pitch seasonal sponsorships'], tp:'Partner calls'}
+  ],
+  flow:[['Mapped','partners listed'],['Approached','meetings'],['Offer signed','agreements'],['Live','in the app'],['Seen','by travellers'],['Redeemed','used offers'],['Renewed','next season']],
+  conv:['Meeting rate','Sign rate','Time to live','View rate','Redemption rate','Renewal rate'],
+  obj:['Stay in contact with the traveller through the whole trip','Add revenue per trip from experiences and local offers','Win tourism board co-marketing and sponsorship'],
+  kpi:[
+    ['Destination coverage','Priority destinations with 5+ live partners ÷ priority destinations','Partner tracker','Monthly','Destination partnerships','up','Leading'],
+    ['Active offers','Live offers per destination','App CMS','Weekly','Content','up','Leading'],
+    ['In-trip view rate','Travellers who viewed an offer ÷ travellers in destination','App analytics','Weekly','CRM','up','Leading'],
+    ['Redemption rate','Redemptions ÷ travellers in destination','Redemption tool','Monthly','Destination partnerships','up','Lagging'],
+    ['Ancillary revenue per trip','Commission + experience revenue ÷ completed trips','Finance','Monthly','Destination partnerships','up','Lagging'],
+    ['Settlement on time','Partners paid by day 10 ÷ partners due','Finance','Monthly','Finance','up','Leading'],
+    ['Sponsorship revenue','Tourism board and sponsor revenue','Finance','Quarterly','Destination partnerships','up','Lagging'],
+    ['Partner renewal rate','Partners renewing next season ÷ partners up for renewal','Partner tracker','Seasonal','Destination partnerships','up','Lagging']
+  ],
+  cad:['Weekly: offer performance','Monthly: settlement and partner reports','Seasonal: offer refresh'],
+  in:[['Consumer','bookings and trip dates'],['Supply','local introductions from hotels']],
+  hand:[['Consumer','offers inside pre-trip and in-trip messages'],['Corporate','tourism board partnerships for announcements'],['Lifecycle','merchant and sponsor renewals']]
+},
+{
+  id:'corporate', n:'05', name:'Corporate Communications',
+  sub:'The message changes from “book your next trip” to the corporate story: what Vacario is building, growth, technology, partnerships, milestones and market expansion.',
+  who:['Investors','Media','Governments','Strategic partners','Employees'],
+  chain:['Vacario','Investors + media + governments + strategic partners + employees'],
+  lanes:{ceo:'CEO & leadership', cm:'Communications', fl:'Finance & legal'},
+  steps:[
+    {l:'ceo', t:'Set the story', out:'Approved message house', tr:'Start of each half-year', sla:'Reviewed every 6 months',
+      acts:['What Vacario is building and why India first','Technology, growth, partnerships','Three proof points per message'], tp:'Message house'},
+    {l:'cm', t:'Plan milestones', out:'Announcement calendar', tr:'Monthly business review', sla:'Updated monthly',
+      acts:['Launches, city expansion, partnerships','Funding, awards, hires','Earliest date each can be announced'], tp:'Milestone calendar'},
+    {l:'cm', t:'Prepare materials', out:'Draft pack', tr:'Milestone confirmed', sla:'Pack ready 10 days before',
+      acts:['Press release and fact sheet','Investor note and partner brief','Internal note and Q&A'], tp:'Templates in knowledge base'},
+    {l:'fl', t:'Check & approve', out:'Approved pack', tr:'Draft pack ready', sla:'Sign-off in 3 working days', gate:'Approved?', loop:'No → revise pack',
+      acts:['Finance checks every number','Legal checks claims and partner names','CEO final sign-off'], tp:'Approval workflow'},
+    {l:'ceo', t:'Tell employees first', out:'Team briefed', tr:'Pack approved', sla:'At least 2 h before release',
+      acts:['Brief Canada, India and Philippines teams','Share the Q&A','Remind: only the spokesperson speaks to media'], tp:'All-hands, internal channel'},
+    {l:'cm', t:'Release by audience', out:'Announcement out', tr:'Release date', sla:'Same day, all audiences',
+      acts:['Investors: update email','Media: release, interviews','Government and tourism departments: letter or meeting','Partners: direct brief'], tp:'Email, newswire, meetings, LinkedIn'},
+    {l:'cm', t:'Answer questions', out:'Consistent answers', tr:'Inbound enquiry', sla:'Media reply within 4 h',
+      acts:['One named spokesperson','Use the prepared Q&A','Log every enquiry'], tp:'Q&A document'},
+    {l:'cm', t:'Measure & file', out:'Lessons for next time', tr:'1 week after release', sla:'Report in 7 days',
+      acts:['Coverage and message pull-through','Investor and partner responses','File the pack in the knowledge base'], tp:'Coverage log, dashboard'}
+  ],
+  flow:[['Milestone','confirmed'],['Pack','drafted'],['Approved','signed off'],['Employees','briefed'],['Released','all audiences'],['Coverage','earned'],['Follow-up','meetings, MoUs']],
+  conv:['On-time pack','Approval time','Briefed first','Pickup rate','Follow-up rate'],
+  obj:['Build trust with investors, media, government and partners','Announce every milestone with one consistent story','Make sure employees always hear news first'],
+  kpi:[
+    ['Milestones on schedule','Announcements made on planned date ÷ planned','Milestone calendar','Monthly','Communications','up','Leading'],
+    ['Media mentions','Articles, broadcasts and posts naming Vacario','Coverage log','Monthly','Communications','up','Lagging'],
+    ['Tier-1 coverage share','Mentions in national business and travel media ÷ mentions','Coverage log','Monthly','Communications','up','Lagging'],
+    ['Message pull-through','Coverage carrying at least one key message ÷ coverage','Coverage review','Per release','Communications','up','Lagging'],
+    ['Investor update on time','Updates sent by agreed date ÷ due','Investor log','Monthly','CEO','hold','Leading'],
+    ['Investor meetings','Meetings or calls from updates and releases','Investor log','Quarterly','CEO','up','Lagging'],
+    ['Government and tourism MoUs','MoUs or formal partnerships signed','Partnership log','Quarterly','CEO','up','Lagging'],
+    ['Employees briefed first','Releases with staff briefing before release (target 100%)','Internal log','Per release','CEO','hold','Leading']
+  ],
+  cad:['Monthly: investor update','Per milestone: release pack','Quarterly: story and message review'],
+  in:[['Destination & Merchant','tourism board partnerships'],['Supply','large hotel partnerships'],['Internal','milestones and numbers']],
+  hand:[['Internal','staff briefing before release'],['Consumer','earned media for campaigns']]
+},
+{
+  id:'lifecycle', n:'06', name:'Lifecycle Communications',
+  sub:'Directly tied to guest and partner retention. Communication should not stop once someone joins, spends, sells or sponsors. This is where Vacario should shine.',
+  who:['Guests','Suppliers','Creators','Merchants & sponsors'],
+  chain:['Join','Activate','Engage','Reward','Retain or win back'],
+  lanes:{crm:'CRM (guests)', am:'Account managers (partners)', cs:'Customer service & insight'},
+  steps:[
+    {l:'crm', t:'Welcome', out:'First action started', tr:'Sign-up or contract signed', sla:'Same day',
+      acts:['One welcome track per audience','One clear next action','Set contact preferences'], tp:'Email, WhatsApp, in-app'},
+    {l:'am', t:'Activate', out:'Activated member or partner', tr:'Days 1–14 with no first result', sla:'Reminder day 3, call day 10', gate:'Activated?', loop:'No → personal call',
+      acts:['Guest: first booking','Supplier: listing live; creator: first post','Merchant: first redemption'], tp:'Reminders, onboarding call'},
+    {l:'am', t:'Give value monthly', out:'Ongoing engagement', tr:'Monthly', sla:'By day 5 of month',
+      acts:['Guests: trip ideas and member prices','Partners: performance statement','Creators: earnings and new briefs'], tp:'Email, dashboard, WhatsApp'},
+    {l:'crm', t:'Mark milestones', out:'Loyalty', tr:'Milestone reached', sla:'Within 24 h of milestone',
+      acts:['First trip, 5th booking','100th night sold, top-partner badge','Tier upgrades and rewards'], tp:'Push, email, loyalty points'},
+    {l:'cs', t:'Ask for feedback', out:'Satisfaction score and fixes', tr:'After trip; quarterly for partners', sla:'Close detractor loop in 72 h',
+      acts:['Short NPS question','Call every detractor','Share themes with product and supply'], tp:'Survey, NPS'},
+    {l:'cs', t:'Spot risk early', out:'At-risk list', tr:'Inactivity rules', sla:'Weekly at-risk list',
+      acts:['Guest: no visit in 60 days','Supplier: falling availability','Creator: no post in 45 days'], tp:'Dashboard alerts'},
+    {l:'am', t:'Win back or renew', out:'Retained member or partner', tr:'At-risk flag; 60 days before renewal', sla:'Contact within 7 days of flag',
+      acts:['Personal offer or call','Renewal review for sponsors','Exit reason logged if lost'], tp:'Offer, call, meeting'}
+  ],
+  flow:[['Join','new members + partners'],['Activate','first result'],['Engage','monthly active'],['Reward','milestones'],['Retain','still active at 90 d'],['Win back','returned']],
+  conv:['Activation rate','Active rate','Milestone rate','90-day retention','Win-back rate'],
+  obj:['Keep guests booking again','Keep suppliers, creators and sponsors active and renewing','Make every message relevant to where the person is in their journey'],
+  kpi:[
+    ['Activation rate','Reached first result in 14 days ÷ joined (per audience)','CRM, partner tracker','Weekly','CRM / account managers','up','Leading'],
+    ['Time to first value','Median days from join to first result','CRM, partner tracker','Monthly','CRM / account managers','down','Leading'],
+    ['90-day retention','Active at day 90 ÷ joined (cohort)','Analytics','Monthly','CRM','up','Lagging'],
+    ['Repeat booking rate','Guests with 2+ bookings ÷ guests (12 months)','Booking system','Quarterly','CRM','up','Lagging'],
+    ['Partner churn','Suppliers or creators lost ÷ active at start of period','Partner tracker','Quarterly','Account managers','down','Lagging'],
+    ['Sponsor renewal rate','Sponsors renewing ÷ sponsors up for renewal','Partner tracker','Quarterly','Account managers','up','Lagging'],
+    ['NPS by audience','% promoters − % detractors','Survey','Monthly','Customer service & insight','up','Lagging'],
+    ['Win-back rate','At-risk members who return in 30 days ÷ at-risk contacted','CRM','Monthly','CRM','up','Leading'],
+    ['Loyalty share','Bookings by loyalty members ÷ all bookings','Booking system','Monthly','CRM','up','Lagging']
+  ],
+  cad:['Always on: triggered messages','Monthly: statements and value updates','Quarterly: retention review by track'],
+  in:[['Consumer','guests after their trip'],['Supply','suppliers after go-live'],['Creator','creators after onboarding']],
+  hand:[['Consumer','returning guests into campaigns'],['Internal','retention numbers into performance reporting']]
+},
+{
+  id:'internal', n:'07', name:'Internal Communications',
+  sub:'The systems and routines that keep the organisation aligned, informed, accountable and moving quickly across Canada, India, technology, operations, marketing and leadership.',
+  who:['Leadership','Canada','India','Philippines','All functions'],
+  chain:['Strategy','Priorities & budgets','Weekly reviews','Daily execution','Reporting','Knowledge base'],
+  lanes:{ex:'Executive team', fin:'Finance', fh:'Function heads', rl:'Region leads', op:'Operations'},
+  steps:[
+    {l:'ex', t:'Set strategy & decisions', out:'Monthly priorities', tr:'Monthly strategic review', sla:'First week of month',
+      acts:['Priorities, major decisions, approvals','Investor and shareholder matters','Every decision written in the decision log'], tp:'Strategic review, decision log'},
+    {l:'fin', t:'Budgets & approvals', out:'Approved function plans', tr:'Priorities set', sla:'Approvals within 3 working days',
+      acts:['Budget per function against the model','Cash need and forecast','Spend approval limits'], tp:'Budget model, approval form'},
+    {l:'ex', t:'Weekly management review', out:'Actions with owners', tr:'Weekly', sla:'Monday, 45 min',
+      acts:['Each head: progress, blockers, KPIs','Decisions and owners recorded','Escalations reviewed'], tp:'Video call, dashboard'},
+    {l:'fh', t:'Weekly functional meetings', out:'Team work plans', tr:'Weekly', sla:'Tuesday–Wednesday',
+      acts:['Tech & product, supply, marketing & social','Finance, customer service, BD','Actions onto the shared task board'], tp:'Team meetings, task board'},
+    {l:'rl', t:'Time-zone handoff', out:'No waiting overnight', tr:'End of each region’s day', sla:'Every working day',
+      acts:['Handoff note: done, open, needs decision','Overlap call when needed','Owner named for every open item'], tp:'Shared channel, template'},
+    {l:'op', t:'Daily check-ins', out:'Issues assigned', tr:'Daily', sla:'15 min where required',
+      acts:['Priorities and staffing','Customer-service and vendor issues','Compliance and admin'], tp:'Stand-up'},
+    {l:'fin', t:'Performance reporting', out:'One set of numbers', tr:'Weekly and monthly', sla:'Dashboard every Monday',
+      acts:['Users, bookings, engagement, conversion','Inventory, creator activity, revenue','Marketing results vs. budget'], tp:'Dashboard'},
+    {l:'op', t:'Knowledge base', out:'One source of truth', tr:'After every meeting or decision', sla:'Notes filed within 24 h',
+      acts:['Contracts, decks, brand assets, specs','SOPs, research, meeting notes','Decision log and policies'], tp:'Knowledge base'},
+    {l:'op', t:'Crisis & escalation', out:'Contained, logged incident', tr:'Incident detected', sla:'SEV 1 acknowledged in 15 min', gate:'SEV 1?', loop:'Yes → CEO at once',
+      acts:['Detect, log, set severity','Escalate, contain, communicate','Resolve and file post-mortem'], tp:'Escalation channel, phone'}
+  ],
+  flow:[['Strategy','monthly review'],['Plans','budgets approved'],['Weekly review','actions set'],['Execution','daily work'],['Reporting','dashboard'],['Knowledge','filed & findable']],
+  conv:['Approval time','Action close rate','Handoff compliance','On-time dashboard','Filing rate'],
+  obj:['Everyone works from the same priorities and numbers','Decisions are made fast and written down','Nothing waits overnight because of time zones'],
+  kpi:[
+    ['Decision log completeness','Decisions logged ÷ decisions made in reviews','Decision log','Monthly','Executive team','up','Leading'],
+    ['Action close rate','Actions closed by due date ÷ actions due','Task board','Weekly','Function heads','up','Leading'],
+    ['Approval turnaround','Median working days to approve spend','Approval form','Monthly','Finance','down','Leading'],
+    ['Dashboard on time','Weeks dashboard published by Monday ÷ weeks','Dashboard','Monthly','Finance','hold','Leading'],
+    ['Handoff compliance','Handoff notes sent ÷ region working days','Shared channel','Weekly','Region leads','up','Leading'],
+    ['SEV 1 response time','Minutes from detection to acknowledgement (target ≤ 15)','Incident log','Per incident','Operations','down','Leading'],
+    ['Time to resolve','Hours from detection to resolution, by severity','Incident log','Monthly','Operations','down','Lagging'],
+    ['Post-mortems filed','SEV 1–2 incidents with post-mortem in 5 working days ÷ incidents','Knowledge base','Monthly','Operations','up','Lagging'],
+    ['SOP freshness','SOPs reviewed in last 6 months ÷ SOPs','Knowledge base','Quarterly','Operations','up','Lagging']
+  ],
+  cad:['Daily: operational check-ins where required','Weekly: functional meetings and management review','Monthly: strategic / business review'],
+  in:[['All channels','results, issues, decisions needed']],
+  hand:[['Corporate','staff briefed before external news'],['All channels','priorities, budgets and one set of numbers']]
+}
+];
+
+/* ------------------------------------------------------------------ helpers */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let pageNo = 0;
+const TOTAL = 6 + CH.length * 3 + 3;
+function page(inner, {cls='', section=''} = {}){
+  pageNo++;
+  const run = cls.includes('cover') ? '' :
+    `<div class="run"><span>vacario India · <b>Communication Workflows</b></span><span>${esc(section)}</span></div>`;
+  const foot = cls.includes('cover') ? '' :
+    `<div class="foot"><span>Fall 2026 Integrated Sales, Marketing &amp; Promotions Plan</span><span>${String(pageNo).padStart(2,'0')} / ${TOTAL}</span></div>`;
+  return `<section class="page ${cls}">${run}${inner}${foot}</section>`;
+}
+const band = (c, title) => `
+  <div class="band">
+    <div class="bigno">${c.n}</div>
+    <div><div class="eyebrow">${esc(title)}</div><h2>${esc(c.name)}</h2><p class="sub">${esc(c.sub)}</p></div>
+    <div class="tags">${c.who.map(w => `<span class="tag">${esc(w)}</span>`).join('')}</div>
+  </div>`;
+const chain = (c, label) => `<div class="chain-row"><div class="lbl">${label}</div><div class="chain">${c.chain.map(x => `<div class="cn">${esc(x)}</div>`).join('')}</div></div>`;
+const DIR = {up:['↑','up'], down:['↓','down'], hold:['=','hold']};
+const STAGE_TINT = ['#0e5b5e','#1c6b6c','#2a7b7a','#3a8a86','#4d9892','#62a59d','#78b1a8'];
+
+/* ------------------------------------------------------------------ pages */
+const out = [];
+
+/* cover */
+out.push(page(`
+  <div class="quote">One company · one source of truth<br>one clearly defined communications path</div>
+  <div class="eyebrow" style="margin-top:14mm">vacario India · Fall 2026 · Integrated Sales, Marketing &amp; Promotions Plan</div>
+  <h1>Communication Workflows &amp; KPIs</h1>
+  <p class="tel">Seven communication channels, each broken into a swimlane workflow, a detailed step plan and a KPI scorecard.
+    <small>The Next Generation of Travel is Coming to India Before Any Other Country On the Planet.</small></p>
+  <div class="stats">
+    <div><b>7</b>communication channels</div>
+    <div><b>${CH.reduce((a,c) => a + c.steps.length, 0)}</b>workflow steps with owner, trigger and SLA</div>
+    <div><b>${CH.reduce((a,c) => a + c.kpi.length, 0)}</b>KPIs with formula, source and frequency</div>
+    <div><b>1</b>north-star metric</div>
+  </div>
+  <div class="grid7">${CH.map(c => `<div><span>${c.n}</span>${esc(c.name.replace(' Communications',''))}</div>`).join('')}</div>
+`, {cls:'cover'}));
+
+/* contents */
+const tocRows = [['00','Channel map and handoffs','3'],['00','KPI framework: one north star','4'],['00','Who owns what (RACI)','5'],['00','Operating rhythm','6']];
+CH.forEach((c,i) => tocRows.push([c.n, c.name, `${7+i*3}–${9+i*3}`]));
+tocRows.push(['07','Internal: streams, escalation and time zones', `${7+CH.length*3}–${8+CH.length*3}`]);
+tocRows.push(['—','KPI summary: all channels', `${9+CH.length*3}`]);
+out.push(page(`
+  <div><div class="eyebrow">Contents</div><h2 style="margin-top:2mm">How this document works</h2></div>
+  <div class="toc">${tocRows.map(r => `<a><b>${r[0]}</b><span>${esc(r[1])}</span><em>p. ${r[2]}</em></a>`).join('')}</div>
+  <div class="legend" style="margin-top:auto">
+    <div class="card"><h3>1 · Workflow</h3><p>Swimlane diagram. Each lane is a team; boxes are steps in order. Gold tags are decision points, and the orange line under a box says what happens on a “no”.</p></div>
+    <div class="card"><h3>2 · Step plan</h3><p>Each step in detail: what happens, who owns it, what starts it, the time allowed (SLA), touchpoints and output.</p></div>
+    <div class="card"><h3>3 · KPI scorecard</h3><p>The stages the channel moves people through, the conversion measured between each, and every KPI with its formula, data source, frequency and owner.</p></div>
+    <div class="card"><h3>Status of this document</h3><p>Channel flows are quoted from the plan. Steps, owners, SLAs and KPIs are a proposed operating version. <b>Targets are left blank</b> for the team to set against the budget model.</p></div>
+  </div>
+`, {section:'Contents'}));
+
+/* channel map */
+const HAND = [
+  ['Supply','Consumer','New inventory and destinations to promote'],
+  ['Creator','Consumer','Content for ads, CRM and the app feed'],
+  ['Consumer','Destination & Merchant','Travellers and trip dates for in-trip offers'],
+  ['Consumer','Lifecycle','Guests after the trip'],
+  ['Supply / Creator','Lifecycle','Partners after go-live and onboarding'],
+  ['Destination & Merchant','Corporate','Tourism board partnerships to announce'],
+  ['All channels','Internal','Results, issues, decisions needed'],
+  ['Internal','All channels','Priorities, budgets, one set of numbers'],
+  ['Corporate','Internal','Staff briefed before any release']
+];
+out.push(page(`
+  <div><div class="eyebrow">00 · Overview</div><h2 style="margin-top:2mm">How the seven channels connect</h2>
+  <p class="lead" style="margin-top:2mm">Four channels feed the traveller's booking. Lifecycle loops around every audience after they join. Corporate earns trust and capital. Internal runs underneath all of it.</p></div>
+  <div class="split" style="flex:1">
+    <svg viewBox="0 0 700 380" style="width:100%; height:100%">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e5b5e"/></marker></defs>
+      <ellipse cx="350" cy="160" rx="140" ry="86" fill="#fbe6dc" fill-opacity=".45" stroke="#d9602e" stroke-width="1.6" stroke-dasharray="6 5"/>
+      <text x="350" y="64" text-anchor="middle" font-size="11" font-weight="700" fill="#d9602e">06 · LIFECYCLE · join → activate → engage → reward → retain</text>
+      <rect x="262" y="124" width="176" height="72" rx="5" fill="#0e5b5e"/>
+      <text x="350" y="154" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Traveller</text>
+      <text x="350" y="174" text-anchor="middle" font-size="11" fill="#cfe6e4">booking · trip · review · repeat</text>
+      ${[[12,18,'01 · Consumer','ads · social · CRM · referral'],[498,18,'02 · Supply','inventory · availability · price'],[12,226,'03 · Creator','content → followers → bookings'],[498,226,'04 · Destination & Merchant','in-trip offers · local content']].map(([x,y,a,b]) => `
+        <rect x="${x}" y="${y}" width="190" height="60" rx="5" fill="#fff" stroke="#0e5b5e" stroke-width="1.4"/>
+        <text x="${x+95}" y="${y+26}" text-anchor="middle" font-size="13" font-weight="700" fill="#15191a">${a}</text>
+        <text x="${x+95}" y="${y+45}" text-anchor="middle" font-size="10" fill="#4f5652">${b}</text>`).join('')}
+      <g stroke="#0e5b5e" stroke-width="1.8" fill="none" marker-end="url(#ah)">
+        <path d="M202,60 L262,128"/><path d="M498,60 L438,128"/><path d="M202,250 L262,192"/><path d="M498,250 L438,192"/>
+      </g>
+      <text x="220" y="100" font-size="9.5" fill="#0e5b5e" font-weight="600">acquire</text>
+      <text x="452" y="100" font-size="9.5" fill="#0e5b5e" font-weight="600">inventory</text>
+      <text x="206" y="232" font-size="9.5" fill="#0e5b5e" font-weight="600">trust + reach</text>
+      <text x="444" y="232" font-size="9.5" fill="#0e5b5e" font-weight="600">in-trip value</text>
+      <rect x="262" y="262" width="176" height="44" rx="5" fill="#fff" stroke="#b98309" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="350" y="281" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15191a">05 · Corporate</text>
+      <text x="350" y="297" text-anchor="middle" font-size="9.5" fill="#4f5652">investors · media · government</text>
+      <rect x="12" y="322" width="676" height="50" rx="5" fill="#eceee7" stroke="#bfc5b8"/>
+      <text x="350" y="343" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15191a">07 · Internal — one source of truth</text>
+      <text x="350" y="361" text-anchor="middle" font-size="9.5" fill="#4f5652">Canada ↔ India ↔ Philippines · meetings · dashboards · knowledge base · escalation</text>
+    </svg>
+    <div>
+      <h3 style="margin-bottom:2mm">Handoffs between channels</h3>
+      <table><thead><tr><th>From</th><th>To</th><th>What moves</th></tr></thead>
+      <tbody>${HAND.map(h => `<tr><td style="font-weight:600">${esc(h[0])}</td><td style="font-weight:600;color:var(--accent)">→ ${esc(h[1])}</td><td class="muted">${esc(h[2])}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>
+`, {section:'00 · Channel map'}));
+
+/* KPI tree */
+out.push(page(`
+  <div><div class="eyebrow">00 · KPI framework</div><h2 style="margin-top:2mm">One north star, seven channels feeding it</h2>
+  <p class="lead" style="margin-top:2mm">Every channel KPI in this document ladders up to one number the whole company can quote. Leading KPIs move first and are managed weekly; lagging KPIs confirm the result monthly or quarterly.</p></div>
+  <div class="tree" style="flex:1; justify-content:center">
+    <div class="tnode root"><div class="k">Completed bookings × average booking value</div><div class="c">North star · gross booking value from completed trips · monthly</div></div>
+    <svg viewBox="0 0 1000 24" preserveAspectRatio="none" style="width:100%; height:9mm; margin:-9mm 0 -9mm">
+      <path d="M500,0 V12 M125,12 H875 M125,12 V24 M375,12 V24 M625,12 V24 M875,12 V24" stroke="#0e5b5e" stroke-width="1.5" fill="none" vector-effect="non-scaling-stroke"/></svg>
+    <div class="trow" style="grid-template-columns:repeat(4,1fr)">
+      <div class="tnode"><div class="k">New travellers booking</div><div class="c">01 Consumer · 03 Creator</div><ul><li>CPI, sign-up rate, 30-day conversion</li><li>Blended CAC</li><li>Creator-attributed bookings</li></ul></div>
+      <div class="tnode"><div class="k">Bookable inventory</div><div class="c">02 Supply</div><ul><li>Live listings by destination</li><li>Time to live</li><li>Availability accuracy</li></ul></div>
+      <div class="tnode"><div class="k">Revenue per trip</div><div class="c">04 Destination &amp; Merchant</div><ul><li>Redemption rate</li><li>Ancillary revenue per trip</li><li>Sponsorship revenue</li></ul></div>
+      <div class="tnode"><div class="k">Travellers and partners who stay</div><div class="c">06 Lifecycle</div><ul><li>12-month repeat rate</li><li>90-day retention, partner churn</li><li>NPS by audience</li></ul></div>
+    </div>
+    <div class="trow" style="grid-template-columns:1fr 1fr; width:70%">
+      <div class="tnode en"><div class="k">Trust and capital</div><div class="c">05 Corporate · enabler</div><ul><li>Tier-1 coverage, message pull-through</li><li>Investor meetings, government MoUs</li></ul></div>
+      <div class="tnode en"><div class="k">Speed and one set of numbers</div><div class="c">07 Internal · enabler</div><ul><li>Action close rate, dashboard on time</li><li>SEV 1 response, handoff compliance</li></ul></div>
+    </div>
+  </div>
+  <div style="display:flex; gap:6mm; align-items:center" class="note">
+    <span><span class="pill lead">Leading</span> moves first, managed weekly</span>
+    <span><span class="pill lag">Lagging</span> confirms the result</span>
+    <span><b class="dir up">↑</b> higher is better &nbsp; <b class="dir down">↓</b> lower is better &nbsp; <b class="dir hold">=</b> hold at target</span>
+  </div>
+`, {section:'00 · KPI framework'}));
+
+/* RACI */
+const ROLES = ['CEO & leadership','Marketing (performance + CRM)','Community, social & content','Creator partnerships','Supply & BD','Destination partnerships','Communications','Finance & legal','Product & tech','Customer service & ops'];
+const RACI = {
+  consumer:   ['I','A','R','C','C','C','I','C','R','R'],
+  supply:     ['I','C','I','I','A','C','I','R','R','C'],
+  creator:    ['I','C','R','A','C','I','I','R','I','I'],
+  destination:['I','C','R','I','C','A','I','R','R','C'],
+  corporate:  ['A','C','I','I','C','C','R','R','I','I'],
+  lifecycle:  ['I','A','R','C','R','R','I','I','R','R'],
+  internal:   ['A','R','R','R','R','R','C','R','R','R']
+};
+out.push(page(`
+  <div><div class="eyebrow">00 · Ownership</div><h2 style="margin-top:2mm">Who owns what</h2>
+  <p class="lead" style="margin-top:2mm">One accountable owner per channel. Responsible teams do the work; consulted teams are asked before; informed teams are told after.</p></div>
+  <table class="raci"><thead><tr><th style="width:52mm">Channel</th>${ROLES.map(r => `<th>${esc(r)}</th>`).join('')}</tr></thead>
+  <tbody>${CH.map(c => `<tr><td style="font-weight:600; font-size:8.4pt"><span class="mono" style="color:var(--accent)">${c.n}</span>&nbsp; ${esc(c.name.replace(' Communications',''))}</td>${RACI[c.id].map(x => `<td><span class="r ${x}">${x}</span></td>`).join('')}</tr>`).join('')}</tbody></table>
+  <div style="display:flex; gap:7mm; margin-top:auto" class="note">
+    <span><span class="r A">A</span> Accountable: one per channel, signs off</span>
+    <span><span class="r R">R</span> Responsible: does the work</span>
+    <span><span class="r C">C</span> Consulted before</span>
+    <span><span class="r I">I</span> Informed after</span>
+  </div>
+`, {section:'00 · RACI'}));
+
+/* operating rhythm */
+out.push(page(`
+  <div><div class="eyebrow">00 · Operating rhythm</div><h2 style="margin-top:2mm">A standard week, and what each channel reviews when</h2></div>
+  <div class="week">
+    <div class="h">Time (IST)</div><div class="h">Monday</div><div class="h">Tuesday</div><div class="h">Wednesday</div><div class="h">Thursday</div><div class="h">Friday</div>
+    <div class="h" style="display:flex;align-items:center">Morning</div>
+      <div><div class="ev g">Dashboard published</div><div class="ev">Ops check-in</div></div>
+      <div><div class="ev">Ops check-in</div><div class="ev w">Marketing &amp; social meeting</div></div>
+      <div><div class="ev">Ops check-in</div><div class="ev w">Supply pipeline review</div></div>
+      <div><div class="ev">Ops check-in</div><div class="ev w">Creator content &amp; approvals</div></div>
+      <div><div class="ev">Ops check-in</div><div class="ev w">CRM send plan for next week</div></div>
+    <div class="h" style="display:flex;align-items:center">Afternoon</div>
+      <div><div class="ev g">Weekly management review</div></div>
+      <div><div class="ev w">Tech &amp; product meeting</div></div>
+      <div><div class="ev w">Finance &amp; approvals</div></div>
+      <div><div class="ev w">Destination offers review</div></div>
+      <div><div class="ev w">Customer service &amp; BD</div></div>
+    <div class="h" style="display:flex;align-items:center">6:00 pm</div>
+      <div><div class="ev">India → Canada handoff</div></div><div><div class="ev">India → Canada handoff</div></div><div><div class="ev">India → Canada handoff</div></div><div><div class="ev">India → Canada handoff</div></div><div><div class="ev">India → Canada handoff</div></div>
+  </div>
+  <table class="cad">
+    <thead><tr><th style="width:44mm">Channel</th><th>Daily</th><th>Weekly</th><th>Monthly</th><th>Quarterly / seasonal</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600">01 Consumer</td><td class="on">Campaign pacing, CPI</td><td class="on">CRM results, sign-up and opt-in rates</td><td class="on">CAC, conversion, channel mix vs. budget</td><td class="on">Repeat rate</td></tr>
+      <tr><td style="font-weight:600">02 Supply</td><td class="on">Sync and parity exceptions</td><td class="on">Pipeline, time to live</td><td class="on">Partner statements, win rate</td><td class="on">Top-partner reviews, satisfaction</td></tr>
+      <tr><td style="font-weight:600">03 Creator</td><td></td><td class="on">Calendar, approvals, clicks</td><td class="on">Attribution and payouts</td><td class="on">Tier review, retention</td></tr>
+      <tr><td style="font-weight:600">04 Destination</td><td></td><td class="on">Offer views, active offers</td><td class="on">Redemptions, settlement</td><td class="on">Seasonal refresh, renewals</td></tr>
+      <tr><td style="font-weight:600">05 Corporate</td><td></td><td></td><td class="on">Investor update, coverage</td><td class="on">Story review, MoUs</td></tr>
+      <tr><td style="font-weight:600">06 Lifecycle</td><td class="on">Triggered messages</td><td class="on">Activation, at-risk list</td><td class="on">Value updates, NPS, retention</td><td class="on">Churn and renewal review</td></tr>
+      <tr><td style="font-weight:600">07 Internal</td><td class="on">Check-ins, handoffs</td><td class="on">Management review, dashboard</td><td class="on">Strategic review</td><td class="on">SOP review</td></tr>
+    </tbody>
+  </table>
+`, {section:'00 · Operating rhythm'}));
+
+/* per-channel pages */
+CH.forEach(c => {
+  const laneKeys = Object.keys(c.lanes);
+  const nCol = c.steps.length;
+  const boxes = c.steps.map((s,i) => `
+    <div class="box ${i===0?'first':''} ${i===nCol-1?'last':''}" data-i="${i}" style="grid-row:${laneKeys.indexOf(s.l)+1}; grid-column:${i+2}">
+      <div class="n"><i>${i+1}</i><span class="t">${esc(s.t)}</span></div>
+      <div class="o">→ ${esc(s.out)}</div>
+      ${s.loop ? `<div class="loop">↺ ${esc(s.loop)}</div>` : ''}
+    </div>`).join('');
+  const lanes = laneKeys.map((k,r) => `
+    <div class="lane-bg" style="grid-row:${r+1}; background:var(--l${r%5+1})"></div>
+    <div class="lane-name" style="grid-row:${r+1}; grid-column:1">${esc(c.lanes[k])}</div>`).join('');
+  const gates = c.steps.map((s,i) => s.gate ? `<div class="gate" data-gate="${i}">◆ ${esc(s.gate)}</div>` : '').join('');
+
+  /* A — workflow */
+  out.push(page(`
+    ${band(c, 'Workflow')}
+    ${chain(c, c.id==='lifecycle' ? 'Stages' : c.id==='internal' ? 'Path' : 'Flow in plan')}
+    <div class="swim" data-swim style="grid-template-columns:30mm repeat(${nCol}, minmax(0,1fr)); grid-template-rows:repeat(${laneKeys.length}, minmax(min-content,1fr))">
+      ${lanes}${boxes}${gates}<svg class="wires"></svg>
+    </div>
+    <div class="io">
+      <div><h3>Inputs from</h3><ul>${c.in.map(x => `<li><b>${esc(x[0])}:</b> ${esc(x[1])}</li>`).join('')}</ul></div>
+      <div class="g"><h3>Cadence</h3><ul>${c.cad.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="w"><h3>Hands off to</h3><ul>${c.hand.map(x => `<li><b>${esc(x[0])}:</b> ${esc(x[1])}</li>`).join('')}</ul></div>
+    </div>
+  `, {section:`${c.n} · ${c.name} · workflow`}));
+
+  /* B — detailed steps */
+  out.push(page(`
+    ${band(c, 'Step plan')}
+    <table>
+      <thead><tr><th></th><th>Step</th><th>What happens</th><th>Owner</th><th>Starts when</th><th>Time allowed</th><th>Touchpoints</th><th>Output</th></tr></thead>
+      <tbody>${c.steps.map((s,i) => `<tr>
+        <td class="num"><span class="sn">${i+1}</span></td>
+        <td class="step">${esc(s.t)}${s.gate ? `<div class="formula" style="color:var(--gold)">◆ ${esc(s.gate)} ${esc(s.loop||'')}</div>` : ''}</td>
+        <td><ul>${s.acts.map(a => `<li>${esc(a)}</li>`).join('')}</ul></td>
+        <td style="width:28mm">${esc(c.lanes[s.l])}</td>
+        <td class="muted" style="width:30mm">${esc(s.tr)}</td>
+        <td style="width:30mm"><span class="sla">${esc(s.sla)}</span></td>
+        <td class="muted" style="width:34mm">${esc(s.tp)}</td>
+        <td style="width:30mm; font-weight:500">${esc(s.out)}</td></tr>`).join('')}</tbody>
+    </table>
+  `, {section:`${c.n} · ${c.name} · step plan`}));
+
+  /* C — KPI scorecard */
+  const flow = c.flow.map((f,i) => `
+    ${i ? `<div class="conv"><span>${esc(c.conv[i-1])}</span></div>` : ''}
+    <div class="stage"><div class="bar" style="background:${STAGE_TINT[i]}">${esc(f[0])}</div><div class="m">${esc(f[1])}</div></div>`).join('');
+  out.push(page(`
+    ${band(c, 'KPI scorecard')}
+    <div><h3 style="margin-bottom:2mm">Stages measured, with the conversion KPI between each</h3><div class="kflow" style="padding-bottom:11mm">${flow}</div></div>
+    <div class="split">
+      <table>
+        <thead><tr><th>KPI</th><th>Definition and formula</th><th>Source</th><th>Frequency</th><th>Owner</th><th>Type</th><th style="text-align:center">Good</th><th>Target</th></tr></thead>
+        <tbody>${c.kpi.map(k => `<tr>
+          <td style="font-weight:600; width:34mm">${esc(k[0])}</td>
+          <td><div class="formula" style="margin:0">${esc(k[1])}</div></td>
+          <td class="muted" style="width:26mm">${esc(k[2])}</td>
+          <td style="width:16mm">${esc(k[3])}</td>
+          <td class="muted" style="width:25mm">${esc(k[4])}</td>
+          <td style="width:14mm"><span class="pill ${k[6]==='Leading'?'lead':'lag'}">${k[6]}</span></td>
+          <td style="text-align:center; width:9mm"><b class="dir ${DIR[k[5]][1]}">${DIR[k[5]][0]}</b></td>
+          <td style="width:17mm"><span class="tgt"></span></td></tr>`).join('')}</tbody>
+      </table>
+      <div>
+        <div class="card"><h3>Objectives</h3><ul>${c.obj.map(o => `<li>${esc(o)}</li>`).join('')}</ul></div>
+        <div class="card"><h3>Review</h3><ul>${c.cad.map(o => `<li>${esc(o)}</li>`).join('')}</ul></div>
+        <p class="note" style="margin-top:3mm">Set each target from the budget model before launch, then review it each quarter.</p>
+      </div>
+    </div>
+  `, {section:`${c.n} · ${c.name} · KPIs`}));
+
+  /* lifecycle extra goes on its KPI page? keep as its own content below */
+});
+
+/* Internal extras: streams + escalation */
+const STREAMS = [
+  ['Executive & leadership','Strategy, priorities, major decisions, budgets, approvals, investor and shareholder matters','Strategic review, decision log','Monthly','CEO'],
+  ['Cross-functional','Technology, product, inventory, marketing, social, finance, customer service, BD','Management review, task board','Weekly','COO / GM'],
+  ['Canada ↔ India ↔ Philippines','Reporting lines, decision authority, handoffs, time zones, escalation','Handoff notes, overlap call','Daily','Region leads'],
+  ['Product & technology','App progress, bugs, releases, API integrations, AI tools, testing, launch readiness','Tech meeting, release notes','Weekly + each release','Head of product'],
+  ['Sales & marketing','Campaign calendar, promotions, partnerships, influencers, earned media, content, results','Marketing meeting, calendar','Weekly','Marketing lead'],
+  ['Travel supply','Hotels, vacation properties, airlines, API suppliers, availability, pricing, contracting','Supply pipeline review','Weekly','Supply lead'],
+  ['Operational','Priorities, staffing, customer-service issues, vendors, compliance, admin','Daily check-in','Daily where required','Operations lead'],
+  ['Financial','Budgets, spend approvals, cash needs, forecasts, KPIs, department performance','Finance review, approval form','Weekly + monthly','Finance'],
+  ['Policies & procedures','Policies, brand standards, approvals, data and security, employee guidelines','Knowledge base','On change','Operations'],
+  ['Performance reporting','Users, bookings, engagement, conversion, inventory, creator activity, revenue, marketing','Dashboard','Weekly + monthly','Finance + analytics'],
+  ['Meeting structure','Daily check-ins, weekly functional, weekly management, monthly strategic','Shared calendar','As listed','COO / GM'],
+  ['Knowledge base','Contracts, decks, brand assets, specs, SOPs, research, notes, decisions','Central repository','After every meeting','Operations']
+];
+out.push(page(`
+  <div class="band"><div class="bigno">07</div><div><div class="eyebrow">Internal · the twelve streams</div><h2>What each internal stream covers</h2><p class="sub">Every stream named in the plan, with where it happens, how often and who runs it.</p></div><div></div></div>
+  <table><thead><tr><th>Stream</th><th>Covers</th><th>Where it happens</th><th>Cadence</th><th>Runs it</th></tr></thead>
+  <tbody>${STREAMS.map(s => `<tr><td style="font-weight:600; width:46mm">${esc(s[0])}</td><td class="muted">${esc(s[1])}</td><td style="width:44mm">${esc(s[2])}</td><td style="width:30mm"><span class="sla">${esc(s[3])}</span></td><td style="width:30mm">${esc(s[4])}</td></tr>`).join('')}</tbody></table>
+`, {section:'07 · Internal · streams'}));
+
+const ESC = ['Detect','Log in escalation channel','Set severity','Escalate to owner','Contain','Communicate','Resolve','Post-mortem & file'];
+out.push(page(`
+  <div class="band"><div class="bigno">07</div><div><div class="eyebrow">Internal · crisis &amp; escalation</div><h2>Escalation path and time-zone handoffs</h2><p class="sub">Defined procedures for technology outages, customer incidents, supplier problems, reputational issues, legal matters and urgent executive decisions.</p></div><div></div></div>
+  <div class="kflow" style="padding-bottom:2mm">${ESC.map((e,i) => `<div class="stage"><div class="bar" style="background:${i<3?'#c23434':i<6?'#d9602e':'#0e5b5e'}; font-size:7pt">${esc(e)}</div></div>`).join('')}</div>
+  <table><thead><tr><th>Severity</th><th>Examples</th><th>Acknowledge</th><th>Escalate to</th><th>Who is told</th><th>Update every</th></tr></thead>
+  <tbody>
+    <tr><td><span class="sev s1">SEV 1</span></td><td>App or payments down, travellers stranded, safety incident, legal threat, press story</td><td><span class="sla">15 min, any hour</span></td><td>CEO + function head at once</td><td>Affected customers and partners; media only through the spokesperson</td><td>30 min</td></tr>
+    <tr><td><span class="sev s2">SEV 2</span></td><td>Supplier overbooking, API sync failure, complaint going public on social</td><td><span class="sla">1 h, working hours</span></td><td>Function head, same day</td><td>Affected customers and partners</td><td>4 h</td></tr>
+    <tr><td><span class="sev s3">SEV 3</span></td><td>Single customer issue, minor bug, vendor delay</td><td><span class="sla">Next check-in</span></td><td>Team lead</td><td>The customer involved</td><td>Daily</td></tr>
+  </tbody></table>
+  <div class="split" style="grid-template-columns:1fr 1fr">
+    <div>
+      <h3 style="margin-bottom:2mm">Handoff clock · until 31 Oct 2026 (Canada on EDT)</h3>
+      <table><thead><tr><th>India (IST)</th><th>Canada Eastern (EDT)</th><th>Philippines (PHT)</th><th>What happens</th></tr></thead><tbody>
+        <tr><td class="mono">9:30 am</td><td class="mono">12:00 am</td><td class="mono">12:00 pm</td><td>India and Philippines read Canada's handoff note</td></tr>
+        <tr><td class="mono">6:00 pm</td><td class="mono">8:30 am</td><td class="mono">8:30 pm</td><td>India → Canada handoff; overlap call if needed</td></tr>
+        <tr><td class="mono">3:30 am</td><td class="mono">6:00 pm</td><td class="mono">6:00 am</td><td>Canada closes with its handoff note</td></tr>
+      </tbody></table>
+    </div>
+    <div>
+      <h3 style="margin-bottom:2mm">From 1 Nov 2026 (Canada on EST)</h3>
+      <table><thead><tr><th>India (IST)</th><th>Canada Eastern (EST)</th><th>Philippines (PHT)</th><th>What happens</th></tr></thead><tbody>
+        <tr><td class="mono">9:30 am</td><td class="mono">11:00 pm</td><td class="mono">12:00 pm</td><td>India and Philippines read Canada's handoff note</td></tr>
+        <tr><td class="mono">7:00 pm</td><td class="mono">8:30 am</td><td class="mono">9:30 pm</td><td>India → Canada handoff; overlap call if needed</td></tr>
+        <tr><td class="mono">4:30 am</td><td class="mono">6:00 pm</td><td class="mono">7:00 am</td><td>Canada closes with its handoff note</td></tr>
+      </tbody></table>
+      <p class="note" style="margin-top:2mm">Assumes the Canada team works Eastern Time. India and the Philippines do not change clocks.</p>
+    </div>
+  </div>
+`, {section:'07 · Internal · escalation'}));
+
+/* KPI summary */
+const allK = CH.flatMap(c => c.kpi.map(k => [c.n, c.name.replace(' Communications',''), ...k]));
+const third = Math.ceil(allK.length/3);
+const kt = rows => `<table><thead><tr><th></th><th>KPI</th><th>Freq.</th><th>Type</th><th style="text-align:center">Good</th></tr></thead><tbody>${rows.map(k =>
+  `<tr><td class="mono" style="color:var(--accent); width:7mm; padding-block:1.35mm">${k[0]}</td><td style="padding-block:1.35mm; font-size:7pt">${esc(k[2])}</td><td class="muted" style="padding-block:1.35mm; font-size:6.8pt">${esc(k[5])}</td><td style="padding-block:1.35mm"><span class="pill ${k[8]==='Leading'?'lead':'lag'}" style="font-size:5.4pt; padding:.6mm 1mm">${k[8]}</span></td><td style="text-align:center; padding-block:1.35mm"><b class="dir ${DIR[k[7]][1]}" style="font-size:8pt">${DIR[k[7]][0]}</b></td></tr>`).join('')}</tbody></table>`;
+out.push(page(`
+  <div><div class="eyebrow">Summary</div><h2 style="margin-top:2mm">All ${allK.length} KPIs on one page</h2></div>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5mm">${kt(allK.slice(0,third))}${kt(allK.slice(third,2*third))}${kt(allK.slice(2*third))}</div>
+  <p class="note" style="margin-top:auto">Channel number on the left. Formulas, sources and owners are on each channel's KPI scorecard.</p>
+`, {section:'KPI summary'}));
+
+document.getElementById('doc').innerHTML = out.join('');
+
+/* ------------------------------------------------------------------ swimlane connectors */
+function wire(){
+  document.querySelectorAll('[data-swim]').forEach(sw => {
+    const R = sw.getBoundingClientRect();
+    const svg = sw.querySelector('svg.wires');
+    const bx = [...sw.querySelectorAll('.box')].sort((a,b) => a.dataset.i - b.dataset.i).map(b => {
+      const r = b.getBoundingClientRect();
+      return {l:r.left-R.left, r:r.right-R.left, t:r.top-R.top, b:r.bottom-R.top, cy:(r.top+r.bottom)/2-R.top, cx:(r.left+r.right)/2-R.left};
+    });
+    let d = '';
+    const mids = [];
+    for (let i=0; i<bx.length-1; i++){
+      const a = bx[i], b = bx[i+1];
+      const x1 = a.r, y1 = a.cy, x2 = b.l - 1.5, y2 = b.cy, xm = (x1 + b.l)/2;
+      d += Math.abs(y1-y2) < 1 ? `<path d="M${x1},${y1} H${x2}" marker-end="url(#m)"/>`
+        : `<path d="M${x1},${y1} H${xm} V${y2} H${x2}" marker-end="url(#m)"/>`;
+      mids.push({x:xm, y:Math.abs(y1-y2)<1 ? y1 : (y1+y2)/2});
+    }
+    svg.innerHTML = `<defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e5b5e"/></marker></defs>
+      <g fill="none" stroke="#0e5b5e" stroke-width="1.3">${d}</g>`;
+    sw.querySelectorAll('.gate').forEach(g => {
+      const i = +g.dataset.gate;
+      const a = bx[i];
+      if (!a) return;
+      g.style.left = a.cx + 'px';
+      g.style.top = (a.t - 5) + 'px';
+    });
+  });
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(wire); else wire();
+window.addEventListener('load', wire);
+</script>
+</body>
+</html>
