@@ -119,6 +119,11 @@ td.muted{color:var(--ink-2)}
 .card ul{margin:0; padding-left:3.6mm}
 .card li{margin-bottom:.9mm; font-size:7.8pt}
 .card + .card{margin-top:3mm}
+.legend .card, .xbottom .card{margin-top:0}
+.proof{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:3mm}
+.proof div{border:.3mm solid var(--rule-2); border-radius:1mm; padding:2.2mm 2.6mm; background:var(--paper)}
+.proof b{display:block; font:600 8.4pt/1.2 'IBM Plex Sans',sans-serif; margin-bottom:1mm}
+.proof span{font:500 6.8pt/1.35 'IBM Plex Mono',monospace; color:var(--accent-ink)}
 .note{font-size:6.8pt; color:var(--ink-3); line-height:1.35}
 
 /* cover */
@@ -135,13 +140,54 @@ td.muted{color:var(--ink-2)}
 .cover .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:6mm; margin-top:14mm; max-width:230mm}
 .cover .stats div{font-size:9pt; color:#d7ecea; line-height:1.3}
 .cover .stats b{display:block; font:700 30pt/1 'IBM Plex Sans Condensed',sans-serif; color:#fff; margin-bottom:1.6mm}
+/* explained */
+.xgrid{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:7mm; min-height:0}
+.xgrid h3{margin-bottom:1.6mm}
+.xp{font-size:9.2pt; line-height:1.5; color:var(--ink); margin-bottom:4mm}
+.story{background:var(--accent-soft); border:.3mm solid #b7d6d3; border-radius:1.2mm; padding:3.6mm 4mm}
+.story h3{color:var(--accent-ink); margin-bottom:1.6mm}
+.story p{font-size:9pt; line-height:1.6; color:var(--ink)}
+.story b{font:600 7.4pt/1 'IBM Plex Mono',monospace; color:#fff; background:var(--accent); padding:.5mm 1.1mm; border-radius:.6mm}
+.story .note{margin-top:2.4mm; font-size:6.8pt}
+.xbottom{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:7mm; margin-top:auto}
+.rules{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:1.6mm}
+.rules li{display:grid; grid-template-columns:4mm 1fr; gap:1.6mm; font-size:8.2pt}
+.rules li::before{content:"✓"; color:var(--accent); font-weight:700}
+td.bad{color:var(--crit); font-weight:600; width:46%}
+
+/* KPI formula cards */
+.kgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:4mm; flex:1 1 auto; min-height:0}
+.kcard{border:.3mm solid var(--rule-2); border-radius:1.2mm; padding:3mm 3.2mm 2.6mm; display:flex; flex-direction:column; gap:1.9mm; background:#fff; min-height:0}
+.kc-hd{display:flex; justify-content:space-between; align-items:flex-start; gap:2mm}
+.kc-hd > b{font:600 10pt/1.2 'IBM Plex Sans',sans-serif}
+.kc-hd > span{display:flex; gap:1.2mm; align-items:center; flex:none}
+.kc-w{font-size:7.8pt; color:var(--ink-2); line-height:1.4}
+.lbl{display:block; font:600 5.9pt/1 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:1.1mm}
+.kc-f{background:var(--paper); border-left:.8mm solid var(--accent); padding:2mm 2.4mm; border-radius:0 .8mm .8mm 0}
+.eq{display:flex; align-items:center; flex-wrap:nowrap; gap:1.6mm; font:500 7.4pt/1.25 'IBM Plex Mono',monospace; color:var(--accent-ink)}
+.frac{display:inline-flex; flex-direction:column; align-items:center; text-align:center; min-width:0; flex:0 1 auto}
+.eq > *{flex:none}
+.eq > .frac{flex:0 1 auto}
+.frac > span{padding:0 1mm}
+.frac .nu{border-bottom:.3mm solid currentColor; padding-bottom:.7mm}
+.frac .de{padding-top:.7mm}
+.ftext{font:500 7.4pt/1.4 'IBM Plex Mono',monospace; color:var(--accent-ink)}
+.kc-ex{background:var(--gold-soft); border-radius:.8mm; padding:1.8mm 2.4mm}
+.kc-ex .eq, .kc-ex .ftext{color:#6b4d05}
+.kc-ex .ftext b, .kc-ex .res{font-weight:700; color:#4a3400; font-size:8.4pt}
+.kc-r{font-size:7.4pt; line-height:1.4}
+.kc-ft{margin-top:auto; padding-top:1.6mm; border-top:.25mm dotted var(--rule-2); font:500 6.2pt/1.3 'IBM Plex Mono',monospace; color:var(--ink-3)}
+.gloss{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:3mm 5mm}
+.gloss div{border-top:.4mm solid var(--accent); padding-top:1.6mm; font-size:7.6pt; color:var(--ink-2); line-height:1.4}
+.gloss b{display:block; font:600 9pt/1.2 'IBM Plex Sans',sans-serif; color:var(--ink); margin-bottom:.8mm}
+
 /* contents */
-.toc{display:grid; grid-template-columns:1fr 1fr; gap:0 10mm}
+.toc{display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:column; gap:0 10mm}
 .toc a{display:grid; grid-template-columns:12mm 1fr auto; gap:3mm; align-items:baseline; padding:2.4mm 0; border-bottom:.25mm solid var(--rule); color:var(--ink); text-decoration:none}
 .toc a b{font:600 9pt/1 'IBM Plex Mono',monospace; color:var(--accent)}
 .toc a span{font-size:10pt; font-weight:500}
 .toc a em{font:500 7.5pt/1 'IBM Plex Mono',monospace; color:var(--ink-3); font-style:normal}
-.legend{display:grid; grid-template-columns:repeat(4,1fr); gap:4mm}
+.legend{display:grid; grid-template-columns:repeat(3,1fr); gap:3mm 4mm}
 .legend .card{background:#fff}
 
 /* map */
@@ -466,7 +512,7 @@ const CH = [
   kpi:[
     ['Decision log completeness','Decisions logged ÷ decisions made in reviews','Decision log','Monthly','Executive team','up','Leading'],
     ['Action close rate','Actions closed by due date ÷ actions due','Task board','Weekly','Function heads','up','Leading'],
-    ['Approval turnaround','Median working days to approve spend','Approval form','Monthly','Finance','down','Leading'],
+    ['Spend approval turnaround','Median working days to approve spend','Approval form','Monthly','Finance','down','Leading'],
     ['Dashboard on time','Weeks dashboard published by Monday ÷ weeks','Dashboard','Monthly','Finance','hold','Leading'],
     ['Handoff compliance','Handoff notes sent ÷ region working days','Shared channel','Weekly','Region leads','up','Leading'],
     ['SEV 1 response time','Minutes from detection to acknowledgement (target ≤ 15)','Incident log','Per incident','Operations','down','Leading'],
@@ -480,16 +526,163 @@ const CH = [
 }
 ];
 
+/* ------------------------------------------------------------------ channel explanations */
+const EXPL = {
+consumer:{
+  why:'Consumer communications is how Vacario finds travellers, turns them into bookers and brings them back. It spends most of the marketing budget, so every step has to show what it returns.',
+  how:'Paid ads, press and creator content bring people to the app. From sign-up, CRM takes over: a welcome series learns what each person wants, and reminders bring back anyone who searched without booking. Once they book, messages switch from selling to helping: confirmation, trip preparation and support during the stay. After checkout the traveller is asked for a review and a referral, and after 30 days they move to Lifecycle, where the aim is the next booking.',
+  rules:['Every campaign link carries tracking tags, so each booking can be traced to its source.','No more than one marketing message a day per person across all touchpoints.','WhatsApp and SMS go only to people who have opted in.','Service messages (confirmation, trip details) always go out, even to people who opted out of marketing.'],
+  breaks:[['Installs rise but bookings do not','Check sign-up rate and 30-day conversion before adding ad spend.'],['Guests stop opening messages','Cut frequency and base content on the preference quiz, not generic deals.'],['Bad reviews after a stay','Send to Supply the same day; fix the property before promoting it again.']],
+  story:'Priya in Hyderabad sees a Reel about a Coorg homestay and taps the link <b>(1)</b>. She installs the app and picks “hills, family, under ₹8,000” in the welcome quiz <b>(2)</b>. She searches but does not book; next day a WhatsApp reminder shows a price drop <b>(3)</b> and she books <b>(4)</b>. A week before arrival she gets directions and a coffee-plantation tour offer <b>(5)</b>. She messages support about a late check-in and gets a reply in minutes <b>(6)</b>. After checkout she leaves a review and sends her referral link to her sister <b>(7)</b>. A month later she gets Diwali trip ideas and books again <b>(8)</b>.'
+},
+supply:{
+  why:'Supply communications brings in the rooms and stays that travellers book. Without accurate inventory in the right places, no amount of marketing produces bookings. The audience is business owners, so the messages are about revenue, reliability and ease.',
+  how:'Each month the supply lead compares what travellers search for with what Vacario can sell and names the gaps. Business development contacts suitable owners, hotels and managers and qualifies them. Finance and legal agree terms and sign. Supply operations builds and checks the listing, makes a test booking and switches it on. From then on, operations keeps prices and availability accurate every day, and an account manager sends monthly results and meets the best partners each quarter to add more inventory.',
+  rules:['No listing goes live without a successful test booking.','Every partner has one named account manager.','Payouts are made on the agreed date, every time.','Rate parity is checked every week.'],
+  breaks:[['Signed partners take weeks to go live','Track time to live per listing; chase anything over 14 days.'],['Bookings fail because rooms are not really free','Move the partner to a channel manager or API and watch sync errors daily.'],['Partners go quiet after signing','Send the first monthly statement even with zero bookings, with a plan to change that.']],
+  story:'Search data shows many travellers looking for Munnar tea-estate stays but few listings <b>(1)</b>. BD calls ten estates and qualifies four <b>(2)</b>. Three sign on the standard commission, with GST documents collected <b>(3)</b>. Operations photographs one estate, connects its channel manager and loads rates <b>(4)</b>, then makes a test booking before switching it on <b>(5)</b>. A sync error one weekend is fixed the same day <b>(6)</b>. At month end the owner gets a statement showing 14 bookings and agrees to list a second cottage <b>(7)</b>.'
+},
+creator:{
+  why:'Creators reach travellers who trust them more than ads. The plan treats creators as part of Vacario’s distribution: each has a link and a code, earns from bookings, and supplies content Vacario reuses.',
+  how:'Each quarter the team finds creators who match target travellers by niche, region and language, and invites the best into the programme on one of three tiers. Onboarding gives them a kit, a tracking link and code, and the disclosure rules. For a campaign, the content lead briefs the trip and books the stay through Supply. Drafts are checked before posting. Social reshares the posts and boosts the best as paid ads. Finance pays monthly from the attribution report, and the strongest creators move to long-term ambassador deals.',
+  rules:['Every paid or gifted post carries a clear disclosure label, in line with ASCI guidelines.','Creators are paid on time from the monthly statement.','Usage rights for paid ads are agreed before content is made.','One review round only, so creators keep their own voice.'],
+  breaks:[['Big reach, no bookings','Judge creators on cost per attributed booking, not followers.'],['Content late or off-brief','Brief three weeks before travel; confirm deliverables in writing.'],['Posts missing the disclosure label','Do not approve until the label is present.']],
+  story:'The team finds a Telugu travel creator with 80,000 engaged followers in Andhra Pradesh and Telangana <b>(1)</b> and signs her on the micro tier with commission per booking <b>(2)</b>. She gets her link, the code VAC-ANU and the disclosure rules <b>(3)</b>. The brief is a monsoon weekend in Araku Valley, booked through a supply partner <b>(4)</b>. Her draft is approved in a day <b>(5)</b>. The Reel posts, is reshared and boosted <b>(6)</b>. Her code brings 22 bookings and she is paid on the 10th <b>(7)</b>. After two strong quarters she becomes an ambassador <b>(8)</b>.'
+},
+destination:{
+  why:'Most travel apps go quiet once the stay is booked. This channel keeps Vacario useful during the trip, with things to do, places to eat and offers nearby, and earns extra revenue from each trip.',
+  how:'For each priority destination the team maps the tourism board, attractions, restaurants and experience operators. Tourism boards are offered co-marketing and traveller insight; merchants are offered visitors who are already in town. Each offer has clear terms and a code or QR for redemption. Content builds guides and offer cards in the app. CRM puts offers in the pre-trip message and sends timely suggestions during the stay. Redemptions are recorded, partners are settled monthly and offers are refreshed before each season.',
+  rules:['At most one in-trip offer message a day.','Every offer has an end date and a redemption method before it goes live.','Merchants see the same redemption count Vacario sees.','Tourism boards get a report within two weeks of each campaign.'],
+  breaks:[['Offers go unused','Send them at the right moment (arrival day, near the place) and drop weak ones.'],['Merchants dispute numbers','Use QR redemption logged in real time and visible to both sides.'],['Stale offers after the season','Refresh six weeks before each season.']],
+  story:'Jaipur is a priority destination, so the team maps the tourism department, Amber Fort guides and ten restaurants <b>(1)</b>. A food-walk operator and three restaurants agree to offers <b>(2–3)</b>. Guides and offer cards go into the app <b>(4)</b>. A family booked for November gets the food walk in their pre-trip message and a restaurant offer on arrival evening <b>(5)</b>. They scan the QR at dinner <b>(6)</b>. The restaurant is paid its commission on the 10th <b>(7)</b>, and offers are refreshed for winter <b>(8)</b>.'
+},
+corporate:{
+  why:'Corporate communications tells the story of the company rather than the product: what Vacario is building, how fast it is growing, its technology and its partners. It builds the trust needed for funding, partnerships and government support.',
+  how:'Leadership approves one message house every six months. Communications keeps a calendar of milestones and prepares a pack for each: press release, fact sheet, investor note, partner brief, internal note and Q&A. Finance checks the numbers, legal checks the claims and the CEO signs off. Employees are briefed first; then each audience hears the news through its own route on the same day. One spokesperson handles questions, and results are logged.',
+  rules:['Employees hear news before anyone outside.','Finance checks every number before release.','Only the named spokesperson speaks to media.','Partner names are used only with written approval.'],
+  breaks:[['Different people quote different numbers','The fact sheet is the only source; log every figure released.'],['Staff learn news from social media','Hold the release until the internal briefing has gone out.'],['Announcements bunch up or slip','Update the milestone calendar monthly; plan one major story a month.']],
+  story:'Vacario signs a co-marketing agreement with a state tourism department, which fits the “India first” message <b>(1)</b>. It goes on the calendar for the second week of the month <b>(2)</b>. The pack is drafted <b>(3)</b>; finance checks the numbers, legal approves the department’s name and the CEO signs off <b>(4)</b>. Staff in Canada, India and the Philippines are briefed that morning <b>(5)</b>. The release goes to media, investors and partners <b>(6)</b>. The CEO takes two interview requests <b>(7)</b>, and the coverage report is filed a week later <b>(8)</b>.'
+},
+lifecycle:{
+  why:'The plan says communication should not stop once somebody joins, spends, sells or sponsors. Keeping a guest or partner costs far less than finding a new one, so this is where Vacario should shine.',
+  how:'Guests, suppliers, creators and merchants each follow the same five stages on their own track. They are welcomed and pointed to one first action. Anyone without a first result in 14 days gets reminders, then a personal call. Each month they receive something useful. Milestones are recognised and rewarded. Feedback is collected at key moments and detractors are called back. Anyone going quiet is flagged and contacted with a personal offer or a renewal conversation.',
+  rules:['One track per audience; nobody gets another audience’s messages.','Every message has one clear next action.','Detractors are contacted within 72 hours.','Renewals start 60 days before the end date.'],
+  breaks:[['Many join, few activate','Shorten the path to the first result and call at day 10.'],['Partners leave without warning','Act on early signs (falling availability, no posts) from the weekly at-risk list.'],['Too many messages','Cap marketing messages; let triggered messages replace scheduled ones.']],
+  story:'A new homestay owner signs up and gets a welcome with one task: upload photos <b>(Join)</b>. By day 10 the listing is not live, so the account manager calls and finishes it with them <b>(Activate)</b>. Each month they get a statement with bookings and reviews <b>(Engage)</b>. At 100 nights sold they get a top-partner badge and featured placement <b>(Reward)</b>. When availability drops in the off-season they are flagged and invited into a monsoon promotion <b>(Retain)</b>.'
+},
+internal:{
+  why:'Internal communications keeps a team spread across Canada, India and the Philippines working from the same priorities and the same numbers. The plan’s rule: one company, one source of truth, one communications path from strategy to execution.',
+  how:'Leadership sets priorities each month and records decisions. Finance turns them into approved budgets. Each week the management review checks progress against KPIs and assigns actions, and each function plans its week. Because the regions are hours apart, each ends its day with a handoff note so work continues overnight. Operations runs daily check-ins where needed. Finance publishes one dashboard every Monday. Everything is filed in the knowledge base, and incidents follow a set escalation path.',
+  rules:['If a decision is not in the decision log, it has not been made.','Every action has one owner and a due date.','One dashboard; nobody presents their own version of the numbers.','SEV 1 incidents reach the CEO at once, at any hour.'],
+  breaks:[['Work waits overnight between regions','Handoff note every working day, with an owner for each open item.'],['Meetings end without decisions','Close every meeting by reading back decisions and owners.'],['Files scattered across inboxes','Nothing counts as shared until it is in the knowledge base.']],
+  story:'At the monthly review, leadership decides to open Goa inventory first <b>(1)</b>. Finance approves the extra supply budget in two days <b>(2)</b>. Monday’s management review gives the Goa target to the supply lead <b>(3)</b>, and the supply team plans its week <b>(4)</b>. India’s evening handoff note tells Canada which contracts need sign-off <b>(5)</b>. A payments outage at 2 am IST is logged as SEV 1 and the CEO is alerted within 15 minutes <b>(9)</b>. Monday’s dashboard shows Goa listings rising <b>(7)</b>, and the decision and post-mortem are filed <b>(8)</b>.'
+}
+};
+
+/* ------------------------------------------------------------------ KPI formulas
+   f: [numerator, denominator] or a string for non-ratio KPIs
+   u: '%' ratio ×100 · 'inv' (1 − n÷d) ×100 · '₹' money ÷ count · 'x' plain ratio · 'nps'
+   ex: [n, d] example inputs (the result is calculated below), or a string
+   nm: numerator is money · per: unit label after a plain ratio                                  */
+const KX = {
+'Cost per install (CPI)':{w:'What one app install from paid ads costs. The first check on whether ad money is buying people at a sensible price.', f:['Paid media spend','Installs from paid campaigns'], u:'₹', nm:true, ex:[150000,3000], r:'Compare by channel and destination weekly. Move budget away from the highest-CPI campaigns unless their installs convert to bookings better.'},
+'Sign-up rate':{w:'The share of people who install the app and then create an account. A low rate means onboarding asks too much too early.', f:['Sign-ups','Installs'], u:'%', ex:[1800,3000], r:'If it drops right after an app release, check the sign-up screens first.'},
+'Opt-in rate':{w:'The share of new users who allow WhatsApp or push messages. Without opt-in, the CRM steps cannot reach them.', f:['Users opted into WhatsApp or push','Sign-ups'], u:'%', ex:[1080,1800], r:'Ask at a moment of value (a price alert, a saved trip), not on first launch.'},
+'30-day booking conversion':{w:'Of the people who signed up in a month, how many booked within 30 days. The main test of whether the Welcome and Engage steps work.', f:['First bookings within 30 days of sign-up','Sign-ups in the same month (cohort)'], u:'%', ex:[90,1800], r:'Measure by sign-up month, so a late booking counts against the month the person joined.'},
+'Blended CAC':{w:'The full cost to win one paying customer: all marketing spend, including creators and content, divided by new customers. The same measure as cost per booking in the budget engine.', f:['Total marketing spend','New booking customers'], u:'₹', nm:true, ex:[600000,400], r:'CAC must be earned back by the first or second booking. Compare it with contribution per booking every month.'},
+'Average booking value':{w:'The average value of one booking. Multiplied by completed bookings it gives the north star.', f:['Gross booking value (GBV)','Number of bookings'], u:'₹', nm:true, ex:[5400000,600], r:'Rising value with steady conversion is healthy. Rising value with falling bookings can mean prices are too high.'},
+'Review rate':{w:'The share of completed trips that leave a review. Reviews build trust for the next traveller and supply content for the feed.', f:['Reviews received','Completed trips'], u:'%', ex:[150,500], r:'Ask one day after checkout and make it one tap. Reply to every review within 48 hours.'},
+'Referral share':{w:'How much of the business comes from guests recommending Vacario. Referral bookings have almost no media cost.', f:['Bookings from referral links or credits','All bookings'], u:'%', ex:[60,600], r:'If it is flat, test a bigger or two-sided referral credit and send the link at the happiest moment, right after a good review.'},
+'12-month repeat rate':{w:'The share of customers who booked two or more times in the last 12 months. The cheapest booking is from a past guest.', f:['Customers with 2+ bookings in 12 months','Customers who booked in the same 12 months'], u:'%', ex:[240,1600], r:'Look at it by first destination and first channel to see which travellers come back.'},
+
+'Pipeline coverage':{w:'Whether there are enough good leads to hit next month’s signing target.', f:['Qualified leads in the pipeline','Monthly signing target'], u:'x', ex:[90,30], r:'Below 3× means outreach must increase now. Signings follow outreach by four to six weeks.'},
+'Win rate':{w:'The share of qualified leads that sign. Shows whether the pitch and terms work.', f:['Suppliers signed','Qualified leads'], u:'%', ex:[27,90], r:'Log why deals are lost. Recurring reasons (commission, payout speed) point to the fix.'},
+'Time to live':{w:'How long it takes from a signed contract to a bookable listing. Every day in between is inventory Vacario paid to win but cannot sell.', f:'Median of (go-live date − contract date) for listings that went live this period', ex:'Five listings went live after 6, 8, 9, 12 and 20 days → median = <b>9 days</b>', r:'Use the median so one slow listing does not hide the normal case. Chase anything over 14 days.'},
+'Live listings by destination':{w:'How much bookable inventory there is in each priority destination.', f:'Count of listings that are live and bookable, per priority destination', ex:'Goa 120 · Jaipur 85 · Munnar 40 → <b>245 live listings</b> in three destinations', r:'Compare with search demand per destination; that gap sets next month’s target list.'},
+'Availability accuracy':{w:'How often a booking goes through at the shown price and availability. Failed bookings lose the traveller and hurt trust.', f:['Bookings that failed on availability or price','Bookings attempted'], u:'inv', ex:[12,800], r:'Anything under 98% needs a partner-by-partner look; most failures come from a few partners without a channel manager.'},
+'Supplier cancellation rate':{w:'The share of bookings a supplier cancels. Each one strands a traveller and costs a rebooking.', f:['Bookings cancelled by the supplier','All bookings'], u:'%', ex:[8,800], r:'Repeat offenders get a warning, then fewer placements, then removal.'},
+'Rate parity':{w:'Whether Vacario shows the same or better price than other sites for the same stay.', f:['Listings at parity or better','Listings checked'], u:'%', ex:[188,200], r:'Raise gaps with the partner the same week; travellers who find a lower price elsewhere rarely come back.'},
+'Bookings per live listing':{w:'How productive the average listing is. Shows whether new inventory is in places travellers want.', f:['Bookings in the month','Live listings'], u:'x', per:' bookings per listing', ex:[800,400], r:'Listings with no bookings in 60 days need better content or promotion, or should be dropped.'},
+'Supplier satisfaction':{w:'How happy partners are with Vacario, from a short quarterly survey.', f:'Sum of scores ÷ number of responses (scale 1–10)', ex:'40 partners answer; their scores add up to 324 → 324 ÷ 40 = <b>8.1</b>', r:'Read the comments from anyone scoring 6 or lower and call them within a week.'},
+
+'Active creators by tier':{w:'How many creators are actually posting, by size of audience.', f:'Count of creators with at least one post in the last 30 days, by tier', ex:'Nano 25 · Micro 12 · Macro 3 → <b>40 active creators</b>', r:'A signed creator who never posts costs time; re-brief or drop after 45 quiet days.'},
+'On-time delivery':{w:'The share of agreed content that arrives on the agreed date.', f:['Content delivered by the agreed date','Content due'], u:'%', ex:[54,60], r:'Late creators slip campaigns. Take it into account at the quarterly tier review.'},
+'Approval turnaround':{w:'How fast Vacario approves creator drafts. Slow approvals delay posts and frustrate creators.', f:'Median hours from draft received to approval', ex:'Drafts approved after 6, 20, 26, 30 and 50 hours → median = <b>26 hours</b>', r:'The SLA is 48 hours. Anything slower points to too many reviewers.'},
+'Engagement rate':{w:'How strongly a creator’s audience reacts to a post. A better guide to influence than follower count.', f:['Likes + comments + saves + shares','Reach (unique accounts that saw the post)'], u:'%', ex:[4200,60000], r:'Compare creators of the same tier; saves and shares matter most for travel.'},
+'Link clicks':{w:'How many people went from creator content to Vacario.', f:'Sum of clicks on all creator tracking links in the period', ex:'40 creators × 150 clicks on average → <b>6,000 clicks</b>', r:'Clicks with no bookings usually mean the landing page does not match the post.'},
+'Attributed bookings':{w:'Bookings Vacario can trace to a creator through their link or code.', f:'Bookings made through a creator link (within 30 days of the click) + bookings using a creator code', ex:'85 bookings by link + 35 by code → <b>120 attributed bookings</b>', r:'This is what creators are paid on, so the rules (30-day window, code or link) must be written into every agreement.'},
+'Cost per attributed booking':{w:'What it costs to get one booking through creators. The creator equivalent of CAC.', f:['Creator fees + commission + hosted trip costs','Attributed bookings'], u:'₹', nm:true, ex:[360000,120], r:'Compare with blended CAC. Creators above it need a new brief or a smaller fee.'},
+'Disclosure compliance':{w:'The share of paid or gifted posts with a correct disclosure label. Required under ASCI guidelines; the target is 100%.', f:['Paid or gifted posts with a correct label','Paid or gifted posts'], u:'%', ex:[60,60], r:'Anything below 100% is fixed the same day: ask the creator to edit the post.'},
+'Creator retention':{w:'How many creators who were active last quarter are still active this quarter.', f:['Creators active in both quarters','Creators active last quarter'], u:'%', ex:[28,40], r:'Late payment and slow approvals are the usual reasons creators leave.'},
+
+'Destination coverage':{w:'How many priority destinations have enough local partners to fill a trip with offers.', f:['Priority destinations with 5+ live partners','Priority destinations'], u:'%', ex:[6,10], r:'Work on the destinations with the most bookings and the fewest partners first.'},
+'Active offers':{w:'How many offers a traveller can use in each destination.', f:'Count of offers live in the app, per destination', ex:'Goa 18 · Jaipur 12 · Munnar 6 → <b>36 live offers</b>', r:'Aim for variety (food, activity, transport), not just volume.'},
+'In-trip view rate':{w:'The share of travellers in a destination who open at least one offer.', f:['Travellers who viewed an offer','Travellers in the destination'], u:'%', ex:[330,500], r:'Low views mean the timing or message is wrong, not the offers.'},
+'Redemption rate':{w:'The share of travellers in a destination who use an offer.', f:['Offer redemptions','Travellers in the destination'], u:'%', ex:[110,500], r:'High views with low redemptions mean the offer is weak or hard to use.'},
+'Ancillary revenue per trip':{w:'The extra revenue earned on each trip beyond the stay.', f:['Commission + experience revenue','Completed trips'], u:'₹', nm:true, ex:[275000,500], r:'Add it to booking contribution when judging whether CAC is affordable.'},
+'Settlement on time':{w:'The share of partners paid by the 10th of the following month.', f:['Partners paid by day 10','Partners due payment'], u:'%', ex:[38,40], r:'Late payment is the fastest way to lose small merchants.'},
+'Sponsorship revenue':{w:'Money from tourism boards and sponsors for campaigns and placement.', f:'Sum of tourism board, co-marketing and sponsor fees recognised in the period', ex:'Two tourism board campaigns ₹4,00,000 + three sponsorships ₹1,50,000 → <b>₹5,50,000</b>', r:'Every sponsor gets a results report; renewal depends on it.'},
+'Partner renewal rate':{w:'The share of destination partners who renew for the next season.', f:['Partners who renewed','Partners up for renewal'], u:'%', ex:[34,40], r:'Look at redemptions for those who did not renew; poor results usually explain it.'},
+
+'Milestones on schedule':{w:'Whether announcements go out on the planned date.', f:['Announcements made on the planned date','Announcements planned'], u:'%', ex:[5,6], r:'A slip is fine if planned; a missed date with no notice is not.'},
+'Media mentions':{w:'How often Vacario appears in the media.', f:'Count of articles, broadcasts and posts naming Vacario, from the coverage log', ex:'18 online + 4 print + 2 broadcast → <b>24 mentions</b>', r:'Read it with tier-1 share; volume alone can hide weak coverage.'},
+'Tier-1 coverage share':{w:'The share of coverage in national business and travel media.', f:['Mentions in tier-1 media','All mentions'], u:'%', ex:[6,24], r:'Agree the tier-1 list once and keep it fixed so the number can be compared over time.'},
+'Message pull-through':{w:'Whether coverage carries Vacario’s own key messages.', f:['Coverage carrying at least one key message','All coverage'], u:'%', ex:[18,24], r:'Low pull-through means the messages are not quotable; rewrite them as short facts.'},
+'Investor update on time':{w:'Whether investors get their update on the agreed date. Target 100%.', f:['Updates sent by the agreed date','Updates due'], u:'%', ex:[3,3], r:'Send on time even when the news is mixed; silence worries investors more.'},
+'Investor meetings':{w:'Interest the updates and releases create among investors.', f:'Count of investor meetings or calls that came from an update or release', ex:'Two after the monthly update + three after a release → <b>5 meetings</b> in the quarter', r:'Note which update or story led to each meeting.'},
+'Government and tourism MoUs':{w:'Formal partnerships with government and tourism bodies.', f:'Count of MoUs or formal partnerships signed with government or tourism bodies', ex:'One state tourism MoU in the quarter → <b>1</b>', r:'Each MoU should lead to a campaign within six months, handled by Destination & Merchant.'},
+'Employees briefed first':{w:'Whether staff heard the news before the public. Target 100%.', f:['Releases with a staff briefing beforehand','Releases'], u:'%', ex:[4,4], r:'If it misses once, find out why before the next release.'},
+
+'Activation rate':{w:'The share of new guests or partners who reach their first result within 14 days: first booking, listing live, first post or first redemption.', f:['Reached first result within 14 days','Joined in the same period'], u:'%', ex:[450,1800], r:'Measure each audience separately; the first results differ.'},
+'Time to first value':{w:'How long it takes a new member or partner to get their first result.', f:'Median days from joining to first result', ex:'First results after 2, 4, 5, 9 and 13 days → median = <b>5 days</b>', r:'The faster the first result, the more likely people stay.'},
+'90-day retention':{w:'The share of people who joined in a month and are still active 90 days later.', f:['Still active at day 90','Joined in the same month (cohort)'], u:'%', ex:[540,1800], r:'Compare cohorts month by month; this shows whether changes are working.'},
+'Repeat booking rate':{w:'The share of guests with two or more bookings in 12 months. The same measure as Consumer’s 12-month repeat rate, owned jointly.', f:['Guests with 2+ bookings in 12 months','Guests who booked in the same 12 months'], u:'%', ex:[240,1600], r:'The clearest sign that Lifecycle works.'},
+'Partner churn':{w:'The share of suppliers or creators who left during the period.', f:['Partners lost in the period','Partners active at the start of the period'], u:'%', ex:[12,400], r:'Lower is better. Log every exit reason.'},
+'Sponsor renewal rate':{w:'The share of sponsors who renew.', f:['Sponsors who renewed','Sponsors up for renewal'], u:'%', ex:[17,20], r:'Start the renewal conversation 60 days early, with the results report.'},
+'NPS by audience':{w:'How likely people are to recommend Vacario, on a 0–10 scale. Promoters answer 9–10, detractors 0–6.', f:'% promoters (9–10) − % detractors (0–6)', u:'nps', ex:'200 answers: 110 promoters (55%), 60 passives, 30 detractors (15%) → 55 − 15 = <b>NPS +40</b>', r:'NPS runs from −100 to +100. Call every detractor within 72 hours.'},
+'Win-back rate':{w:'The share of at-risk members who come back after being contacted.', f:['At-risk members who returned within 30 days','At-risk members contacted'], u:'%', ex:[36,300], r:'Test the offer and the channel; a personal message often beats a discount.'},
+'Loyalty share':{w:'The share of bookings made by loyalty members.', f:['Bookings by loyalty members','All bookings'], u:'%', ex:[180,600], r:'Rising share means the programme is valued; check it is not only discounting.'},
+
+'Decision log completeness':{w:'Whether decisions made in reviews are written down.', f:['Decisions recorded in the decision log','Decisions made in reviews'], u:'%', ex:[19,20], r:'Read the log back at the end of each review to close the gap.'},
+'Action close rate':{w:'The share of actions finished by their due date.', f:['Actions closed by the due date','Actions due'], u:'%', ex:[68,80], r:'Low rates usually mean too many actions per person; cut them.'},
+'Spend approval turnaround':{w:'How fast spend requests are approved.', f:'Median working days from request to approval', ex:'Approvals took 1, 1, 2, 3 and 6 days → median = <b>2 days</b>', r:'The SLA is 3 working days; slower approvals hold up campaigns and contracts.'},
+'Dashboard on time':{w:'Whether the weekly dashboard comes out by Monday. Target 100%.', f:['Weeks the dashboard was published by Monday','Weeks in the period'], u:'%', ex:[4,4], r:'The management review uses it, so a late dashboard means a review without numbers.'},
+'Handoff compliance':{w:'Whether each region sends its end-of-day handoff note.', f:['Handoff notes sent','Region working days (3 regions × working days)'], u:'%', ex:[62,66], r:'Missing notes show up as work waiting overnight.'},
+'SEV 1 response time':{w:'How fast a critical incident is acknowledged by its owner. Target 15 minutes or less.', f:'Minutes from detection to acknowledgement, for each SEV 1 incident', ex:'Detected at 02:10, acknowledged at 02:21 → <b>11 minutes</b> (within target)', r:'Every miss is reviewed in the post-mortem.'},
+'Time to resolve':{w:'How long incidents take to fix, by severity.', f:'Median hours from detection to resolution, per severity level', ex:'SEV 2 incidents resolved in 3, 5 and 9 hours → median = <b>5 hours</b>', r:'Track SEV 1 and SEV 2 separately; averages across levels hide problems.'},
+'Post-mortems filed':{w:'Whether lessons from serious incidents are written down.', f:['SEV 1–2 incidents with a post-mortem within 5 working days','SEV 1–2 incidents'], u:'%', ex:[3,4], r:'A post-mortem names the cause and one change to stop a repeat.'},
+'SOP freshness':{w:'Whether procedures are kept up to date.', f:['SOPs reviewed in the last 6 months','All SOPs'], u:'%', ex:[36,45], r:'Out-of-date SOPs are worse than none; review or retire them.'}
+};
+
+/* ------------------------------------------------------------------ glossary */
+const GLOSS = [
+  ['GBV','Gross booking value: the total value of bookings before costs, refunds excluded.'],
+  ['North star','The one number the whole company steers by: completed bookings × average booking value.'],
+  ['CAC','Customer acquisition cost: marketing spend ÷ new customers who booked.'],
+  ['CPI','Cost per install: paid spend ÷ app installs from paid campaigns.'],
+  ['Cohort','A group that joined in the same period, followed over time, e.g. everyone who signed up in October.'],
+  ['Attribution','Linking a booking to what caused it: a campaign tag, a creator link or a code.'],
+  ['Conversion','The share of people who move from one stage to the next, e.g. sign-up to first booking.'],
+  ['Median','The middle value when sorted. Used for times so that one extreme case does not distort the result.'],
+  ['Leading KPI','Moves first and can be changed this week, e.g. opt-in rate. Managed weekly.'],
+  ['Lagging KPI','Confirms the result later, e.g. repeat rate. Reviewed monthly or quarterly.'],
+  ['NPS','Net Promoter Score: % answering 9–10 minus % answering 0–6 to “How likely are you to recommend us?”.'],
+  ['Rate parity','Vacario’s price for a stay is the same as or better than other sites.'],
+  ['SLA','Service level: the time allowed for a step, e.g. reply within 15 minutes.'],
+  ['UGC','User-generated content: photos, videos and reviews made by travellers.'],
+  ['Tier-1 media','National business and travel outlets on an agreed, fixed list.'],
+  ['ASCI','Advertising Standards Council of India, whose guidelines require paid creator posts to be clearly labelled.']
+];
+
 /* ------------------------------------------------------------------ helpers */
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let pageNo = 0;
-const TOTAL = 6 + CH.length * 3 + 3;
 function page(inner, {cls='', section=''} = {}){
   pageNo++;
   const run = cls.includes('cover') ? '' :
     `<div class="run"><span>vacario India · <b>Communication Workflows</b></span><span>${esc(section)}</span></div>`;
   const foot = cls.includes('cover') ? '' :
-    `<div class="foot"><span>Fall 2026 Integrated Sales, Marketing &amp; Promotions Plan</span><span>${String(pageNo).padStart(2,'0')} / ${TOTAL}</span></div>`;
+    `<div class="foot"><span>Fall 2026 Integrated Sales, Marketing &amp; Promotions Plan</span><span>${String(pageNo).padStart(2,'0')} / __TOTAL__</span></div>`;
   return `<section class="page ${cls}">${run}${inner}${foot}</section>`;
 }
 const band = (c, title) => `
@@ -500,6 +693,31 @@ const band = (c, title) => `
   </div>`;
 const chain = (c, label) => `<div class="chain-row"><div class="lbl">${label}</div><div class="chain">${c.chain.map(x => `<div class="cn">${esc(x)}</div>`).join('')}</div></div>`;
 const DIR = {up:['↑','up'], down:['↓','down'], hold:['=','hold']};
+const fmtN = (v, money) => (money ? '₹' : '') + Number(v).toLocaleString('en-IN');
+const fmtP = v => (Math.round(v * 10) / 10).toLocaleString('en-IN') + '%';
+function kx(name){ const k = KX[name]; if (!k) throw new Error('No formula for ' + name); return k; }
+function fText(k){
+  if (!Array.isArray(k.f)) return k.f;
+  const [n, d] = k.f;
+  return k.u === '%' ? `${n} ÷ ${d} × 100` : k.u === 'inv' ? `(1 − ${n} ÷ ${d}) × 100` : `${n} ÷ ${d}`;
+}
+const frac = (n, d) => `<span class="frac"><span class="nu">${n}</span><span class="de">${d}</span></span>`;
+const nw = t => `<span style="white-space:nowrap">${t}</span>`;
+const wrapF = (u, f) => u === 'inv' ? `${nw('(1 −')}${f}${nw(') × 100')}` : u === '%' ? `${f}${nw('× 100')}` : f;
+function fBlock(k){
+  if (!Array.isArray(k.f)) return `<div class="ftext">${esc(k.f)}</div>`;
+  return `<div class="eq">${wrapF(k.u, frac(esc(k.f[0]), esc(k.f[1])))}</div>`;
+}
+function exBlock(k){
+  if (!Array.isArray(k.ex)) return `<div class="ftext">${k.ex}</div>`;
+  const [n, d] = k.ex;
+  let res;
+  if (k.u === '%') res = fmtP(n / d * 100);
+  else if (k.u === 'inv') res = fmtP((1 - n / d) * 100);
+  else if (k.u === '₹') res = fmtN(Math.round(n / d), true);
+  else res = (n / d).toFixed(1) + (k.per || '×');
+  return `<div class="eq">${wrapF(k.u, frac(fmtN(n, k.nm), fmtN(d)))}${nw(`= <span class="res">${res}</span>`)}</div>`;
+}
 const STAGE_TINT = ['#0e5b5e','#1c6b6c','#2a7b7a','#3a8a86','#4d9892','#62a59d','#78b1a8'];
 
 /* ------------------------------------------------------------------ pages */
@@ -522,17 +740,20 @@ out.push(page(`
 `, {cls:'cover'}));
 
 /* contents */
-const tocRows = [['00','Channel map and handoffs','3'],['00','KPI framework: one north star','4'],['00','Who owns what (RACI)','5'],['00','Operating rhythm','6']];
-CH.forEach((c,i) => tocRows.push([c.n, c.name, `${7+i*3}–${9+i*3}`]));
-tocRows.push(['07','Internal: streams, escalation and time zones', `${7+CH.length*3}–${8+CH.length*3}`]);
-tocRows.push(['—','KPI summary: all channels', `${9+CH.length*3}`]);
+const tocRows = [['00','Channel map and handoffs','3'],['00','KPI framework: one north star','4'],['00','Who owns what (RACI)','5'],['00','Operating rhythm','6'],['00','Reading the KPIs: terms and rules','7']];
+let pp = 8;
+CH.forEach(c => { const n = 4 + Math.ceil(c.kpi.length / 6); tocRows.push([c.n, c.name, `${pp}–${pp + n - 1}`]); pp += n; });
+tocRows.push(['07','Internal: streams, escalation and time zones', `${pp}–${pp + 1}`]);
+tocRows.push(['—','KPI summary: all channels', `${pp + 2}`]);
 out.push(page(`
   <div><div class="eyebrow">Contents</div><h2 style="margin-top:2mm">How this document works</h2></div>
-  <div class="toc">${tocRows.map(r => `<a><b>${r[0]}</b><span>${esc(r[1])}</span><em>p. ${r[2]}</em></a>`).join('')}</div>
+  <div class="toc" style="grid-template-rows:repeat(${Math.ceil(tocRows.length/2)}, auto)">${tocRows.map(r => `<a><b>${r[0]}</b><span>${esc(r[1])}</span><em>p. ${r[2]}</em></a>`).join('')}</div>
   <div class="legend" style="margin-top:auto">
+    <div class="card"><h3>0 · Explained</h3><p>Why the channel exists, how the workflow runs in plain words, a worked example that walks one person through every step, the rules, and where it usually breaks.</p></div>
     <div class="card"><h3>1 · Workflow</h3><p>Swimlane diagram. Each lane is a team; boxes are steps in order. Gold tags are decision points, and the orange line under a box says what happens on a “no”.</p></div>
     <div class="card"><h3>2 · Step plan</h3><p>Each step in detail: what happens, who owns it, what starts it, the time allowed (SLA), touchpoints and output.</p></div>
     <div class="card"><h3>3 · KPI scorecard</h3><p>The stages the channel moves people through, the conversion measured between each, and every KPI with its formula, data source, frequency and owner.</p></div>
+    <div class="card"><h3>4 · KPI formulas</h3><p>One card per KPI: what it tells you, the formula, a worked example with sample numbers, and how to read the result.</p></div>
     <div class="card"><h3>Status of this document</h3><p>Channel flows are quoted from the plan. Steps, owners, SLAs and KPIs are a proposed operating version. <b>Targets are left blank</b> for the team to set against the budget model.</p></div>
   </div>
 `, {section:'Contents'}));
@@ -670,8 +891,49 @@ out.push(page(`
   </table>
 `, {section:'00 · Operating rhythm'}));
 
+/* glossary */
+out.push(page(`
+  <div><div class="eyebrow">00 · Reading the KPIs</div><h2 style="margin-top:2mm">Terms, formula cards and the rules every KPI follows</h2></div>
+  <div class="gloss">${GLOSS.map(g => `<div><b>${esc(g[0])}</b>${esc(g[1])}</div>`).join('')}</div>
+  <div class="xbottom" style="grid-template-columns:1fr 1fr">
+    <div class="card"><h3>How to read a formula card</h3><ul>
+      <li><b>What it tells you</b>: the question the KPI answers.</li>
+      <li><b>Formula</b>: the top line is divided by the bottom line. “× 100” turns the result into a percentage.</li>
+      <li><b>Example</b>: sample numbers put through the formula to show the arithmetic. They are illustrations, not forecasts or targets.</li>
+      <li><b>How to read it</b>: what a good or bad result means, and the first thing to do about it.</li></ul></div>
+    <div class="card"><h3>Rules for every KPI</h3><ul>
+      <li>One owner and one data source per KPI, named on its card.</li>
+      <li>Calculated the same way every time. Any change to a formula is logged in the knowledge base.</li>
+      <li>Rates that follow people over time are measured by cohort (the month they joined).</li>
+      <li>Periods are calendar months unless the card says otherwise. Money is in Indian rupees.</li>
+      <li>Targets are set from the budget model and reviewed each quarter.</li></ul></div>
+  </div>
+`, {section:'00 · Reading the KPIs'}));
+
 /* per-channel pages */
 CH.forEach(c => {
+  const X = EXPL[c.id];
+  /* 0 — explained */
+  out.push(page(`
+    ${band(c, 'Explained')}
+    <div class="xgrid">
+      <div>
+        <h3>Why this channel exists</h3><p class="xp">${esc(X.why)}</p>
+        <h3>How the workflow runs</h3><p class="xp">${esc(X.how)}</p>
+      </div>
+      <div class="story"><h3>Worked example: one pass through the workflow</h3><p>${X.story}</p>
+        <p class="note">Numbers in boxes are the steps on the workflow page that follows. People and places are illustrations.</p></div>
+    </div>
+    <div><h3 style="margin-bottom:2mm">How we know it is working · first four KPIs, full formula cards on pages that follow</h3>
+      <div class="proof">${c.kpi.slice(0,4).map(k => `<div><b>${esc(k[0])} <span class="dir ${DIR[k[5]][1]}" style="font-size:8pt">${DIR[k[5]][0]}</span></b><span>${esc(fText(kx(k[0])))}</span></div>`).join('')}</div></div>
+    <div class="xbottom">
+      <div><h3 style="margin-bottom:2mm">Rules that keep it working</h3><ul class="rules">${X.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>
+      <div><h3 style="margin-bottom:2mm">Where it usually breaks, and what to do</h3>
+        <table><thead><tr><th>Warning sign</th><th>What to do</th></tr></thead>
+        <tbody>${X.breaks.map(b => `<tr><td class="bad">${esc(b[0])}</td><td>${esc(b[1])}</td></tr>`).join('')}</tbody></table></div>
+    </div>
+  `, {section:`${c.n} · ${c.name} · explained`}));
+
   const laneKeys = Object.keys(c.lanes);
   const nCol = c.steps.length;
   const boxes = c.steps.map((s,i) => `
@@ -728,7 +990,7 @@ CH.forEach(c => {
         <thead><tr><th>KPI</th><th>Definition and formula</th><th>Source</th><th>Frequency</th><th>Owner</th><th>Type</th><th style="text-align:center">Good</th><th>Target</th></tr></thead>
         <tbody>${c.kpi.map(k => `<tr>
           <td style="font-weight:600; width:34mm">${esc(k[0])}</td>
-          <td><div class="formula" style="margin:0">${esc(k[1])}</div></td>
+          <td><div class="formula" style="margin:0">${esc(fText(kx(k[0])))}</div></td>
           <td class="muted" style="width:26mm">${esc(k[2])}</td>
           <td style="width:16mm">${esc(k[3])}</td>
           <td class="muted" style="width:25mm">${esc(k[4])}</td>
@@ -744,7 +1006,26 @@ CH.forEach(c => {
     </div>
   `, {section:`${c.n} · ${c.name} · KPIs`}));
 
-  /* lifecycle extra goes on its KPI page? keep as its own content below */
+  /* D — KPI formula cards, six per page */
+  for (let i = 0; i < c.kpi.length; i += 6){
+    const chunk = c.kpi.slice(i, i + 6);
+    out.push(page(`
+      <div class="band">
+        <div class="bigno" style="font-size:28pt">${c.n}</div>
+        <div><div class="eyebrow">KPI formulas · ${i/6 + 1} of ${Math.ceil(c.kpi.length/6)}</div><h2 style="font-size:17pt">${esc(c.name)}</h2></div>
+        <div class="note" style="max-width:80mm; text-align:right">Examples use sample numbers to show the arithmetic.<br>They are not forecasts or targets.</div>
+      </div>
+      <div class="kgrid" style="grid-template-rows:repeat(2, minmax(0,1fr))">${chunk.map(k => { const K = kx(k[0]); return `
+        <div class="kcard">
+          <div class="kc-hd"><b>${esc(k[0])}</b><span><span class="pill ${k[6]==='Leading'?'lead':'lag'}">${k[6]}</span><b class="dir ${DIR[k[5]][1]}">${DIR[k[5]][0]}</b></span></div>
+          <p class="kc-w">${esc(K.w)}</p>
+          <div class="kc-f"><span class="lbl">Formula</span>${fBlock(K)}</div>
+          <div class="kc-ex"><span class="lbl" style="color:#8a6a1a">Example</span>${exBlock(K)}</div>
+          <p class="kc-r"><span class="lbl">How to read it</span>${esc(K.r)}</p>
+          <div class="kc-ft">${esc(k[2])} · ${esc(k[3])} · ${esc(k[4])}</div>
+        </div>`; }).join('')}</div>
+    `, {section:`${c.n} · ${c.name} · KPI formulas`}));
+  }
 });
 
 /* Internal extras: streams + escalation */
@@ -810,7 +1091,7 @@ out.push(page(`
   <p class="note" style="margin-top:auto">Channel number on the left. Formulas, sources and owners are on each channel's KPI scorecard.</p>
 `, {section:'KPI summary'}));
 
-document.getElementById('doc').innerHTML = out.join('');
+document.getElementById('doc').innerHTML = out.join('').replaceAll('__TOTAL__', String(pageNo));
 
 /* ------------------------------------------------------------------ swimlane connectors */
 function wire(){

@@ -23,11 +23,13 @@ objectives, KPIs, cadence and the channels it hands off to. Lifecycle adds a sta
 matrix; Internal adds the twelve internal streams, the crisis and escalation path with severity
 levels, and Canada / India / Philippines handoff times. `./build.sh` builds both pages.
 
-`deliverables/Vacario-Communication-Workflows-and-KPIs.pdf` is the print version: 30 A4 landscape
-pages with a swimlane workflow, a detailed step plan (owner, trigger, SLA, touchpoints, output) and a
-KPI scorecard (formula, source, frequency, owner, leading/lagging, blank target) for every channel,
-plus the channel map, north-star KPI tree, RACI, weekly operating rhythm and a one-page summary of all
-61 KPIs. Its source is `workflows-print.html`; open it in Chrome and print to PDF (landscape, no
+`deliverables/Vacario-Communication-Workflows-and-KPIs.pdf` is the print version: 52 A4 landscape
+pages. Each channel gets six pages: an explanation (why it exists, how it runs, a worked example
+through every step, rules, warning signs and fixes), a swimlane workflow, a detailed step plan
+(owner, trigger, SLA, touchpoints, output), a KPI scorecard, and formula cards for every KPI (what it
+tells you, the formula, a worked example calculated from sample numbers, how to read it). Around them:
+the channel map, north-star KPI tree, RACI, weekly operating rhythm, a glossary of KPI terms and a
+one-page summary of all 61 KPIs. Its source is `workflows-print.html`; open it in Chrome and print to PDF (landscape, no
 margins, background graphics on) to regenerate.
 
 ---
