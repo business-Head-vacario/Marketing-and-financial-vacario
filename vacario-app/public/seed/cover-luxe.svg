@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="sky-cover-luxe" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="55%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <radialGradient id="sun-cover-luxe" cx="0.72" cy="0.22" r="0.3">
+      <stop offset="0%" stop-color="#fff7cc" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff7cc" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#sky-cover-luxe)"/>
+  <circle cx="864" cy="138.6" r="56.699999999999996" fill="#fff7cc" opacity="0.9"/>
+  <rect width="1200" height="630" fill="url(#sun-cover-luxe)"/>
+  <path d="M0 428.40000000000003 L 264 264.6 L 456 378.00000000000006 L 696 220.50000000000003 L 936 390.6 L 1200 315.00000000000006 V 630 H0 Z" fill="#4c1d95" opacity="0.92"/>
+         <path d="M0 466.20000000000005 L 360 390.6 L 624 459.90000000000003 L 888 365.40000000000003 L 1200 441.00000000000006 V 630 H0 Z" fill="#131427" opacity="0.75"/>
+  <g opacity="0.5" fill="#ffffff">
+    <circle cx="10" cy="20" r="1.2" opacity="0.25"/><circle cx="147" cy="109" r="2.2" opacity="0.35"/><circle cx="284" cy="198" r="3.2" opacity="0.45"/><circle cx="421" cy="287" r="1.2" opacity="0.55"/><circle cx="558" cy="76.12" r="2.2" opacity="0.65"/><circle cx="695" cy="165.12" r="3.2" opacity="0.25"/><circle cx="832" cy="254.12" r="1.2" opacity="0.35"/><circle cx="969" cy="43.24000000000001" r="2.2" opacity="0.45"/><circle cx="1106" cy="132.24" r="3.2" opacity="0.55"/><circle cx="43" cy="221.24" r="1.2" opacity="0.65"/><circle cx="180" cy="310.24" r="2.2" opacity="0.25"/><circle cx="317" cy="99.36000000000001" r="3.2" opacity="0.35"/><circle cx="454" cy="188.36" r="1.2" opacity="0.45"/><circle cx="591" cy="277.36" r="2.2" opacity="0.55"/><circle cx="728" cy="66.48000000000002" r="3.2" opacity="0.65"/><circle cx="865" cy="155.48000000000002" r="1.2" opacity="0.25"/><circle cx="1002" cy="244.48000000000002" r="2.2" opacity="0.35"/><circle cx="1139" cy="33.60000000000002" r="3.2" opacity="0.45"/><circle cx="76" cy="122.60000000000002" r="1.2" opacity="0.55"/><circle cx="213" cy="211.60000000000002" r="2.2" opacity="0.65"/><circle cx="350" cy="300.6" r="3.2" opacity="0.25"/><circle cx="487" cy="89.72000000000003" r="1.2" opacity="0.35"/><circle cx="624" cy="178.72000000000003" r="2.2" opacity="0.45"/><circle cx="761" cy="267.72" r="3.2" opacity="0.55"/><circle cx="898" cy="56.84000000000003" r="1.2" opacity="0.65"/><circle cx="1035" cy="145.84000000000003" r="2.2" opacity="0.25"/>
+  </g>
+  <text x="60" y="538" font-family="Outfit, Verdana, sans-serif" font-size="39.06" font-weight="800" fill="#ffffff" opacity="0.96">Luxe Escapes</text>
+  <text x="62" y="582" font-family="Verdana, sans-serif" font-size="17.64" fill="#ffffff" opacity="0.8">villas, spas and long lunches</text>
+</svg>
