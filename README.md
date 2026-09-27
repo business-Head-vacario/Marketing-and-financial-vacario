@@ -13,6 +13,27 @@ Set a marketing budget, watch traction, break-even, funding need and cumulative 
 No dependencies, no build tooling, no network calls except the Google Fonts stylesheet.
 
 
+## KPI Workspace
+
+`kpi-workspace.html` (source: `src/kpi-workspace.html`) is the working model of the communication plan.
+Pick a month, type each channel's raw counts and rupee amounts, and all 61 KPIs are calculated from
+their formulas (never typed as percentages), checked against targets and tracked over six months.
+Each channel tab has three working parts: **numbers** (inputs shared across channels where the same
+figure is used twice, e.g. bookings), **KPI cards** (live formula with this month's numbers, target,
+status, trend) and a **lead flow** (a count at each pipeline stage, with stage-to-stage conversion
+and the biggest drop-off named). Below them sit the channel's step-by-step **workflow** and the plain
+explanation. *How it all works* covers the monthly routine, channel map and handoffs, KPI tree,
+formula dictionary, RACI and weekly rhythm; Internal adds the escalation path and time-zone handoffs.
+
+*Files & Claude* is the workspace's memory: attach PDF, Excel, Word, CSV, text or images (text is
+extracted in the browser), add notes, and ask Claude questions answered from the KPIs, lead flows and
+the most relevant attached material. **Read numbers** has Claude propose input values from a file,
+with evidence, for you to approve. Published as a Claude artifact the numbers and files are shared
+with the team; opened as a plain file it keeps everything in that browser and Claude is off.
+
+Shared content (workflows, explanations, KPI formula text, RACI, streams) lives once in
+`src/workflow-data.js`, used by this page and by the PDF. `./build.sh` inlines it.
+
 ## Communication workflows
 
 `workflows.html` (source: `src/workflows.html`) turns the seven communication channels in the
