@@ -13,6 +13,21 @@ Set a marketing budget, watch traction, break-even, funding need and cumulative 
 No dependencies, no build tooling, no network calls except the Google Fonts stylesheet.
 
 
+## Communications Plan: Full Explainer
+
+`deliverables/Vacario-Communications-Plan-Full-Explainer.pdf` (88 A4 pages; source `explainer-print.html`
+with content in `src/workflow-data.js` and `src/explainer-data.js`) is the complete explainer of the
+Fall 2026 plan. It keeps the plan's own wording and adds, marked as proposals: the customer lifecycle
+(nine stages with entry and exit rules, at-risk and lapsed states, lifecycle loop, mind map and a
+yes/no decision path), the customer journey (mind map, feeling curve, stage-by-stage journey map,
+trip timeline, moments of truth), partner lifecycles, sales lifecycles for property onboarding,
+travel-agency partners and enquiry-to-booking, corporate travel (business trips and MICE, each with a
+lifecycle, yes/no path and workflow), benchmarks against leading OTAs with sources, all seven channels
+in full (messages, tactics, swimlane workflow, step definitions, lead flow, KPIs with formulas), seven
+new cross-channel workflows (W1–W7), the operating model, a KPI dictionary, a 13-week rollout and a
+glossary. It renders to PDF headless (Chromium, A4, header and footer with page numbers); printing
+from Chrome also works.
+
 ## KPI Workspace
 
 `kpi-workspace.html` (source: `src/kpi-workspace.html`) is the working model of the communication plan.

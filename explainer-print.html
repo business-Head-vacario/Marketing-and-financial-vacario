@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vacario Communications Explainer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Noto+Sans+Telugu:wght@400;600&display=swap">
+<style>
+/* Print document: A4 portrait, flowing. Margins, running header and page numbers come from the PDF renderer
+   (see README); opening it in Chrome and printing also works. */
+@page{size:210mm 297mm; margin:17mm 16mm 18mm}
+:root{
+  --ink:#15191a; --ink-2:#4f5652; --ink-3:#858c87;
+  --rule:#d8dcd2; --rule-2:#bfc5b8; --paper:#f6f7f3; --well:#eceee7;
+  --accent:#0e5b5e; --accent-soft:#dcebea; --accent-ink:#0a4446;
+  --warm:#d9602e; --warm-soft:#fbe6dc; --gold:#a8760a; --gold-soft:#fbf0d2;
+  --good:#1f7a3a; --good-soft:#dcefe0; --bad:#c23434; --bad-soft:#f8dddd;
+}
+*{box-sizing:border-box}
+html,body{margin:0; background:#fff}
+body{font:400 9.3pt/1.5 'IBM Plex Sans','Liberation Sans',Arial,sans-serif; color:var(--ink); -webkit-print-color-adjust:exact; print-color-adjust:exact}
+@media screen{ body{max-width:178mm; margin:10mm auto} }
+.mono{font-family:'IBM Plex Mono','Liberation Mono',monospace; font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{margin:0; text-wrap:balance; break-after:avoid}
+p{margin:0 0 2.2mm; orphans:3; widows:3}
+ul,ol{margin:0 0 2.4mm; padding-left:5mm}
+li{margin-bottom:.8mm}
+b,strong{font-weight:600}
+
+/* chapters */
+.chapter{break-before:page}
+.ch-open{display:grid; grid-template-columns:auto minmax(0,1fr); gap:1mm 6mm; align-items:end; padding-bottom:4mm; border-bottom:.7mm solid var(--c,var(--accent)); margin-bottom:5mm}
+.ch-open .no{font:700 44pt/.8 'IBM Plex Sans Condensed',sans-serif; color:var(--c,var(--accent)); grid-row:span 2}
+.ch-open .ey{font:600 7.4pt/1 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--c,var(--accent))}
+h1{font:700 23pt/1.02 'IBM Plex Sans Condensed',sans-serif; letter-spacing:-.01em}
+h2{font:700 14.5pt/1.1 'IBM Plex Sans Condensed',sans-serif; margin:7mm 0 2.6mm}
+h3{font:600 10.4pt/1.25 'IBM Plex Sans',sans-serif; margin:4.6mm 0 1.8mm}
+h4{font:600 9.4pt/1.3 'IBM Plex Sans',sans-serif; margin:0 0 1mm}
+.lbl{display:block; font:600 6.6pt/1.2 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:1.2mm}
+.lead{font-size:10.6pt; line-height:1.5; color:var(--ink-2); max-width:160mm}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)} .small{font-size:8.2pt}
+.note{font-size:7.8pt; color:var(--ink-3); line-height:1.4}
+.quote{border-left:.8mm solid var(--c,var(--accent)); padding:1mm 0 1mm 4mm; margin:2mm 0 4mm; font-size:10pt; color:var(--ink)}
+.quote .src{display:block; font:500 7pt 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:1.2mm; letter-spacing:.06em; text-transform:uppercase}
+.added{display:inline-block; font:600 6.3pt/1 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase; padding:1mm 1.6mm; border-radius:.8mm; background:var(--warm-soft); color:var(--warm); vertical-align:middle; margin-left:2mm}
+.fromplan{background:var(--accent-soft); color:var(--accent-ink)}
+.avoid{break-inside:avoid}
+.fig{break-inside:avoid; margin:3mm 0 5mm}
+.fig .cap{font:500 7.4pt/1.3 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:1.6mm; letter-spacing:.03em}
+.cols2{display:grid; grid-template-columns:1fr 1fr; gap:5mm}
+.cols3{display:grid; grid-template-columns:repeat(3,1fr); gap:4mm}
+.card{border:.3mm solid var(--rule-2); border-radius:1.2mm; padding:3mm 3.4mm; background:#fff; break-inside:avoid}
+.card.soft{background:var(--paper)}
+.tag{display:inline-block; font:500 6.8pt/1 'IBM Plex Mono',monospace; padding:1.1mm 1.7mm; border-radius:.8mm; background:var(--accent-soft); color:var(--accent-ink); margin:0 1mm 1mm 0; white-space:nowrap}
+
+/* tables */
+table{border-collapse:collapse; width:100%; margin:1mm 0 4mm; font-size:8.3pt}
+thead{display:table-header-group}
+tr{break-inside:avoid}
+th{font:600 6.6pt/1.25 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); text-align:left; background:var(--well); padding:1.8mm 2mm; border-bottom:.35mm solid var(--ink)}
+td{padding:1.8mm 2mm; border-bottom:.25mm solid var(--rule); vertical-align:top; line-height:1.4}
+td ul{margin:0; padding-left:3.6mm}
+td.k{font-weight:600}
+.f{font:500 7.6pt/1.4 'IBM Plex Mono',monospace; color:var(--accent-ink)}
+.sla{display:inline-block; font:500 7pt/1.3 'IBM Plex Mono',monospace; background:var(--accent-soft); color:var(--accent-ink); padding:.5mm 1.3mm; border-radius:.6mm}
+
+/* cover */
+.cover{height:261mm; display:flex; flex-direction:column; background:var(--accent); color:#fff; margin:0 -16mm; padding:20mm 18mm 16mm; break-after:page}
+.cover .te{font:600 13pt/1.6 'Noto Sans Telugu','IBM Plex Sans',sans-serif; color:#bfe1de}
+.cover h1{font-size:44pt; line-height:.95; margin-top:12mm; color:#fff}
+.cover .sub{font-size:12.5pt; color:#d7ecea; margin-top:7mm; max-width:150mm; line-height:1.45}
+.cover .grid{margin-top:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:3mm}
+.cover .grid div{border-top:.6mm solid #7cc3bd; padding-top:2mm; font:600 9pt/1.25 'IBM Plex Sans Condensed',sans-serif}
+.cover .grid span{display:block; font:500 6.8pt 'IBM Plex Mono',monospace; color:#a9d6d2; margin-bottom:1mm}
+.cover .foot{margin-top:9mm; font:500 7.4pt 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:#a9d6d2; display:flex; justify-content:space-between}
+
+/* contents */
+.toc{columns:2; column-gap:10mm}
+.toc a{display:grid; grid-template-columns:9mm 1fr auto; gap:2mm; align-items:baseline; padding:1.7mm 0; border-bottom:.25mm solid var(--rule); color:var(--ink); text-decoration:none; break-inside:avoid; font-size:9pt}
+.toc a b{font:600 8pt 'IBM Plex Mono',monospace; color:var(--accent)}
+.toc a em{font:500 7.6pt 'IBM Plex Mono',monospace; font-style:normal; color:var(--ink-3)}
+.toc a.sub{font-size:8.2pt; color:var(--ink-2); padding-left:9mm; grid-template-columns:1fr auto}
+
+/* vertical swimlane */
+.vs{position:relative; display:grid; border:.3mm solid var(--rule-2); border-radius:1.2mm; overflow:hidden; row-gap:0}
+.vs .lh{font:600 7pt/1.2 'IBM Plex Sans',sans-serif; padding:2mm 2mm; text-align:center; border-bottom:.3mm solid var(--rule-2); background:var(--well); z-index:1}
+.vs .lb{z-index:0}
+.vs .lb:nth-of-type(even){background:#fafbf8}
+.vs .bx{z-index:2; margin:2.4mm 2mm; background:#fff; border:.35mm solid var(--c,var(--accent)); border-radius:1.2mm; padding:1.5mm 1.8mm; font-size:7.4pt; line-height:1.3; box-shadow:0 .4mm 0 rgba(14,91,94,.1)}
+.vs .bx b{display:flex; gap:1.2mm; align-items:flex-start; font-size:8pt}
+.vs .bx b i{flex:none; font:600 6.2pt/1 'IBM Plex Mono',monospace; font-style:normal; width:4mm; height:4mm; border-radius:50%; background:var(--c,var(--accent)); color:#fff; display:grid; place-items:center; margin-top:.2mm}
+.vs .bx .o{display:block; color:var(--ink-2); margin-top:.6mm}
+.vs .bx .s{display:block; font:500 6.4pt/1.3 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:.6mm}
+.vs .bx.first{background:var(--c,var(--accent)); color:#fff} .vs .bx.first .o, .vs .bx.first .s{color:#e6f2f1} .vs .bx.first b i{background:#fff; color:var(--c,var(--accent))}
+.vs .gate{position:absolute; z-index:3; transform:translate(-50%,-50%); font:600 6.2pt/1 'IBM Plex Mono',monospace; background:var(--gold-soft); color:var(--gold); border:.3mm solid var(--gold); padding:.9mm 1.3mm; border-radius:.8mm; white-space:nowrap}
+.vs .loop{display:block; font:600 6.3pt/1.3 'IBM Plex Mono',monospace; color:var(--warm); margin-top:.6mm}
+svg.wires{position:absolute; inset:0; width:100%; height:100%; z-index:1; overflow:visible; pointer-events:none}
+
+/* yes/no flowchart: connectors are layout elements, so they never drift */
+.fc{padding:2mm 0}
+.fc .fr{display:grid; grid-template-columns:minmax(0,1.05fr) 15mm minmax(0,1fr); align-items:center; break-inside:avoid}
+.fc .nd{border:.35mm solid var(--rule-2); border-radius:1.4mm; padding:2mm 3mm; font-size:8.3pt; line-height:1.35; background:#fff}
+.fc .nd.start,.fc .nd.end{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; border-radius:6mm; text-align:center}
+.fc .nd.ask{border:.45mm solid var(--gold); background:var(--gold-soft); font-weight:600}
+.fc .nd.ask::before{content:"◆ "; color:var(--gold)}
+.fc .nc{position:relative; height:0; border-top:.35mm dashed var(--bad); margin-right:1.6mm}
+.fc .nc::after{content:""; position:absolute; right:-1.6mm; top:-1.35mm; border:1.2mm solid transparent; border-left:1.6mm solid var(--bad); border-right:0}
+.fc .nc span, .fc .fv span{font:700 6.2pt/1 'IBM Plex Mono',monospace; padding:.6mm 1.1mm; border-radius:.6mm}
+.fc .nc span{position:absolute; left:50%; top:-3.6mm; transform:translateX(-50%); background:var(--bad-soft); color:var(--bad)}
+.fc .no{border:.3mm dashed var(--warm); background:var(--warm-soft); border-radius:1.4mm; padding:1.8mm 2.6mm; font-size:7.8pt; line-height:1.35}
+.fc .no .to{display:block; font:600 6.4pt/1.3 'IBM Plex Mono',monospace; color:var(--warm); margin-top:.8mm; letter-spacing:.04em; text-transform:uppercase}
+.fc .fv{display:grid; grid-template-columns:minmax(0,1.05fr) 15mm minmax(0,1fr); height:6.4mm; break-inside:avoid; break-after:avoid}
+.fc .fv div{position:relative}
+.fc .fv div::before{content:""; position:absolute; left:50%; top:0; bottom:1.4mm; width:.35mm; background:var(--accent); transform:translateX(-50%)}
+.fc .fv div::after{content:""; position:absolute; left:50%; bottom:0; transform:translateX(-50%); border:1.1mm solid transparent; border-top:1.5mm solid var(--accent); border-bottom:0}
+.fc .fv span{position:absolute; left:calc(50% + 2mm); top:50%; transform:translateY(-50%); background:var(--good-soft); color:var(--good)}
+
+/* mind map */
+.mm{position:relative; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.95fr) minmax(0,1fr) minmax(0,1.25fr); column-gap:5mm; row-gap:3.6mm; align-items:center; padding:2mm 0}
+.mm .ctr{grid-column:3; grid-row:1 / -1; align-self:center; z-index:2; background:var(--accent); color:#fff; border-radius:50%; aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:3mm}
+.mm .ctr b{font:700 12.5pt/1.1 'IBM Plex Sans Condensed',sans-serif}
+.mm .ctr span{font-size:7.2pt; color:#cfe6e4; margin-top:1mm}
+.mm .br{z-index:2; border-radius:4mm; padding:1.8mm 2.6mm; font:600 8.3pt/1.2 'IBM Plex Sans',sans-serif; color:#fff; background:var(--c); text-align:center}
+.mm .lv{z-index:2; display:flex; flex-direction:column; gap:1mm}
+.mm .lv span{font-size:7.3pt; line-height:1.25; padding:1mm 2mm; border-radius:1mm; background:#fff; border:.3mm solid var(--c); color:var(--ink)}
+.mm .lv.l{align-items:flex-end; text-align:right}
+
+/* journey */
+.stage{display:grid; grid-template-columns:14mm minmax(0,1fr); gap:0 4mm; padding:3mm 0; border-bottom:.3mm solid var(--rule); break-inside:avoid}
+.stage .sn{font:700 15pt/1 'IBM Plex Sans Condensed',sans-serif; color:var(--accent)}
+.stage .sn small{display:block; font:500 6.4pt 'IBM Plex Mono',monospace; color:var(--ink-3); margin-top:1mm; letter-spacing:.04em; text-transform:uppercase}
+.stage .row{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.6mm 5mm; margin-top:1.4mm}
+.stage .row div{font-size:8.1pt}
+.stage .bench{margin-top:1.8mm; font-size:7.7pt; color:var(--ink-2); background:var(--paper); border-radius:1mm; padding:1.4mm 2mm}
+.stage .bench b{color:var(--accent-ink)}
+
+/* misc */
+.pill{display:inline-block; font:600 6.6pt/1 'IBM Plex Mono',monospace; padding:1mm 1.5mm; border-radius:.7mm}
+.pill.lead{background:var(--accent-soft); color:var(--accent-ink)} .pill.lag{background:var(--gold-soft); color:var(--gold)}
+.raci{display:inline-grid; place-items:center; width:5.6mm; height:5.6mm; border-radius:1mm; font:700 7.4pt/1 'IBM Plex Mono',monospace}
+.raci.A{background:var(--accent); color:#fff} .raci.R{background:var(--accent-soft); color:var(--accent-ink)} .raci.C{background:var(--gold-soft); color:var(--gold)} .raci.I{background:var(--well); color:var(--ink-3)}
+.lflow{display:flex; align-items:stretch; margin:2mm 0 8mm; break-inside:avoid}
+.lflow .st{flex:1 1 0; min-width:0; color:#fff; font:600 7.4pt/1.15 'IBM Plex Sans',sans-serif; text-align:center; padding:2.4mm 3mm; display:flex; align-items:center; justify-content:center; position:relative;
+  clip-path:polygon(0 0, calc(100% - 2.6mm) 0, 100% 50%, calc(100% - 2.6mm) 100%, 0 100%, 2.6mm 50%)}
+.lflow .st:first-child{clip-path:polygon(0 0, calc(100% - 2.6mm) 0, 100% 50%, calc(100% - 2.6mm) 100%, 0 100%)}
+.lflow .cv{position:relative; width:0}
+.lflow .cv span{position:absolute; top:11.5mm; left:0; transform:translateX(-50%); font:600 5.9pt/1.15 'IBM Plex Mono',monospace; color:var(--warm); background:var(--warm-soft); border:.25mm solid var(--warm); border-radius:.6mm; padding:.6mm 1mm; white-space:nowrap}
+.pillars{display:grid; grid-template-columns:repeat(3,1fr); gap:3mm; margin:2mm 0 4mm}
+.pillars .card h4{color:var(--c,var(--accent))}
+.pillars .card .say{font-style:italic; color:var(--ink-2); margin-top:1.4mm; font-size:8.2pt}
+</style>
+</head>
+<body>
+<div id="doc"></div>
+<script src="src/workflow-data.js"></script>
+<script src="src/explainer-data.js"></script>
+<script>
+/* ------------------------------------------------------------------ helpers */
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COLOR = {consumer:'#c9414c', supply:'#c96208', creator:'#c02d61', destination:'#0b8a64', corporate:'#1a6fbd', lifecycle:'#6441cf', internal:'#9a7208'};
+const PAL = ['#0e5b5e','#c9414c','#c96208','#0b8a64','#1a6fbd','#6441cf','#9a7208','#c02d61','#3b7d2a','#7a5c3e'];
+const CHM = Object.fromEntries(CH.map(c => [c.id, c]));
+const short = c => c.name.replace(' Communications','');
+function fText(k){
+  if (!Array.isArray(k.f)) return k.f;
+  const [n, d] = k.f;
+  return k.u === '%' ? `${n} ÷ ${d} × 100` : k.u === 'inv' ? `(1 − ${n} ÷ ${d}) × 100` : `${n} ÷ ${d}`;
+}
+const TOC = [];
+let chNo = 0;
+function chapter(title, lead, opts = {}){
+  const n = String(++chNo).padStart(2, '0');
+  TOC.push({n, title, id:'c' + TOC.length, sub:opts.sub});
+  return `<section class="chapter" id="c${TOC.length - 1}" style="${opts.c ? '--c:' + opts.c : ''}">
+    <div class="ch-open"><div class="no">${n}</div><div class="ey">${esc(opts.ey || 'vacario India · communications explainer')}</div><h1 data-toc="${esc(title)}">${esc(title)}</h1></div>
+    ${lead ? `<p class="lead">${lead}</p>` : ''}`;
+}
+const endCh = '</section>';
+
+/* vertical swimlane: lanes are columns, steps run top to bottom */
+function vswim(flow, color, cap){
+  const keys = Object.keys(flow.lanes), L = keys.length, N = flow.steps.length;
+  const lanesBg = keys.map((k, i) => `<div class="lb" style="grid-column:${i + 1}; grid-row:2 / span ${N}"></div>`).join('');
+  const heads = keys.map((k, i) => `<div class="lh" style="grid-column:${i + 1}; grid-row:1">${esc(flow.lanes[k])}</div>`).join('');
+  const boxes = flow.steps.map((s, i) => `<div class="bx ${i === 0 ? 'first' : ''}" data-i="${i}" style="grid-column:${keys.indexOf(s.l) + 1}; grid-row:${i + 2}">
+      <b><i>${i + 1}</i>${esc(s.t)}</b><span class="o">→ ${esc(s.out)}</span>${s.loop ? `<span class="loop">↺ ${esc(s.loop)}</span>` : ''}<span class="s">${esc(s.sla)}</span></div>`).join('');
+  const gates = flow.steps.map((s, i) => s.gate ? `<div class="gate" data-g="${i}">◆ ${esc(s.gate)} · yes ↓</div>` : '').join('');
+  return `<div class="fig"><div class="vs" data-vs style="--c:${color}; grid-template-columns:repeat(${L}, minmax(0,1fr))">${heads}${lanesBg}${boxes}${gates}<svg class="wires"></svg></div>
+    ${cap ? `<div class="cap">${esc(cap)}</div>` : ''}</div>`;
+}
+/* step definitions table */
+function stepTable(steps, lanes, full){
+  return `<table><thead><tr><th style="width:7mm">#</th><th style="width:30mm">Step</th><th>Definition: what happens</th><th style="width:27mm">Owner</th><th style="width:28mm">Time allowed</th><th style="width:26mm">Output</th></tr></thead>
+  <tbody>${steps.map((s, i) => `<tr><td class="mono">${i + 1}</td><td class="k">${esc(s.t)}${s.gate ? `<div class="f" style="color:var(--gold)">◆ ${esc(s.gate)}<br>${esc(s.loop || '')}</div>` : ''}</td>
+    <td>${full ? `<ul>${s.acts.map(a => `<li>${esc(a)}</li>`).join('')}</ul>${s.tr ? `<span class="faint small">Starts when: ${esc(s.tr)}</span>` : ''}` : esc(s.d)}</td>
+    <td>${esc(lanes[s.l])}</td><td><span class="sla">${esc(s.sla)}</span></td><td>${esc(s.out)}</td></tr>`).join('')}</tbody></table>`;
+}
+/* yes / no flowchart */
+function flowchart(d){
+  const rows = d.items.map((it, i) => `<div class="fr"><div class="nd ${it.t}">${esc(it.x)}</div>${it.no ? `<div class="nc"><span>NO</span></div><div class="no">${esc(it.no)}<span class="to">→ ${esc(it.to)}</span></div>` : '<div></div><div></div>'}</div>
+    ${i < d.items.length - 1 ? `<div class="fv"><div>${it.t === 'ask' ? '<span>YES</span>' : ''}</div></div>` : ''}`).join('');
+  return `<div class="fig"><div class="fc">${rows}</div><div class="cap">${esc(d.title)} · gold = yes/no question · follow “yes” down, “no” to the right</div></div>`;
+}
+/* mind map */
+function mindmap(m){
+  const half = Math.ceil(m.branches.length / 2), L = m.branches.slice(0, half), R = m.branches.slice(half);
+  const rows = Math.max(L.length, R.length);
+  const col = i => PAL[i % PAL.length];
+  const side = (arr, left, off) => arr.map((b, j) => {
+    const c = col(j + off), row = j + 1 + Math.floor((rows - arr.length) / 2);
+    return `<div class="br" data-br style="--c:${c}; grid-column:${left ? 2 : 4}; grid-row:${row}">${esc(b[0])}</div>
+      <div class="lv ${left ? 'l' : 'r'}" data-lv style="--c:${c}; grid-column:${left ? 1 : 5}; grid-row:${row}">${b[1].map(x => `<span>${esc(x)}</span>`).join('')}</div>`;
+  }).join('');
+  return `<div class="fig"><div class="mm" data-mm style="grid-template-rows:repeat(${rows}, auto)">
+    <div class="ctr" data-ctr><b>${esc(m.centre)}</b><span>${esc(m.sub)}</span></div>${side(L, true, 0)}${side(R, false, half)}<svg class="wires"></svg></div></div>`;
+}
+/* lifecycle loop */
+function lifeLoop(){
+  const W = 640, H = 470, cx = 320, cy = 222, rx = 250, ry = 170;
+  const pts = LIFE.map((s, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / LIFE.length; return {x:cx + rx * Math.cos(a), y:cy + ry * Math.sin(a), s}; });
+  const edge = (p, q) => { /* point where the segment p→q leaves p's 124×42 pill */
+    const dx = q.x - p.x, dy = q.y - p.y, t = Math.min(66 / Math.abs(dx || 1e-9), 25 / Math.abs(dy || 1e-9)); return {x:p.x + dx * t, y:p.y + dy * t}; };
+  const arrows = pts.map((p, i) => { if (i === pts.length - 1) return ''; const q = pts[i + 1];
+    const a = edge(p, q), b = edge(q, p);
+    return `<path d="M${a.x.toFixed(1)},${a.y.toFixed(1)} L${b.x.toFixed(1)},${b.y.toFixed(1)}" fill="none" stroke="#0e5b5e" stroke-width="1.8" marker-end="url(#la)"/>`; }).join('');
+  const nodes = pts.map((p, i) => `<g><rect x="${p.x - 62}" y="${p.y - 21}" width="124" height="42" rx="21" fill="${i < 4 ? '#0e5b5e' : i < 7 ? '#1a6fbd' : '#6441cf'}"/>
+    <text x="${p.x}" y="${p.y - 3}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">${p.s.n} ${esc(p.s.name)}</text>
+    <text x="${p.x}" y="${p.y + 12}" text-anchor="middle" font-size="9.5" fill="#dfeeed">${esc(p.s.who)}</text></g>`).join('');
+  const r = pts[7], adv = pts[8], pre = pts[4];
+  return `<div class="fig"><svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto; display:block" role="img" aria-label="Customer lifecycle loop">
+    <defs><marker id="la" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e5b5e"/></marker>
+      <marker id="lv" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6441cf"/></marker></defs>
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#f6f7f3" stroke="#d8dcd2" stroke-dasharray="4 5"/>
+    <g font-family="IBM Plex Sans, sans-serif">
+      ${arrows}
+      <path d="M${adv.x + 40},${adv.y + 21} C ${cx - 150},${cy + 20} ${cx - 90},${cy + 110} ${pre.x - 20},${pre.y - 22}" fill="none" stroke="#6441cf" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#lv)"/>
+      <text x="${cx - 60}" y="${cy + 96}" text-anchor="middle" font-size="10" fill="#6441cf" font-weight="600">next trip: back to Prepare</text>
+      <rect x="${cx - 92}" y="${cy - 40}" width="184" height="62" rx="10" fill="#fff" stroke="#d9602e" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="${cx}" y="${cy - 20}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#d9602e">At-risk → Lapsed</text>
+      <text x="${cx}" y="${cy - 5}" text-anchor="middle" font-size="9.5" fill="#4f5652">60–90 days quiet: win-back offer</text>
+      <text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="9.5" fill="#4f5652">books again → Won back → Repeat</text>
+      ${nodes}
+    </g></svg><div class="cap">The customer lifecycle loop · L1–L4 winning a customer (teal) · L5–L7 the trip (blue) · L8–L9 keeping them (violet) · dashed: the loop back and the at-risk path</div></div>`;
+}
+/* emotion curve */
+function feelCurve(){
+  const W = 640, H = 200, l = 40, r = 20, t = 18, b = 44, n = LIFE.length;
+  const X = i => l + i * (W - l - r) / (n - 1), Y = v => t + (5 - v) * (H - t - b) / 4;
+  const pts = LIFE.map((s, i) => [X(i), Y(JOURNEY[s.id].feel)]);
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0] + ',' + p[1]).join('');
+  return `<div class="fig"><svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto; display:block" role="img" aria-label="How the customer feels at each stage">
+    <g font-family="IBM Plex Sans, sans-serif">
+    ${[1,2,3,4,5].map(v => `<line x1="${l}" x2="${W - r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eceee7"/><text x="${l - 8}" y="${Y(v) + 3}" text-anchor="end" font-size="9" fill="#858c87">${['','low','','neutral','','high'][v]}</text>`).join('')}
+    <path d="${d} L${X(n - 1)},${H - b} L${X(0)},${H - b} Z" fill="#0e5b5e" fill-opacity=".08"/>
+    <path d="${d}" fill="none" stroke="#0e5b5e" stroke-width="2.2" stroke-linejoin="round"/>
+    ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#fff" stroke="#0e5b5e" stroke-width="2"/>
+      <text x="${p[0]}" y="${H - b + 16}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#15191a">${LIFE[i].n}</text>
+      <text x="${p[0]}" y="${H - b + 29}" text-anchor="middle" font-size="8.5" fill="#4f5652">${esc(LIFE[i].name.replace('Review & share','Review'))}</text>`).join('')}
+    </g></svg><div class="cap">How the traveller feels at each stage (1 low – 5 high, a planning estimate to test with research) · the dips are where pain points sit</div></div>`;
+}
+function lflow(c){
+  const tint = ['#0e5b5e','#1c6b6c','#2a7b7a','#3a8a86','#4d9892','#62a59d','#78b1a8'];
+  return `<div class="lflow">${c.flow.map((f, i) => `${i ? `<div class="cv"><span>${esc(c.conv[i - 1])}</span></div>` : ''}<div class="st" style="background:${tint[i]}">${esc(f[0])}</div>`).join('')}</div>`;
+}
+
+/* ------------------------------------------------------------------ build */
+const out = [];
+out.push(`<section class="cover">
+  <div class="te">ప్రపంచంలోని మరే దేశానికంటే ముందుగా, ప్రయాణాల కొత్త తరం భారతదేశానికి రాబోతోంది.<br><span style="font-size:10pt">The Next Generation of Travel is Coming to India Before Any Other Country On the Planet</span></div>
+  <h1>Communications Plan<br>The Full Explainer</h1>
+  <p class="sub">vacario India · Fall 2026 Integrated Sales, Marketing and Promotions Plan. Every communication channel explained, every workflow defined, the customer lifecycle and journey mapped end to end, sales lifecycles for properties, travel agencies and enquiries, corporate travel and MICE added, and each flow checked against how India’s and the world’s leading travel platforms work.</p>
+  <div class="grid">${CH.map(c => `<div><span>${c.n}</span>${esc(short(c))}</div>`).join('')}<div><span>+</span>Customer lifecycle &amp; journey</div></div>
+  <div class="foot"><span>The Next Generation Of Travel™</span><span>Fall 2026</span></div>
+</section>`);
+out.push(`<section id="toc"><div class="ch-open"><div class="no">·</div><div class="ey">Contents</div><h1>What’s inside</h1></div><div class="toc" id="tocList"></div>
+  <div class="card soft" style="margin-top:6mm"><h4>How to read this document</h4>
+  <p class="small">Text marked <span class="added fromplan" style="margin:0">From the plan</span> is quoted from the Fall 2026 plan. Everything marked <span class="added" style="margin:0">Added</span> is new: a proposed operating version for the team to review, adjust and approve. Owners are roles, time limits and KPI targets are proposals, and nothing here replaces a decision by the accountable owner. Benchmarks describe other companies’ public programmes as checked in September 2026; confirm before quoting them outside the company.</p></div>
+</section>`);
+
+/* 1 introduction */
+out.push(chapter('The plan on one page', 'vacario™ uses seven communication channels. The plan asks that each has clear, measurable objectives and a set of tactics or strategies to meet them. This document turns that requirement into a working system: who says what, to whom, through which touchpoint, in which order, and how we know it worked.'));
+out.push(`<div class="quote">“One company, one source of truth, and one clearly defined communications path from strategy through execution.”<span class="src">From the plan</span></div>
+<table><thead><tr><th style="width:9mm">#</th><th style="width:40mm">Channel</th><th>The flow, as written in the plan</th></tr></thead><tbody>
+${CH.map(c => `<tr><td class="mono">${c.n}</td><td class="k" style="color:${COLOR[c.id]}">${esc(c.name)}</td><td>${c.id === 'lifecycle' ? '<i>No single flow in the plan: “Communication shouldn’t stop once somebody joins, spends, sells or sponsors.”</i> Stages added here: ' + esc(c.chain.join(' → ')) : c.id === 'internal' ? '<i>Systems and routines across Canada, India, the Philippines and every function.</i> Path added here: ' + esc(c.chain.join(' → ')) : esc(c.chain.join(' → '))}</td></tr>`).join('')}
+</tbody></table>
+<p class="note">The plan says “7 communications channels” and then “Below are the 6 Communications Channels” before listing seven. This document uses seven.</p>
+<h2>What this document adds <span class="added">Added</span></h2>
+<div class="cols2">
+  <div class="card"><h4>A defined customer lifecycle and journey</h4><p class="small">Nine stages with measurable entry and exit rules, the at-risk and lapsed states, a yes/no decision path, a journey map with pain points and fixes, mind maps and a trip timeline.</p></div>
+  <div class="card"><h4>Every workflow defined</h4><p class="small">Each channel’s workflow, step by step: definition, owner, trigger, time allowed and output, drawn as a swimlane with one column per team.</p></div>
+  <div class="card"><h4>Sales lifecycles and new workflows</h4><p class="small">Property onboarding, travel-agency partners and enquiry-to-booking sales cycles; plus lead management, campaign launch, referrals, reviews, customer support, consent, promotions, business trips and MICE events.</p></div>
+  <div class="card"><h4>Measurement and rollout</h4><p class="small">A KPI dictionary with formulas, a north-star measure, an operating rhythm, ownership (RACI) and a 13-week rollout plan.</p></div>
+</div>`);
+out.push(endCh);
+
+/* 2 system */
+out.push(chapter('How the communications system fits together', 'Four channels feed the traveller’s booking directly. Lifecycle wraps around every audience once they join. Corporate earns the trust and capital the others depend on. Internal runs underneath, keeping one set of priorities and one set of numbers.'));
+out.push(`<div class="fig"><svg viewBox="0 0 700 380" style="width:100%; height:auto">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e5b5e"/></marker></defs>
+  <g font-family="IBM Plex Sans, sans-serif">
+  <ellipse cx="350" cy="160" rx="140" ry="86" fill="#6441cf" fill-opacity=".06" stroke="#6441cf" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <text x="350" y="64" text-anchor="middle" font-size="11" font-weight="700" fill="#6441cf">06 · LIFECYCLE · join → activate → engage → reward → retain</text>
+  <rect x="262" y="124" width="176" height="72" rx="5" fill="#0e5b5e"/>
+  <text x="350" y="154" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Traveller</text>
+  <text x="350" y="174" text-anchor="middle" font-size="11" fill="#cfe6e4">booking · trip · review · repeat</text>
+  ${[[12,18,'consumer','ads · social · CRM · referral'],[498,18,'supply','inventory · availability · price'],[12,226,'creator','content → followers → bookings'],[498,226,'destination','in-trip offers · local content']].map(([x,y,id,b]) => `
+    <rect x="${x}" y="${y}" width="190" height="60" rx="5" fill="#fff" stroke="${COLOR[id]}" stroke-width="1.8"/>
+    <text x="${x+95}" y="${y+26}" text-anchor="middle" font-size="13" font-weight="700" fill="${COLOR[id]}">${CHM[id].n} · ${esc(short(CHM[id]).replace('Destination & Merchant','Destination & Merchant'))}</text>
+    <text x="${x+95}" y="${y+45}" text-anchor="middle" font-size="10" fill="#4f5652">${b}</text>`).join('')}
+  <g stroke="#0e5b5e" stroke-width="1.8" fill="none" marker-end="url(#ah)"><path d="M202,60 L262,128"/><path d="M498,60 L438,128"/><path d="M202,250 L262,192"/><path d="M498,250 L438,192"/></g>
+  <rect x="262" y="262" width="176" height="44" rx="5" fill="#fff" stroke="${COLOR.corporate}" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <text x="350" y="281" text-anchor="middle" font-size="12.5" font-weight="700" fill="${COLOR.corporate}">05 · Corporate</text>
+  <text x="350" y="297" text-anchor="middle" font-size="9.5" fill="#4f5652">investors · media · government</text>
+  <rect x="12" y="322" width="676" height="50" rx="5" fill="#eceee7" stroke="#bfc5b8"/>
+  <text x="350" y="343" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15191a">07 · Internal — one source of truth</text>
+  <text x="350" y="361" text-anchor="middle" font-size="9.5" fill="#4f5652">Canada ↔ India ↔ Philippines · meetings · dashboards · knowledge base · escalation</text>
+  </g></svg><div class="cap">The seven channels around the traveller</div></div>
+<h2>Who hands what to whom</h2>
+<table><thead><tr><th>From</th><th>To</th><th>What moves</th></tr></thead><tbody>${HAND.map(h => `<tr><td class="k">${esc(h[0])}</td><td class="k" style="color:var(--accent)">→ ${esc(h[1])}</td><td>${esc(h[2])}</td></tr>`).join('')}</tbody></table>
+<h2>One north star <span class="added">Added</span></h2>
+<p>Every KPI ladders up to one number the whole company can quote: <b>completed bookings × average booking value</b>, the gross booking value of trips actually taken. New travellers (Consumer, Creator), bookable inventory (Supply), revenue per trip (Destination &amp; Merchant) and people who stay (Lifecycle) drive it; Corporate and Internal make everything else possible.</p>`);
+out.push(endCh);
+
+/* 3 customer lifecycle */
+out.push(chapter('The customer lifecycle', 'The lifecycle describes where each traveller is in their relationship with Vacario, from first seeing the brand to recommending it. Every stage has a measurable entry rule, so the team can count how many people are in it, and an exit rule, so everyone knows what moves a person on. Every message, owner and KPI hangs off these stages.', {ey:'Customer lifecycle · added'}));
+out.push(`${lifeLoop()}
+<h2>The stages, defined</h2>
+<p>Read each stage as a contract between teams: when someone meets the entry rule, the named owner is responsible for moving them to the exit, using the messages and touchpoints listed, and is measured by the KPIs shown.</p>
+${LIFE.map(s => { const j = JOURNEY[s.id]; return `<div class="stage">
+  <div class="sn">${s.n}<small>${esc(s.who)}</small></div>
+  <div><h3 style="margin:0 0 .8mm">${esc(s.name)} <span class="faint small" style="font-weight:400">· owner: ${esc(s.owner)}</span></h3>
+    <div class="row">
+      <div><span class="lbl">Enters when</span>${esc(s.entry)}</div>
+      <div><span class="lbl">Leaves when</span>${esc(s.exit)}</div>
+      <div><span class="lbl">The customer thinks</span>${esc(s.thinks)}</div>
+      <div><span class="lbl">Our job</span>${esc(s.job)}</div>
+      <div><span class="lbl">Key messages</span>${s.msgs.map(esc).join(' · ')}</div>
+      <div><span class="lbl">Channels and touchpoints</span>${s.ch.map(x => `<span class="tag">${esc(x)}</span>`).join('')} ${esc(s.tp)}</div>
+      <div><span class="lbl">Pain point → our answer</span>${esc(j.pain)} → <b>${esc(j.fix)}</b></div>
+      <div><span class="lbl">KPIs</span>${s.kpis.map(esc).join(' · ')}</div>
+    </div>
+    ${STAGE_BENCH[s.id] ? `<div class="bench"><b>Benchmark:</b> ${esc(STAGE_BENCH[s.id])}</div>` : ''}
+  </div></div>`; }).join('')}
+<h2>When customers go quiet</h2>
+<table><thead><tr><th style="width:24mm">State</th><th>Rule</th><th>What we do</th><th style="width:26mm">KPI</th></tr></thead><tbody>
+${LIFE_SIDE.map(r => `<tr><td class="k">${esc(r.name)}</td><td>${esc(r.rule)}</td><td>${esc(r.act)}</td><td>${esc(r.kpi)}</td></tr>`).join('')}</tbody></table>
+<h2>The lifecycle as a mind map</h2>
+<p>The same nine stages on one page: for each, who is in it, what we say, and what we measure.</p>
+${mindmap(MINDMAPS.lifecycle)}
+<h2>The traveller’s path, yes or no</h2>
+<p>At every stage the traveller either moves on or doesn’t. This decision path shows exactly what happens on each “no”, so no one is left without a next step.</p>
+${flowchart(DECIDE.traveller)}
+<h2>Segments</h2>
+<p>The stages are the same for everyone; the messages change by who is travelling.</p>
+<table><thead><tr><th style="width:40mm">Segment</th><th>What they care about</th><th style="width:48mm">Peak moments</th></tr></thead><tbody>${SEGMENTS.map(s => `<tr><td class="k">${esc(s[0])}</td><td>${esc(s[1])}</td><td>${esc(s[2])}</td></tr>`).join('')}</tbody></table>
+<h2>Contact rules</h2>
+<p>Lifecycle owns the calendar of who hears what, and every channel follows these rules.</p>
+<table><tbody>${CONTACT_RULES.map(r => `<tr><td class="k" style="width:34mm">${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</tbody></table>`);
+out.push(endCh);
+
+/* 4 customer journey */
+out.push(chapter('The customer journey', 'The lifecycle says where a customer is; the journey says what one trip feels like from their side. Designing messages around the journey means each one arrives when it is useful, not when it suits us.', {ey:'Customer journey · added'}));
+out.push(`${mindmap(MINDMAPS.journey)}
+<h2>How the traveller feels along the way</h2>
+${feelCurve()}
+<h2>The journey map, stage by stage</h2>
+<p>Four phases, nine stages. For each: what the traveller wants and does, what they think and feel, where they meet us, what goes wrong, what we do about it, what we say, and how we measure it.</p>
+${JOURNEY_PHASES.map(ph => `<h3 style="color:var(--accent)">${esc(ph[0])} <span class="faint small" style="font-weight:400">· ${esc(ph[2])}</span></h3>
+  ${ph[1].split(' ').map(id => { const s = LIFE.find(x => x.id === id), j = JOURNEY[id], m = JOURNEY_MORE[id]; return `<div class="stage">
+    <div class="sn">${s.n}<small>${esc(s.name)}</small></div>
+    <div class="row" style="margin-top:0">
+      <div><span class="lbl">Wants</span>${esc(m.goal)}</div>
+      <div><span class="lbl">Does</span>${esc(j.doing)}</div>
+      <div><span class="lbl">Thinks</span>${esc(s.thinks)}</div>
+      <div><span class="lbl">Feels (${j.feel}/5)</span>${esc(m.feelWord)}</div>
+      <div><span class="lbl">Touchpoints</span>${esc(m.touch)}</div>
+      <div><span class="lbl">Pain point</span><span style="color:var(--bad)">${esc(j.pain)}</span></div>
+      <div><span class="lbl">Opportunity and our answer</span>${esc(m.opp)}. <b>${esc(j.fix)}</b></div>
+      <div><span class="lbl">What we say</span><i>${esc(m.say)}</i></div>
+      <div><span class="lbl">Measured by</span>${esc(m.kpi)}</div>
+      <div><span class="lbl">Owner</span>${esc(s.owner)}</div>
+    </div></div>`; }).join('')}`).join('')}
+<h2>One trip, message by message</h2>
+<table><thead><tr><th style="width:24mm">When</th><th>What the traveller gets</th><th style="width:40mm">Channel</th></tr></thead><tbody>
+${TIMELINE.map(t => `<tr><td class="k mono">${esc(t[0])}</td><td>${esc(t[1])}</td><td>${esc(t[2])}</td></tr>`).join('')}</tbody></table>
+<p class="note">T = check-in day, C = check-out day.</p>
+<h2>Moments of truth</h2>
+<p>Six moments decide whether a traveller comes back. Each has an owner and a time limit somewhere in this document.</p>
+<div class="cols3">${MOMENTS.map(m => `<div class="card soft"><h4>${esc(m[0])}</h4><p class="small">${esc(m[1])}</p><span class="tag">${esc(m[2])}</span></div>`).join('')}</div>`);
+out.push(endCh);
+
+/* 5 partner lifecycles */
+out.push(chapter('Partner lifecycles', 'The plan says communication should not stop once someone sells or sponsors. Suppliers, creators and merchants have lifecycles too, handled by the Lifecycle channel with the same five steps: join, activate, engage, reward, retain.', {ey:'Lifecycle · added'}));
+out.push(`<table><thead><tr><th style="width:26mm">Partner</th><th>Stages</th><th>Warning signs</th><th>What we do</th></tr></thead><tbody>
+${PARTNER_LIFE.map(r => `<tr><td class="k">${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('')}</tbody></table>
+<h2>Each partner track, stage by stage</h2>
+<table><thead><tr><th style="width:22mm">Stage</th><th>Guest</th><th>Supplier</th><th>Creator</th><th>Merchant / sponsor</th></tr></thead><tbody>
+<tr><td class="k">Join</td><td>Welcome series, preferences</td><td>Welcome pack, portal login</td><td>Creator kit, link and code</td><td>Partner welcome, offer setup</td></tr>
+<tr><td class="k">Activate</td><td>First booking</td><td>Listing live in 14 days</td><td>First post published</td><td>First offer redeemed</td></tr>
+<tr><td class="k">Engage</td><td>Trip ideas, festival offers</td><td>Monthly statement</td><td>Monthly earnings, briefs</td><td>Redemption and reach report</td></tr>
+<tr><td class="k">Reward</td><td>Points, member prices</td><td>Top Partner badge, placement</td><td>Tier upgrade, hosted trips</td><td>Featured placement, case study</td></tr>
+<tr><td class="k">Retain</td><td>60-day win-back</td><td>Quarterly review</td><td>Re-brief after 45 quiet days</td><td>Renewal 60 days early</td></tr>
+</tbody></table>`);
+out.push(endCh);
+
+/* sales lifecycles */
+out.push(chapter('Sales lifecycles: properties, travel agencies and enquiries', 'Three sales cycles bring in what the customer lifecycle depends on: properties to sell (S1), travel agents who sell for us (S2), and the enquiries our campaigns generate (S3). Each is defined the same way: stages with owners and time limits, a yes/no decision path, a workflow, and KPIs.', {ey:'Sales lifecycles · added'}));
+out.push(`${mindmap(SALES_MM)}
+<table><thead><tr><th style="width:10mm">#</th><th style="width:52mm">Cycle</th><th>Feeds</th></tr></thead><tbody>
+<tr><td class="mono">S1</td><td class="k">Property onboarding</td><td>Supply channel → bookable inventory for every traveller</td></tr>
+<tr><td class="mono">S2</td><td class="k">Travel agency partners</td><td>Consumer bookings through agents, especially tier-2 and tier-3 cities, families, groups and pilgrimages</td></tr>
+<tr><td class="mono">S3</td><td class="k">Enquiry to booking</td><td>Customer lifecycle: an accepted quote becomes a First booking (L4) and moves to Prepare (L5)</td></tr></tbody></table>`);
+SALES.forEach((sc, i) => {
+  out.push(`<div style="break-before:page"><h2>${sc.n} · ${esc(sc.name)}</h2>
+  <p>${esc(sc.why)}</p>
+  <h3>Stages</h3>
+  <table><thead><tr><th style="width:8mm">#</th><th style="width:26mm">Stage</th><th>Definition</th><th style="width:30mm">Owner</th><th style="width:28mm">Time allowed</th></tr></thead><tbody>
+  ${sc.stages.map((r, k) => `<tr><td class="mono">${k + 1}</td><td class="k">${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="sla">${esc(r[3])}</span></td></tr>`).join('')}</tbody></table>
+  <h3>Yes or no</h3>
+  ${flowchart(sc.decide)}
+  <h3>Workflow</h3>
+  ${vswim(sc.flow, '#c96208', `${sc.n} · ${sc.name} · one column per team`)}
+  ${stepTable(sc.flow.steps, sc.flow.lanes)}
+  <h3>KPIs</h3>
+  <table><tbody>${sc.kpi.map(k => `<tr><td class="k" style="width:52mm">${esc(k[0])}</td><td class="f">${esc(k[1])}</td></tr>`).join('')}</tbody></table>
+  <p class="small muted"><b style="color:var(--accent-ink)">Benchmark:</b> ${esc(sc.bench)}</p></div>`);
+});
+out.push(endCh);
+
+/* 6 corporate travel */
+out.push(chapter('Corporate travel: business trips and MICE', CORP.intro, {ey:'New line · added', c:'#1a6fbd'}));
+out.push(`<h2>Who is involved</h2>
+<table><tbody>${CORP.people.map(p => `<tr><td class="k" style="width:44mm">${esc(p[0])}</td><td>${esc(p[1])}</td></tr>`).join('')}</tbody></table>
+${mindmap(MINDMAPS.corporate)}
+<h2>The business-trip lifecycle</h2>
+<table><thead><tr><th style="width:9mm">#</th><th style="width:30mm">Stage</th><th>Definition</th><th style="width:28mm">Owner</th><th style="width:30mm">Time allowed</th></tr></thead><tbody>
+${CORP.trip.map(r => `<tr><td class="mono">${r[0]}</td><td class="k">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td><span class="sla">${esc(r[4])}</span></td></tr>`).join('')}</tbody></table>
+<h3>Business trip, yes or no</h3>
+${flowchart(DECIDE.business)}
+<h3>Business-trip workflow (W8)</h3>
+${vswim(CORP.tripFlow, '#1a6fbd', 'W8 · Business trip · one column per team')}
+${stepTable(CORP.tripFlow.steps, CORP.tripFlow.lanes)}
+<h2>The MICE event lifecycle</h2>
+<p>MICE covers meetings, incentive trips, conferences and exhibitions: groups travelling for a company event. It is longer, higher-value and more complex than a business trip, with contracts, deposits and cut-off dates.</p>
+<table><thead><tr><th style="width:9mm">#</th><th style="width:30mm">Stage</th><th>Definition</th><th style="width:28mm">Owner</th><th style="width:30mm">Time allowed</th></tr></thead><tbody>
+${CORP.mice.map(r => `<tr><td class="mono">${r[0]}</td><td class="k">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td><span class="sla">${esc(r[4])}</span></td></tr>`).join('')}</tbody></table>
+<h3>MICE event, yes or no</h3>
+${flowchart(DECIDE.mice)}
+<h3>MICE workflow (W9)</h3>
+${vswim(CORP.miceFlow, '#1a6fbd', 'W9 · MICE event · one column per team')}
+${stepTable(CORP.miceFlow.steps, CORP.miceFlow.lanes)}
+<h2>Corporate travel KPIs</h2>
+<table><thead><tr><th style="width:26mm">Line</th><th style="width:44mm">KPI</th><th>Formula</th></tr></thead><tbody>
+${CORP.kpi.map(k => `<tr><td>${esc(k[0])}</td><td class="k">${esc(k[1])}</td><td class="f">${esc(k[2])}</td></tr>`).join('')}</tbody></table>`);
+out.push(endCh);
+
+/* 7 benchmarks */
+out.push(chapter('What we learn from leading travel platforms', 'Each flow in this document was checked against how India’s and the world’s leading online travel companies run the same moment: MakeMyTrip, Cleartrip, Yatra, EaseMyTrip, Booking.com, Expedia and Airbnb. We borrow what works and keep what makes Vacario different.', {ey:'Benchmarks · added'}));
+out.push(`<table><thead><tr><th style="width:26mm">Flow</th><th style="width:16mm">Where</th><th>What they do</th><th>What Vacario does</th></tr></thead><tbody>
+${BENCH.map(b => `<tr><td class="k">${esc(b.area)}<div class="faint small" style="font-weight:400">${esc(b.who)}</div></td><td class="mono small">${esc(b.stage)}</td><td>${esc(b.they)}</td><td>${esc(b.we)}</td></tr>`).join('')}</tbody></table>
+<p class="note">Public information checked in September 2026 (sources in the appendix). Other companies change their programmes; confirm details before quoting them outside the company.</p>`);
+out.push(endCh);
+
+/* 8 the seven channels */
+CH.forEach(c => {
+  const X = EXPL[c.id], M = MSG[c.id], col = COLOR[c.id];
+  out.push(chapter(c.name, esc(X.why), {no:c.n, ey:'Channel ' + c.n, c:col}));
+  out.push(`<div class="quote" style="--c:${col}">${esc(c.sub)}<span class="src">From the plan${c.id === 'lifecycle' || c.id === 'internal' ? ', expanded' : ''}</span></div>
+  <div class="cols2">
+    <div><span class="lbl">Audiences</span>${c.who.map(w => `<span class="tag">${esc(w)}</span>`).join('')}
+      <span class="lbl" style="margin-top:3mm">Objectives</span><ul>${c.obj.map(o => `<li>${esc(o)}</li>`).join('')}</ul></div>
+    <div><span class="lbl">How the workflow runs</span><p class="small">${esc(X.how)}</p></div>
+  </div>
+  <h2>Key messages</h2>
+  <div class="pillars" style="--c:${col}">${M.pillars.map(p => `<div class="card"><h4>${esc(p[0])}</h4><p class="small">${esc(p[1])}</p><div class="say">${esc(p[2])}</div></div>`).join('')}</div>
+  <p class="small"><b>Tone:</b> ${esc(M.tone)}</p>
+  <h2>Tactics and touchpoints</h2>
+  <table><tbody>${M.tactics.map(t => `<tr><td class="k" style="width:52mm">${esc(t[0])}</td><td>${esc(t[1])}</td></tr>`).join('')}</tbody></table>
+  <h2>The workflow</h2>
+  <p>${c.steps.length} steps, from ${esc(c.steps[0].t.toLowerCase())} to ${esc(c.steps[c.steps.length - 1].t.toLowerCase())}. Each box is one step in the column of the team that owns it; gold tags are yes/no checkpoints.</p>
+  ${vswim({lanes:c.lanes, steps:c.steps}, col, `${c.n} · ${c.name} workflow · one column per team`)}
+  <h3>Each step, defined</h3>
+  ${stepTable(c.steps, c.lanes, true)}
+  <h2>${c.id === 'internal' ? 'The path from strategy to execution' : 'Lead flow'}</h2>
+  <p>${c.id === 'internal' ? 'Internal work moves from strategy to a written record. The measures between stages show where it slows down.' : 'The stages people or partners move through in this channel, with the conversion measured between each. A weak conversion shows which workflow step to fix first.'}</p>
+  ${lflow(c)}
+  <h2>KPIs and how they are calculated</h2>
+  <table><thead><tr><th style="width:40mm">KPI</th><th>Formula</th><th style="width:18mm">How often</th><th style="width:14mm">Type</th><th style="width:28mm">Owner</th></tr></thead><tbody>
+  ${c.kpi.map(k => `<tr><td class="k">${esc(k[0])}<div class="faint small" style="font-weight:400">${esc(KX[k[0]].w)}</div></td><td class="f">${esc(fText(KX[k[0]]))}</td><td>${esc(k[3])}</td><td><span class="pill ${k[6] === 'Leading' ? 'lead' : 'lag'}">${k[6]}</span></td><td>${esc(k[4])}</td></tr>`).join('')}</tbody></table>
+  <div class="cols2 avoid">
+    <div class="card soft"><h4>Worked example</h4><p class="small">${X.story}</p></div>
+    <div class="card"><h4>Rules that keep it working</h4><ul class="small">${X.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+      <h4 style="margin-top:2mm">Warning signs</h4><ul class="small">${X.breaks.map(b => `<li><b style="color:var(--bad)">${esc(b[0])}:</b> ${esc(b[1])}</li>`).join('')}</ul></div>
+  </div>
+  <table><tbody>
+    <tr><td class="k" style="width:34mm">Comes in from</td><td>${c.in.map(x => `<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' · ')}</td></tr>
+    <tr><td class="k">Hands off to</td><td>${c.hand.map(x => `<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' · ')}</td></tr>
+    <tr><td class="k">Review rhythm</td><td>${c.cad.map(esc).join(' · ')}</td></tr>
+  </tbody></table>
+  ${c.id === 'internal' ? `<h2>The twelve internal streams</h2>
+  <table><thead><tr><th style="width:38mm">Stream</th><th>Covers</th><th style="width:28mm">How often</th><th style="width:24mm">Runs it</th></tr></thead><tbody>${STREAMS.map(s => `<tr><td class="k">${esc(s[0])}</td><td>${esc(s[1])}</td><td>${esc(s[3])}</td><td>${esc(s[4])}</td></tr>`).join('')}</tbody></table>
+  <h2>Crisis and escalation</h2>
+  <p>${ESC.map((e, i) => `<span class="tag" style="background:${i < 3 ? 'var(--bad-soft)' : i < 6 ? 'var(--warm-soft)' : 'var(--accent-soft)'}; color:${i < 3 ? 'var(--bad)' : i < 6 ? 'var(--warm)' : 'var(--accent-ink)'}">${i + 1} ${esc(e)}</span>`).join(' ')}</p>
+  <table><thead><tr><th>Level</th><th>For example</th><th>Answer within</th><th>Escalate to</th><th>Who is told</th><th>Updates</th></tr></thead><tbody>${SEV.map(r => `<tr><td class="k">${esc(r[0])}</td>${r.slice(1).map(x => `<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table>` : ''}`);
+  out.push(endCh);
+});
+
+/* 9 new workflows */
+out.push(chapter('New cross-channel workflows', 'The seven channel workflows cover what each team does. Some work crosses every channel and had no defined path in the plan: capturing leads, launching campaigns, running referrals, handling reviews, fixing problems, managing consent and approving promotions. Each is defined here the same way, with a swimlane, step definitions and KPIs.', {ey:'Workflows W1–W7 · added'}));
+out.push(`<table><thead><tr><th style="width:10mm">#</th><th style="width:50mm">Workflow</th><th>Serves</th></tr></thead><tbody>
+${NEWFLOW.map(w => `<tr><td class="mono">${w.n}</td><td class="k">${esc(w.name)}</td><td>${w.serves.map(esc).join(' · ')}</td></tr>`).join('')}
+<tr><td class="mono">W8</td><td class="k">Business trip</td><td>Corporate travel chapter</td></tr><tr><td class="mono">W9</td><td class="k">MICE event</td><td>Corporate travel chapter</td></tr>
+<tr><td class="mono">S1–S3</td><td class="k">Sales cycles: properties, agencies, enquiries</td><td>Sales lifecycles chapter</td></tr></tbody></table>`);
+NEWFLOW.forEach((w, i) => {
+  out.push(`<div style="${i ? 'break-before:page' : ''}"><h2 data-toc-sub="${esc(w.n + ' ' + w.name)}">${w.n} · ${esc(w.name)}</h2>
+  <p>${esc(w.why)}</p>
+  <p class="small"><b>Serves:</b> ${w.serves.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</p>
+  ${WF_BENCH[w.id] ? `<p class="small muted"><b style="color:var(--accent-ink)">Benchmark:</b> ${esc(WF_BENCH[w.id])}</p>` : ''}
+  ${vswim(w, '#0e5b5e', `${w.n} · ${w.name} · one column per team`)}
+  ${stepTable(w.steps, w.lanes)}
+  <h3>KPIs</h3>
+  <table><tbody>${w.kpi.map(k => `<tr><td class="k" style="width:52mm">${esc(k[0])}</td><td class="f">${esc(k[1])}</td></tr>`).join('')}</tbody></table></div>`);
+});
+out.push(endCh);
+
+/* 10 operating model */
+out.push(chapter('The operating model', 'How the seven channels and nine new workflows are run week to week: who is accountable, when the team meets, and what happens when something goes wrong.', {ey:'Operating model'}));
+out.push(`<h2>Who owns what</h2>
+<p class="small">A = accountable (one per channel, signs off) · R = does the work · C = asked before · I = told after</p>
+<table><thead><tr><th>Channel</th>${ROLES.map(r => `<th style="font-size:5.6pt; letter-spacing:.02em">${esc(r)}</th>`).join('')}</tr></thead><tbody>
+${CH.map(c => `<tr><td class="k" style="white-space:nowrap">${c.n} ${esc(short(c))}</td>${RACI[c.id].map(x => `<td style="text-align:center"><span class="raci ${x}">${x}</span></td>`).join('')}</tr>`).join('')}</tbody></table>
+<h2>Meeting rhythm</h2>
+<table><thead><tr><th style="width:30mm">When</th><th>What</th><th style="width:40mm">Who</th></tr></thead><tbody>
+<tr><td class="k">Daily</td><td>Operational check-ins where required; India → Canada handoff note at 6 pm IST</td><td>Operations, region leads</td></tr>
+<tr><td class="k">Monday</td><td>Dashboard published; weekly management review</td><td>Finance; function heads</td></tr>
+<tr><td class="k">Tue – Fri</td><td>Functional meetings: marketing &amp; social, supply pipeline, creator content, destination offers, tech &amp; product, finance, customer service &amp; BD</td><td>Each function head</td></tr>
+<tr><td class="k">Monthly</td><td>Strategic / business review; investor update; partner statements</td><td>Executive team</td></tr>
+<tr><td class="k">Quarterly</td><td>Partner, creator and sponsor reviews; message house review; consent and data review; KPI targets reset</td><td>Account managers, communications, legal</td></tr>
+</tbody></table>
+<h2>Handoffs across time zones</h2>
+<table><thead><tr><th>India (IST)</th><th>Canada Eastern</th><th>Philippines</th><th>What happens</th></tr></thead><tbody>
+<tr><td class="mono">6:00 pm</td><td class="mono">8:30 am EDT (from 1 Nov: 7:00 pm IST = 8:30 am EST)</td><td class="mono">8:30 pm</td><td>India hands over to Canada</td></tr>
+<tr><td class="mono">3:30 am</td><td class="mono">6:00 pm EDT</td><td class="mono">6:00 am</td><td>Canada closes with its handoff note</td></tr>
+<tr><td class="mono">9:30 am</td><td class="mono">12:00 am EDT</td><td class="mono">12:00 pm</td><td>India and the Philippines start from Canada’s note</td></tr></tbody></table>
+<p class="note">Assumes the Canada team works Eastern Time.</p>`);
+out.push(endCh);
+
+/* 11 measurement */
+out.push(chapter('Measurement: every KPI and its formula', 'Sixty-one channel KPIs, each calculated the same way every month from raw counts and amounts, plus the workflow KPIs above. Targets are set from the budget model and reviewed each quarter. The KPI Workspace calculates all of them automatically once the monthly numbers are entered.', {ey:'Measurement'}));
+out.push(`<table><thead><tr><th style="width:9mm"></th><th style="width:42mm">KPI</th><th>Formula</th><th style="width:17mm">How often</th><th style="width:13mm">Good</th></tr></thead><tbody>
+${CH.map(c => c.kpi.map(k => `<tr><td class="mono" style="color:${COLOR[c.id]}">${c.n}</td><td class="k">${esc(k[0])}</td><td class="f">${esc(fText(KX[k[0]]))}</td><td>${esc(k[3])}</td><td class="mono">${k[5] === 'down' ? '↓ lower' : k[5] === 'hold' ? '= hold' : '↑ higher'}</td></tr>`).join('')).join('')}
+</tbody></table>
+<h2>Rules for every KPI</h2>
+<ul><li>One owner and one data source per KPI.</li><li>Enter raw counts and amounts, never percentages; the formula does the rest.</li><li>Rates that follow people over time are measured by cohort, the month they joined.</li><li>Leading KPIs are managed weekly, lagging KPIs reviewed monthly or quarterly.</li><li>Money is in Indian rupees; periods are calendar months unless stated.</li></ul>`);
+out.push(endCh);
+
+/* 12 rollout */
+out.push(chapter('The first 13 weeks', 'A proposed order for switching the system on, from foundations to the festive season.', {ey:'Rollout · added'}));
+out.push(`<div class="cols3">${ROADMAP.map(r => `<div class="card"><span class="lbl">${esc(r[0])}</span><h3 style="margin-top:0">${esc(r[1])}</h3><ul class="small">${r[2].map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>`);
+out.push(endCh);
+
+/* 13 glossary + sources */
+out.push(chapter('Glossary and sources', '', {ey:'Appendix'}));
+out.push(`<table><tbody>${GLOSS.concat([['MICE','Meetings, incentives, conferences and exhibitions: company group travel and events.'],['OTA','Online travel agency, such as MakeMyTrip, Cleartrip, Yatra, EaseMyTrip, Booking.com or Expedia.'],['Duty of care','A company’s responsibility for its employees’ safety and wellbeing while travelling for work.'],['Attrition clause','Contract terms for how many booked rooms or places a group may release before a penalty applies.'],['DLT','Distributed ledger registration that Indian telecom rules require for commercial SMS senders and templates.'],['DPDP Act','India’s Digital Personal Data Protection Act, 2023.']]).map(g => `<tr><td class="k" style="width:34mm">${esc(g[0])}</td><td>${esc(g[1])}</td></tr>`).join('')}</tbody></table>
+<h2>Benchmark sources</h2>
+<table><tbody>${SOURCES.map(s => `<tr><td class="k" style="width:62mm">${esc(s[0])}</td><td class="mono small" style="word-break:break-all">${esc(s[1])}</td></tr>`).join('')}</tbody></table>
+<h2>What came from the plan, and what was added</h2>
+<p>From the plan: the seven channels, their flows, the descriptions of Consumer, Supply, Creator, Destination &amp; Merchant, Corporate, Lifecycle and Internal communications, the twelve internal streams and the closing principle. Added in this document: the customer lifecycle, journey, decision paths and mind maps; partner lifecycles; sales lifecycles for properties, travel agencies and enquiries; corporate travel and MICE; benchmarks; every workflow step, owner and time limit; the new workflows; KPIs, formulas and targets process; the operating rhythm and rollout. All additions are proposals for the team to adjust and approve.</p>`);
+out.push(endCh);
+
+document.getElementById('doc').innerHTML = out.join('');
+document.getElementById('tocList').innerHTML = TOC.map(t => `<a href="#${t.id}" data-tocref="${esc(t.title)}"><b>${t.n}</b><span>${esc(t.title)}</span><em data-pg>—</em></a>`).join('');
+window.__TOC = TOC.map(t => t.title);
+
+/* ------------------------------------------------------------------ connectors (after layout) */
+function wireAll(){
+  const box = (el, R) => { const r = el.getBoundingClientRect(); return {l:r.left - R.left, r:r.right - R.left, t:r.top - R.top, b:r.bottom - R.top, cx:(r.left + r.right) / 2 - R.left, cy:(r.top + r.bottom) / 2 - R.top}; };
+  const mk = (id, col) => `<defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker></defs>`;
+  document.querySelectorAll('[data-vs]').forEach((vs, n) => {
+    const R = vs.getBoundingClientRect(), col = getComputedStyle(vs).getPropertyValue('--c').trim() || '#0e5b5e';
+    const bx = [...vs.querySelectorAll('.bx')].sort((a, b) => a.dataset.i - b.dataset.i).map(e => box(e, R));
+    let d = '';
+    for (let i = 0; i < bx.length - 1; i++){
+      const a = bx[i], b = bx[i + 1], ym = (a.b + b.t) / 2;
+      d += Math.abs(a.cx - b.cx) < 1 ? `<path d="M${a.cx},${a.b} V${b.t - 1}"/>` : `<path d="M${a.cx},${a.b} V${ym} H${b.cx} V${b.t - 1}"/>`;
+    }
+    vs.querySelector('svg.wires').innerHTML = mk('vm' + n, col) + `<g fill="none" stroke="${col}" stroke-width="1.3" marker-end="url(#vm${n})">${d.replace(/<path /g, `<path marker-end="url(#vm${n})" `)}</g>`;
+    vs.querySelectorAll('.gate').forEach(g => { const a = bx[+g.dataset.g], b = bx[+g.dataset.g + 1]; if (!a) return; g.style.left = a.cx + 'px'; g.style.top = (b ? (a.b + b.t) / 2 : a.b + 6) + 'px'; });
+  });
+  document.querySelectorAll('[data-mm]').forEach(mm => {
+    const R = mm.getBoundingClientRect(), c = box(mm.querySelector('[data-ctr]'), R);
+    const rad = (c.r - c.l) / 2;
+    let d = '';
+    mm.querySelectorAll('[data-br]').forEach(br => {
+      const b = box(br, R), col = getComputedStyle(br).getPropertyValue('--c').trim(), left = b.cx < c.cx;
+      const ang = Math.atan2(b.cy - c.cy, b.cx - c.cx), sx = c.cx + rad * Math.cos(ang), sy = c.cy + rad * Math.sin(ang);
+      const ex = left ? b.r : b.l;
+      d += `<path d="M${sx},${sy} C${(sx + ex) / 2},${sy} ${(sx + ex) / 2},${b.cy} ${ex},${b.cy}" stroke="${col}" stroke-width="2.2"/>`;
+      const lv = br.nextElementSibling;
+      [...lv.children].forEach(s => { const q = box(s, R), lx = left ? q.r : q.l, bx0 = left ? b.l : b.r;
+        d += `<path d="M${bx0},${b.cy} C${(bx0 + lx) / 2},${b.cy} ${(bx0 + lx) / 2},${q.cy} ${lx},${q.cy}" stroke="${col}" stroke-width="1"/>`; });
+    });
+    mm.querySelector('svg.wires').innerHTML = `<g fill="none">${d}</g>`;
+  });
+}
+window.wireAll = wireAll;
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(wireAll); else wireAll();
+window.addEventListener('load', wireAll);
+</script>
+</body>
+</html>
