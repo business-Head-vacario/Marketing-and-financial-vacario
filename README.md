@@ -38,6 +38,9 @@ feeling curve with stage details, a "play the path" yes/no game for the travelle
 MICE, property, agency and enquiry flows, channel postcards with messages, workflow steps, lead flow
 and KPIs, a north-star calculator and a short quiz. All motion stops when the reader prefers reduced
 motion. Published as a Claude artifact; `./build.sh` builds it.
+`deliverables/Vacario-Communications-Handbook-Illustrated.pdf` is the same page printed (41 A4 pages): the
+page's print mode lays out everything that is interactive on screen, so every lifecycle and journey
+stage, all six yes/no paths, all seven channels and the quiz answers appear in full.
 
 ## Communications Handbook (20 pages)
 

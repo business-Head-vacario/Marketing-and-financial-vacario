@@ -274,9 +274,9 @@ details.acc .in{padding:0 18px 18px}
 
 /* benchmarks as stamps */
 .stamps{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
-.stampc{position:relative; background:var(--card); padding:16px 16px 14px; border-radius:6px; box-shadow:var(--shadow);
-  -webkit-mask:radial-gradient(circle 5px at 5px 5px, transparent 98%, #000) -5px -5px / 14px 14px;
-          mask:radial-gradient(circle 5px at 5px 5px, transparent 98%, #000) -5px -5px / 14px 14px}
+.stampc{position:relative; background:var(--card); padding:18px 18px 16px; border-radius:14px; box-shadow:var(--shadow); border:2px dashed color-mix(in srgb, var(--rani) 45%, var(--line)); outline:6px solid var(--card); outline-offset:-10px}
+.stampc::after{content:""; position:absolute; right:12px; top:12px; width:34px; height:34px; border-radius:50%; border:2px solid color-mix(in srgb, var(--rani) 40%, transparent); background:repeating-linear-gradient(-45deg, transparent 0 4px, color-mix(in srgb, var(--rani) 18%, transparent) 4px 6px)}
+.stampc .who{padding-right:44px}
 .stampc .who{font:700 12px var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--rani)}
 .stampc h4{font-size:19px; margin:4px 0 6px}
 
@@ -334,6 +334,32 @@ details.acc .in{padding:0 18px 18px}
   @keyframes hop{0%,60%,100%{transform:none}30%{transform:translateY(-8px)}}
 }
 #confetti{position:fixed; inset:0; pointer-events:none; z-index:60}
+.plist{margin:10px 0 0; padding-left:20px; font-size:14px}
+.plist li{margin:5px 0}
+.plist li.ask{font-weight:600}
+.plist li.ask b{color:var(--marigold)}
+.plist li.start, .plist li.end{color:var(--peacock); font-weight:700}
+.pno{display:block; font-weight:400; color:var(--rani); font-size:13px}
+.pno em{font-style:normal; color:var(--ink-3)}
+.pj + .pj{margin-top:18px; padding-top:18px; border-top:2px dashed var(--line)}
+.pch + .pch{break-before:page; margin-top:26px}
+html.print .bar, html.print .picker, html.print .jbtns, html.print .ctabs, html.print .hero-cta, html.print #confetti{display:none!important}
+html.print *{animation:none!important; transition:none!important}
+html.print{--paper:#ffffff}
+html.print .loop{grid-template-columns:minmax(0,1fr)}
+html.print #loopDetail{display:none}
+html.print .foot{display:none}
+.ptoc{margin-top:26px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 26px}
+.ptoc a{display:grid; grid-template-columns:44px minmax(0,1fr); gap:10px; align-items:center; text-decoration:none; color:var(--ink); padding:10px 0; border-bottom:2px dashed var(--line); font:700 17px/1.2 var(--body)}
+.ptoc a b{width:40px; height:40px; border-radius:50%; border:3px dashed var(--peacock); display:grid; place-items:center; font:800 16px var(--display); color:var(--peacock)}
+.pnote{margin-top:22px; font-size:14px; color:var(--ink-2); padding:14px 16px; border-radius:14px; background:var(--well)}
+html.print .card, html.print .kpi, html.print .wsteps li, html.print .post, html.print .ticket, html.print .stampc, html.print details.acc, html.print .tl .t, html.print .week div{box-shadow:none; border:1px solid var(--line)}
+@media print{
+  .stop{break-before:page; margin-bottom:0}
+  .route{margin-top:0}
+  .card, .kpi, .wsteps li, .post, .ticket, .stampc, .qz, .try, .pj, tr, .t, .rule, details.acc{break-inside:avoid}
+  h2, h3, h4{break-after:avoid}
+}
 
 /* reveal: content is always visible; stops animate in when they arrive */
 @media (prefers-reduced-motion:no-preference){
@@ -1805,16 +1831,18 @@ function drawLoop(){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) $('#orbiter animateMotion')?.remove();
   showStage(0);
 }
-function showStage(i){
+function stageHTML(i){
   const s = LIFE[i];
-  $$('#loopSvg .node').forEach(n => n.classList.toggle('on', +n.dataset.s === i));
-  const d = $('#loopDetail');
-  d.innerHTML = `<div class="lbl">${esc(s.n)} · ${esc(s.who)}</div><h3>${esc(s.name)}</h3>
+  return `<div class="lbl">${esc(s.n)} · ${esc(s.who)}</div><h3>${esc(s.name)}</h3>
     <p class="muted" style="margin-top:4px">${esc(s.thinks)}</p>
     <div class="kv"><div><span class="lbl">Gets in when</span>${esc(s.entry)}</div><div><span class="lbl">Moves on when</span>${esc(s.exit)}</div>
       <div><span class="lbl">Our job</span>${esc(s.job)}</div><div><span class="lbl">Owner</span>${esc(s.owner)}</div>
       <div><span class="lbl">We say</span>${s.msgs.map(esc).join(' · ')}</div><div><span class="lbl">Measured by</span>${s.kpis.map(esc).join(' · ')}</div></div>
     ${STAGE_BENCH[s.id] ? `<p class="bench"><b>Benchmark:</b> ${esc(STAGE_BENCH[s.id])}</p>` : ''}`;
+}
+function showStage(i){
+  $$('#loopSvg .node').forEach(n => n.classList.toggle('on', +n.dataset.s === i));
+  const d = $('#loopDetail'); d.innerHTML = stageHTML(i);
   d.classList.remove('pop'); void d.offsetWidth; d.classList.add('pop');
 }
 
@@ -1883,9 +1911,13 @@ function showJourney(id){
   const s = LIFE.find(x => x.id === id), j = JOURNEY[id], m = JOURNEY_MORE[id], i = LIFE.indexOf(s);
   $$('#jbtns button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.j === id)));
   $$('#feelSvg circle[data-jd]').forEach(c => { c.setAttribute('r', +c.dataset.jd === i ? 11 : 7); c.setAttribute('fill', +c.dataset.jd === i ? 'var(--marigold)' : 'var(--card)'); });
+  const box = $('#jcard'); box.innerHTML = journeyHTML(id);
+  box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
+}
+function journeyHTML(id){
+  const s = LIFE.find(x => x.id === id), j = JOURNEY[id], m = JOURNEY_MORE[id];
   const phase = JOURNEY_PHASES.find(p => p[1].split(' ').includes(id));
-  const box = $('#jcard');
-  box.innerHTML = `<div class="grid g2" style="align-items:start">
+  return `<div class="grid g2" style="align-items:start">
     <div><div class="lbl">${esc(phase[0])} · ${esc(s.n)}</div><h3 style="font-size:28px">${esc(s.name)}</h3>
       <p class="muted" style="margin:6px 0 12px">${esc(s.thinks)}</p>
       <div class="kv" style="margin-top:0"><div><span class="lbl">They want</span>${esc(m.goal)}</div><div><span class="lbl">They do</span>${esc(j.doing)}</div>
@@ -1894,15 +1926,16 @@ function showJourney(id){
       <span class="lbl" style="margin-top:10px">What we do</span>${esc(m.opp)}. ${esc(j.fix)}.</div>
       <p class="say" style="margin-top:12px">${esc(m.say)}</p>
       <p class="small faint" style="margin-top:8px">Measured by ${esc(m.kpi)} · owner: ${esc(s.owner)}</p></div></div>`;
-  box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
 }
 
 /* ------------------------------------------------------------------ channels */
 function showChannel(id){
-  const c = CHM[id], X = EXPL[id], M = MSG[id], col = CC[id];
   $$('#ctabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.ch === id)));
-  const p = $('#cpanel'); p.style.setProperty('--c', col);
-  p.innerHTML = `<div class="grid g2" style="align-items:start">
+  const p = $('#cpanel'); p.style.setProperty('--c', CC[id]); p.innerHTML = channelHTML(id);
+}
+function channelHTML(id){
+  const c = CHM[id], X = EXPL[id], M = MSG[id], col = CC[id];
+  return `<div class="grid g2" style="align-items:start">
       <div><div class="kicker" style="color:${col}">Channel ${c.n} · from the plan</div><h3 style="font-size:34px; color:${col}; margin-top:4px">${esc(c.name)}</h3>
         <p style="margin-top:8px; font-weight:600">${esc(c.sub)}</p>
         <p class="muted" style="margin-top:8px">${esc(X.how)}</p>
@@ -1982,6 +2015,26 @@ if ('IntersectionObserver' in window){
   }), {threshold:.12});
   $$('.stop').forEach(s => io.observe(s));
 }
+
+/* ------------------------------------------------------------------ print: everything laid out, nothing hidden behind a click */
+function printMode(){
+  document.documentElement.classList.add('print');
+  $$('animateMotion').forEach(a => a.remove());
+  $('#orbiter')?.setAttribute('transform', 'translate(320,52)');
+  const fp = $('#feelPath'); if (fp){ const pt = fp.getPointAtLength(0); $('#walker')?.setAttribute('transform', `translate(${pt.x},${pt.y})`); }
+  $('#loopDetail').innerHTML = `<p class="muted">Every stage, with its rules, is listed below.</p>`;
+  $('#s-lifecycle .loop').insertAdjacentHTML('afterend', `<div class="grid g3 pstages" style="margin-top:16px">${LIFE.map((_, i) => `<div class="card">${stageHTML(i)}</div>`).join('')}</div>`);
+  $('#jcard').innerHTML = LIFE.map(s => `<div class="pj">${journeyHTML(s.id)}</div>`).join('');
+  $('#cpanel').innerHTML = CH.map(c => `<div class="pch" style="--c:${CC[c.id]}">${channelHTML(c.id)}</div>`).join('');
+  const game = $('#s-play .game');
+  game.outerHTML = `<div class="grid g2 ppaths">${Object.keys(PATHS).map(k => `<div class="card"><h4 style="font-size:20px">${esc(PATH_LBL[k])}</h4>
+    <ol class="plist">${PATHS[k].items.map(it => `<li class="${it.t}">${it.t === 'ask' ? '<b>◆</b> ' : ''}${esc(it.x)}${it.no ? `<span class="pno">No → ${esc(it.no)} <em>(${esc(it.to)})</em></span>` : ''}</li>`).join('')}</ol></div>`).join('')}</div>`;
+  $$('.qz').forEach(card => { const q = QUIZ[+card.dataset.q]; $$('button', card).forEach(b => { if (+b.dataset.a === q.a) b.classList.add('right'); }); const w = $('.why', card); w.hidden = false; w.innerHTML = `<b>Answer:</b> ${esc(q.why)}`; });
+  $$('details.acc').forEach(d => d.open = true);
+  $('#top').insertAdjacentHTML('afterend', `<h2 style="font-size:34px; margin-top:30px">What’s inside</h2><nav class="ptoc">${STOPS.map((st, i) => `<a href="#s-${st.id}"><b>${String(i + 1).padStart(2, '0')}</b><span>${esc(st.title)}</span></a>`).join('')}</nav><p class="pnote">${$('.foot').innerHTML}</p>`);
+  $('#nsOut').textContent = '₹45,00,000'; $('#nsTrips').value = '500'; $('#nsAbv').value = '9000';
+}
+window.printMode = printMode;
 
 drawLoop(); drawFeel(); setPath('traveller'); showChannel('consumer'); nsCalc();
 </script>
