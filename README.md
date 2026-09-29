@@ -28,6 +28,17 @@ new cross-channel workflows (W1–W7), the operating model, a KPI dictionary, a 
 glossary. It renders to PDF headless (Chromium, A4, header and footer with page numbers); printing
 from Chrome also works.
 
+## Interactive handbook
+
+`handbook.html` (source `src/handbook.html`, content from `src/workflow-data.js` and
+`src/explainer-data.js`) is the playful, animated version of the handbook: one scrolling trip with 14
+stops, each with a one-line summary, why it matters and a "Try this on Monday" list. It includes an
+illustrated hero, an animated spot illustration per stop, a clickable lifecycle loop, a journey
+feeling curve with stage details, a "play the path" yes/no game for the traveller, business trip,
+MICE, property, agency and enquiry flows, channel postcards with messages, workflow steps, lead flow
+and KPIs, a north-star calculator and a short quiz. All motion stops when the reader prefers reduced
+motion. Published as a Claude artifact; `./build.sh` builds it.
+
 ## Communications Handbook (20 pages)
 
 `deliverables/Vacario-Communications-Handbook.pdf` (source `handbook-print.html`) condenses the full

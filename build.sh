@@ -40,3 +40,4 @@ build() {
 build src/app.html index.html "Marketing budget scenarios, break-even and funding need for the Vacario India growth plan."
 build src/workflows.html workflows.html "Step-by-step workflows for the seven Vacario India communication channels."
 build src/kpi-workspace.html kpi-workspace.html "Enter monthly numbers, measure all 61 KPIs, follow each channel's workflow and lead flow, and ask Claude using your own files."
+build src/handbook.html handbook.html "The vacario communications handbook as an interactive trip: lifecycle, journey, yes/no paths, channels, workflows and KPIs."

@@ -1,0 +1,847 @@
+<title>Vacario Communications Handbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Baloo+Tammudu+2:wght@600&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one long trip; numbered stops sit on a dotted route line, a plane flies along the top as you read. */
+:root{
+  color-scheme: light;
+  --paper:#f6f7fb; --card:#ffffff; --well:#eef0f7;
+  --ink:#1b1d2a; --ink-2:#4a4e66; --ink-3:#7f84a0; --line:#e1e4ef;
+  --peacock:#0b7a75; --marigold:#e59c00; --rani:#d6336c; --indigo:#3b44a8; --leaf:#2f8f3e; --chili:#d9480f;
+  --on-color:#ffffff; --shadow:0 1px 0 rgba(27,29,42,.04), 0 14px 30px -20px rgba(27,29,42,.35);
+  --display:'Baloo 2', 'Figtree', ui-rounded, system-ui, sans-serif;
+  --body:'Figtree', ui-sans-serif, system-ui, sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, monospace;
+  --telugu:'Baloo Tammudu 2', 'Baloo 2', sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#13141c; --card:#1c1e29; --well:#252838;
+    --ink:#eef0fb; --ink-2:#b4b8d2; --ink-3:#8a8fad; --line:#2e3144;
+    --peacock:#3cc7bf; --marigold:#ffc53d; --rani:#ff6b9a; --indigo:#8b93ff; --leaf:#69db7c; --chili:#ff8a50;
+    --on-color:#13141c; --shadow:0 1px 0 rgba(0,0,0,.3), 0 14px 30px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#13141c; --card:#1c1e29; --well:#252838;
+  --ink:#eef0fb; --ink-2:#b4b8d2; --ink-3:#8a8fad; --line:#2e3144;
+  --peacock:#3cc7bf; --marigold:#ffc53d; --rani:#ff6b9a; --indigo:#8b93ff; --leaf:#69db7c; --chili:#ff8a50;
+  --on-color:#13141c; --shadow:0 1px 0 rgba(0,0,0,.3), 0 14px 30px -20px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+html{scroll-padding-top:70px}
+body{margin:0; background:var(--paper); color:var(--ink); font:400 16px/1.6 var(--body); -webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0; font-family:var(--display); line-height:1.08; text-wrap:balance}
+p{margin:0}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--marigold); outline-offset:3px; border-radius:6px}
+.num,.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.soft{--c:var(--peacock); background:color-mix(in srgb, var(--c) 13%, var(--card))}
+
+/* top bar with the plane */
+.bar{position:sticky; top:env(safe-area-inset-top,0px); z-index:30; background:color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
+.bar-in{max-width:1180px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:14px}
+.bar b{font:800 17px/1 var(--display); white-space:nowrap}
+.bar b span{color:var(--peacock)}
+.trail{position:relative; flex:1; height:22px; min-width:0}
+.trail::before{content:""; position:absolute; left:0; right:0; top:50%; border-top:2px dashed var(--line)}
+.trail i{position:absolute; left:0; top:50%; height:2px; width:0; background:var(--peacock); transform:translateY(-50%)}
+.plane{position:absolute; top:50%; left:0; width:24px; height:24px; transform:translate(-50%,-50%); color:var(--peacock)}
+.stopnav{display:flex; gap:4px}
+.stopnav a{width:9px; height:9px; border-radius:50%; background:var(--line); display:block}
+.stopnav a.on{background:var(--peacock)}
+@media (max-width:760px){ .stopnav{display:none} }
+
+.shell{max-width:1180px; margin:0 auto; padding-inline:20px; padding-block:18px 90px}
+@media (max-width:520px){ .shell{padding-inline:16px} }
+
+/* hero postcard */
+.hero{position:relative; border-radius:28px; background:var(--peacock); color:var(--on-color); padding:34px 34px 30px; overflow:hidden; box-shadow:var(--shadow)}
+.hero .te{font:600 clamp(17px,2.4vw,22px)/1.5 var(--telugu)}
+.hero .en{font-size:14px; opacity:.85; margin-top:2px}
+.hero h1{font-size:clamp(30px,7.6vw,78px); overflow-wrap:anywhere; font-weight:800; letter-spacing:-.02em; margin-top:22px; line-height:.95}
+.hero h1 em{font-style:normal; color:var(--marigold)}
+.hero .sub{margin-top:14px; max-width:60ch; font-size:17px; opacity:.93}
+.hero .stamp{position:absolute; right:26px; top:22px; width:112px; height:112px; border-radius:50%; border:3px dashed color-mix(in srgb, var(--on-color) 60%, transparent); display:grid; place-items:center; text-align:center; font:800 13px/1.15 var(--display); transform:rotate(12deg); opacity:.9}
+@media (max-width:640px){ .hero{padding:26px 20px 22px} .hero .stamp{display:none} }
+.hero svg.fly{position:absolute; inset:auto 0 0 0; width:100%; height:130px; pointer-events:none; opacity:.55}
+.hero-cta{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; position:relative}
+.chip-btn{border:0; border-radius:999px; padding:10px 16px; font:700 14px/1 var(--body); background:var(--on-color); color:var(--peacock)}
+.chip-btn.ghost{background:transparent; color:var(--on-color); box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--on-color) 55%, transparent)}
+.chip-btn:hover{transform:translateY(-1px)}
+
+/* route + stops */
+.route{position:relative; margin-top:38px; padding-left:64px}
+.route::before{content:""; position:absolute; left:23px; top:10px; bottom:10px; border-left:3px dotted color-mix(in srgb, var(--peacock) 45%, var(--line))}
+@media (max-width:760px){ .route{padding-left:0} .route::before{display:none} }
+.stop{position:relative; margin-bottom:64px; --c:var(--peacock)}
+.stop > .pin{position:absolute; left:-64px; top:0; width:50px; height:50px; border-radius:50%; background:var(--card); border:3px dashed var(--c); display:grid; place-items:center; font:800 18px/1 var(--display); color:var(--c); box-shadow:var(--shadow)}
+@media (max-width:760px){ .stop > .pin{position:static; margin-bottom:10px} }
+.kicker{font:700 12px/1 var(--body); letter-spacing:.12em; text-transform:uppercase; color:var(--c)}
+.stop h2{font-size:clamp(30px,4.4vw,44px); font-weight:800; letter-spacing:-.015em; margin-top:6px}
+.oneline{margin-top:10px; font:600 clamp(18px,2.2vw,21px)/1.45 var(--body); max-width:62ch}
+.oneline mark{background:linear-gradient(transparent 58%, color-mix(in srgb, var(--marigold) 45%, transparent) 58%); color:inherit; padding:0 2px}
+.why{margin-top:10px; color:var(--ink-2); max-width:70ch}
+.body{margin-top:22px}
+.try{margin-top:22px; border-radius:var(--r); padding:16px 18px; background:color-mix(in srgb, var(--marigold) 16%, var(--card)); border:2px dashed color-mix(in srgb, var(--marigold) 60%, transparent)}
+.try h4{font-size:18px; display:flex; gap:8px; align-items:center}
+.try h4 svg{flex:none}
+.try ol{margin:8px 0 0; padding-left:22px}
+.try li{margin:4px 0}
+.card{background:var(--card); border-radius:var(--r); box-shadow:var(--shadow); padding:18px 20px; min-width:0}
+.grid{display:grid; gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){ .g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:600px){ .g2,.g3,.g4{grid-template-columns:minmax(0,1fr)} }
+.lbl{display:block; font:700 11.5px/1.2 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:5px}
+.tag{display:inline-block; font:600 12.5px/1 var(--body); padding:6px 10px; border-radius:999px; background:color-mix(in srgb, var(--c,var(--peacock)) 14%, var(--card)); color:var(--ink); margin:0 4px 4px 0}
+.small{font-size:14px} .muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:14.5px}
+th{font:700 11.5px/1.2 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); text-align:left; padding:10px 12px; background:var(--well)}
+th:first-child{border-radius:10px 0 0 10px} th:last-child{border-radius:0 10px 10px 0}
+td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:0}
+.f{font:500 13px/1.45 var(--mono); color:var(--peacock)}
+
+/* postcards for the 7 channels */
+.post{position:relative; border-radius:var(--r); background:var(--card); box-shadow:var(--shadow); padding:16px 16px 14px; border-top:6px solid var(--c); text-align:left; border-left:0; border-right:0; border-bottom:0; display:flex; flex-direction:column; gap:6px; transition:transform .2s}
+.post:hover{transform:translateY(-3px) rotate(-.4deg)}
+.post .n{position:absolute; right:12px; top:10px; font:800 26px/1 var(--display); color:color-mix(in srgb, var(--c) 40%, transparent)}
+.post h3{font-size:21px; color:var(--c)}
+.post .flow{font-size:13px; color:var(--ink-2)}
+
+/* animated map */
+.map svg{width:100%; height:auto; display:block}
+.pulse{stroke-dasharray:6 10; animation:flowdash 1.6s linear infinite}
+@keyframes flowdash{to{stroke-dashoffset:-32}}
+.calc{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; align-items:end}
+@media (max-width:640px){ .calc{grid-template-columns:minmax(0,1fr)} }
+.calc label{font-weight:600; font-size:14px; display:block; margin-bottom:5px}
+.calc input{width:100%; border:2px solid var(--line); border-radius:12px; padding:10px 12px; font:600 17px var(--mono); background:var(--paper); color:var(--ink)}
+.calc input:focus{border-color:var(--peacock); outline:none}
+.calc .out{font:800 clamp(28px,4vw,38px)/1 var(--display); color:var(--peacock)}
+
+/* lifecycle loop */
+.loop{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:20px; align-items:center}
+@media (max-width:900px){ .loop{grid-template-columns:minmax(0,1fr)} }
+.loop svg{width:100%; height:auto; display:block}
+.node{cursor:pointer}
+.node rect{transition:transform .2s; transform-box:fill-box; transform-origin:center}
+.node:hover rect, .node:focus-visible rect{transform:scale(1.06)}
+.node.on rect{stroke:var(--marigold); stroke-width:4}
+.detail h3{font-size:30px}
+.detail .who{font:600 14px var(--body); color:var(--ink-3)}
+.kv{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 18px; margin-top:12px}
+@media (max-width:520px){ .kv{grid-template-columns:minmax(0,1fr)} }
+.kv div{font-size:14.5px}
+.bench{margin-top:12px; font-size:14px; padding:10px 12px; border-radius:12px; background:var(--well)}
+.bench b{color:var(--peacock)}
+
+/* rules */
+.rule{display:flex; gap:12px; align-items:flex-start}
+.rule .ic{flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:color-mix(in srgb, var(--c) 18%, var(--card)); color:var(--c)}
+.rule h4{font-size:18px}
+
+/* yes/no game */
+.game{display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:18px; align-items:start}
+@media (max-width:860px){ .game{grid-template-columns:minmax(0,1fr)} }
+.picker{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px}
+.picker button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px; font-weight:600; font-size:14px}
+.picker button[aria-pressed="true"]{border-color:var(--peacock); background:var(--peacock); color:var(--on-color)}
+.qcard{min-height:250px; display:flex; flex-direction:column; justify-content:space-between; gap:16px; border-radius:24px; padding:26px; background:var(--card); box-shadow:var(--shadow); border:3px solid transparent}
+.qcard.ask{border-color:color-mix(in srgb, var(--marigold) 70%, transparent)}
+.qcard.detour{border-color:color-mix(in srgb, var(--rani) 70%, transparent); background:color-mix(in srgb, var(--rani) 8%, var(--card))}
+.qcard.win{border-color:var(--leaf); background:color-mix(in srgb, var(--leaf) 10%, var(--card))}
+.qcard .step{font:700 13px var(--body); color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase}
+.qcard .q{font:800 clamp(24px,3.4vw,32px)/1.15 var(--display)}
+.qcard .to{font:600 13px var(--mono); color:var(--rani); margin-top:8px}
+.acts{display:flex; gap:10px; flex-wrap:wrap}
+.big-btn{border:0; border-radius:14px; padding:13px 22px; font:800 18px/1 var(--display); color:var(--on-color); background:var(--peacock); box-shadow:0 4px 0 color-mix(in srgb, var(--peacock) 60%, #000); transition:transform .1s}
+.big-btn:active{transform:translateY(3px); box-shadow:0 1px 0 color-mix(in srgb, var(--peacock) 60%, #000)}
+.big-btn.no{background:var(--rani); box-shadow:0 4px 0 color-mix(in srgb, var(--rani) 60%, #000)}
+.big-btn.plain{background:var(--well); color:var(--ink); box-shadow:0 4px 0 var(--line)}
+.dots{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px}
+.dots i{width:14px; height:14px; border-radius:50%; background:var(--line)}
+.dots i.ok{background:var(--leaf)} .dots i.nope{background:var(--rani)} .dots i.here{background:var(--marigold); box-shadow:0 0 0 3px color-mix(in srgb, var(--marigold) 35%, transparent)}
+.log{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:13.5px; max-height:330px; overflow:auto}
+.log li{padding:7px 10px; border-radius:10px; background:var(--well)}
+.log li b{color:var(--leaf)} .log li b.n{color:var(--rani)}
+.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.97); opacity:.6}100%{transform:none; opacity:1}}
+
+/* journey */
+.jr svg{width:100%; height:auto; display:block}
+.curve.draw{animation:draw 1.8s ease forwards}
+@keyframes draw{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+.jbtns{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 16px}
+.jbtns button{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:7px 12px; font-weight:600; font-size:14px}
+.jbtns button[aria-pressed="true"]{border-color:var(--c); background:var(--c); color:var(--on-color)}
+.say{font:600 17px/1.45 var(--body); font-style:italic; padding:12px 14px; border-left:4px solid var(--marigold); background:var(--well); border-radius:0 12px 12px 0}
+
+/* timeline */
+.tl{position:relative; display:flex; flex-direction:column; gap:10px; padding-left:34px}
+.tl::before{content:""; position:absolute; left:12px; top:8px; bottom:8px; border-left:3px dashed color-mix(in srgb, var(--indigo) 40%, var(--line))}
+.tl .t{position:relative; background:var(--card); border-radius:14px; padding:10px 14px; box-shadow:var(--shadow)}
+.tl .t::before{content:""; position:absolute; left:-29px; top:14px; width:14px; height:14px; border-radius:50%; background:var(--indigo); border:3px solid var(--paper)}
+.tl .t b{font:700 13px var(--mono); color:var(--indigo); margin-right:8px}
+
+/* tickets (sales) */
+.ticket{position:relative; border-radius:var(--r); background:var(--card); box-shadow:var(--shadow); overflow:hidden}
+.ticket .hd{background:var(--c); color:var(--on-color); padding:14px 18px}
+.ticket .hd h3{font-size:22px}
+.ticket .hd span{font:700 12px var(--mono); opacity:.85}
+.ticket .bd{padding:14px 18px; border-top:3px dashed var(--paper)}
+.stagelist{list-style:none; margin:0; padding:0; counter-reset:s}
+.stagelist li{display:grid; grid-template-columns:26px minmax(0,1fr); gap:8px; padding:5px 0; font-size:14px; border-bottom:1px dashed var(--line)}
+.stagelist li:last-child{border-bottom:0}
+.stagelist li::before{counter-increment:s; content:counter(s); width:22px; height:22px; border-radius:50%; background:color-mix(in srgb, var(--c) 16%, var(--card)); color:var(--c); display:grid; place-items:center; font:700 11px var(--mono)}
+.stagelist em{font-style:normal; color:var(--ink-3); font-size:12.5px}
+
+/* channels */
+.ctabs{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; scrollbar-width:thin}
+.ctabs button{flex:none; border:0; border-radius:999px; padding:9px 15px 9px 9px; background:var(--card); box-shadow:var(--shadow); font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px}
+.ctabs button i{width:26px; height:26px; border-radius:50%; background:var(--c); color:var(--on-color); display:grid; place-items:center; font:700 11px var(--mono); font-style:normal}
+.ctabs button[aria-selected="true"]{background:var(--c); color:var(--on-color)}
+.ctabs button[aria-selected="true"] i{background:var(--on-color); color:var(--c)}
+.cpanel{margin-top:16px}
+.pill3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+@media (max-width:760px){ .pill3{grid-template-columns:minmax(0,1fr)} }
+.pill3 .card{border-top:5px solid var(--c)}
+.pill3 i{display:block; margin-top:6px; color:var(--ink-2)}
+.wsteps{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px}
+.wsteps li{position:relative; background:var(--card); border-radius:16px; padding:12px 14px; box-shadow:var(--shadow)}
+.wsteps li .sn{display:inline-grid; place-items:center; width:28px; height:28px; border-radius:9px; background:var(--c); color:var(--on-color); font:800 15px var(--display); margin-right:8px; transform:rotate(-5deg)}
+.wsteps li h4{display:inline; font-size:17px}
+.wsteps li p{font-size:14px; color:var(--ink-2); margin-top:6px}
+.wsteps li .m{display:block; font:500 12px/1.4 var(--mono); color:var(--ink-3); margin-top:6px}
+.wsteps li .gate{display:inline-block; margin-top:6px; font:600 12px var(--body); background:color-mix(in srgb, var(--marigold) 22%, var(--card)); padding:3px 8px; border-radius:8px}
+.lflow{display:flex; overflow-x:auto; padding:4px 0 34px}
+.lflow .st{flex:1 0 110px; position:relative; background:var(--c); color:var(--on-color); font:700 13.5px/1.15 var(--body); text-align:center; padding:12px 16px; clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%)}
+.lflow .st:first-child{clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)}
+.lflow .st:nth-child(odd){filter:saturate(.8) brightness(1.08)}
+.lflow .cv{position:relative; width:0}
+.lflow .cv span{position:absolute; top:48px; left:0; transform:translateX(-50%); font:600 11px/1.1 var(--mono); color:var(--c); background:var(--card); border:1.5px solid var(--c); border-radius:6px; padding:3px 6px; white-space:nowrap}
+.kpis{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px}
+.kpi{background:var(--card); border-radius:16px; padding:12px 14px; box-shadow:var(--shadow)}
+.kpi h4{font-size:17px}
+.kpi p{font-size:13.5px; color:var(--ink-2); margin-top:4px}
+.kpi .f{margin-top:8px; display:block; padding:7px 9px; background:var(--well); border-radius:10px}
+.kpi .m{display:block; margin-top:6px; font-size:12px; color:var(--ink-3)}
+.story{border-radius:16px; padding:14px 16px; background:color-mix(in srgb, var(--c) 10%, var(--card)); font-size:15px}
+.story b{font:700 12px var(--mono); background:var(--c); color:var(--on-color); padding:2px 6px; border-radius:6px}
+
+/* accordion */
+details.acc{background:var(--card); border-radius:16px; box-shadow:var(--shadow)}
+details.acc + details.acc{margin-top:10px}
+details.acc summary{list-style:none; cursor:pointer; padding:14px 18px; display:flex; gap:12px; align-items:center}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary .n{flex:none; width:42px; height:42px; border-radius:12px; background:var(--peacock); color:var(--on-color); display:grid; place-items:center; font:800 15px var(--display)}
+details.acc summary h4{font-size:19px}
+details.acc summary p{font-size:14px; color:var(--ink-2)}
+details.acc summary::after{content:"+"; margin-left:auto; font:800 24px var(--display); color:var(--peacock); transition:transform .2s}
+details.acc[open] summary::after{transform:rotate(45deg)}
+details.acc .in{padding:0 18px 18px}
+.chain{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.chain span{font-size:13.5px; font-weight:600; padding:6px 10px; border-radius:10px; background:var(--well)}
+.chain i{color:var(--ink-3); font-style:normal}
+
+/* RACI + week */
+.raci{display:inline-grid; place-items:center; width:30px; height:30px; border-radius:9px; font:800 14px var(--display)}
+.raci.A{background:var(--peacock); color:var(--on-color)} .raci.R{background:color-mix(in srgb, var(--peacock) 20%, var(--card)); color:var(--peacock)}
+.raci.C{background:color-mix(in srgb, var(--marigold) 25%, var(--card)); color:var(--ink)} .raci.I{background:var(--well); color:var(--ink-3)}
+.week{display:grid; grid-template-columns:repeat(5,minmax(120px,1fr)); gap:10px; min-width:640px}
+.week div{background:var(--card); border-radius:14px; padding:10px; box-shadow:var(--shadow)}
+.week h4{font-size:16px; margin-bottom:6px}
+.week span{display:block; font-size:12.5px; font-weight:600; padding:5px 8px; border-radius:8px; margin-top:5px; background:color-mix(in srgb, var(--c) 16%, var(--card))}
+.ladder{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.ladder span{font-weight:700; font-size:14px; padding:8px 12px; border-radius:999px; background:color-mix(in srgb, var(--c) 18%, var(--card))}
+.ladder i{color:var(--ink-3); font-style:normal}
+
+/* benchmarks as stamps */
+.stamps{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
+.stampc{position:relative; background:var(--card); padding:16px 16px 14px; border-radius:6px; box-shadow:var(--shadow);
+  -webkit-mask:radial-gradient(circle 5px at 5px 5px, transparent 98%, #000) -5px -5px / 14px 14px;
+          mask:radial-gradient(circle 5px at 5px 5px, transparent 98%, #000) -5px -5px / 14px 14px}
+.stampc .who{font:700 12px var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--rani)}
+.stampc h4{font-size:19px; margin:4px 0 6px}
+
+/* quiz */
+.quiz{display:flex; flex-direction:column; gap:14px}
+.qz h4{font-size:19px}
+.qz .opts{display:grid; gap:8px; margin-top:10px}
+.qz button{text-align:left; border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 12px; font-size:15px}
+.qz button:hover{border-color:var(--peacock)}
+.qz button.right{border-color:var(--leaf); background:color-mix(in srgb, var(--leaf) 14%, var(--card))}
+.qz button.wrong{border-color:var(--rani); background:color-mix(in srgb, var(--rani) 10%, var(--card))}
+.qz .why{margin-top:8px; font-size:14.5px}
+.score{font:800 22px var(--display); color:var(--peacock)}
+
+/* glossary */
+.words{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px}
+.words div{background:var(--card); border-radius:14px; padding:10px 14px; box-shadow:var(--shadow); font-size:14px; color:var(--ink-2)}
+.words b{display:block; font:800 18px var(--display); color:var(--ink)}
+
+/* illustrations */
+.shead{display:flex; gap:22px; align-items:flex-start; justify-content:space-between}
+.shead > div:first-child{min-width:0}
+.ill{flex:none; width:210px; height:auto; margin-top:4px}
+@media (max-width:760px){ .ill{width:130px} }
+@media (max-width:480px){ .ill{display:none} }
+.hero-scene{position:relative; display:block; width:100%; height:auto; margin-top:22px; border-radius:18px}
+@media (prefers-reduced-motion:no-preference){
+  .drift{animation:drift 22s linear infinite} .drift.slow{animation-duration:34s}
+  @keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(1000px)}}
+  .drift-sm{animation:driftsm 9s linear infinite}
+  @keyframes driftsm{from{transform:translateX(-70px)}to{transform:translateX(250px)}}
+  .drive{animation:drive 14s linear infinite; animation-delay:-5s}
+  @keyframes drive{from{transform:translateX(-160px)}to{transform:translateX(1060px)}}
+  .wheel{animation:spin 1s linear infinite; transform-box:fill-box; transform-origin:center}
+  .spin{animation:spin 8s linear infinite; transform-box:fill-box; transform-origin:center}
+  .spin.rev{animation-direction:reverse; animation-duration:6s}
+  .spin.fast{animation-duration:4s}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .sway{animation:sway 4s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%}
+  @keyframes sway{50%{transform:rotate(4deg)}}
+  .swing{animation:swing 3s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 0%}
+  @keyframes swing{50%{transform:rotate(-8deg)}}
+  .glow{animation:glow 4s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
+  @keyframes glow{50%{transform:scale(1.08)}}
+  .bub{animation:bub 6s ease-in-out infinite; opacity:1}
+  .bub.b2{animation-delay:1.2s} .bub.b3{animation-delay:2.4s}
+  @keyframes bub{0%,8%{transform:translateY(8px); opacity:.2}16%,86%{transform:none; opacity:1}100%{opacity:.2}}
+  .wave{animation:wave 2s ease-out infinite; transform-box:fill-box; transform-origin:0% 50%}
+  .wave.w2{animation-delay:.5s} .wave.w3{animation-delay:1s}
+  @keyframes wave{0%{opacity:0; transform:scale(.7)}40%{opacity:1}100%{opacity:0; transform:scale(1.15)}}
+  .fly2{animation:fly2 5s ease-in-out infinite}
+  @keyframes fly2{50%{transform:translate(10px,-8px) rotate(-4deg)}}
+  .hop{animation:hop 2.6s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%}
+  .hop.h2{animation-delay:.4s} .hop.h3{animation-delay:.8s}
+  @keyframes hop{0%,60%,100%{transform:none}30%{transform:translateY(-8px)}}
+}
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:60}
+
+/* reveal: content is always visible; stops animate in when they arrive */
+@media (prefers-reduced-motion:no-preference){
+  .stop.in > *{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .stop.in > *:nth-child(2){animation-delay:.05s} .stop.in > *:nth-child(3){animation-delay:.1s} .stop.in > *:nth-child(4){animation-delay:.15s}
+  @keyframes rise{from{transform:translateY(18px); opacity:.35}to{transform:none; opacity:1}}
+  .bob{animation:bob 3.2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-4px) rotate(-2deg)}}
+}
+@media (prefers-reduced-motion:reduce){ .pulse{animation:none} .post:hover{transform:none} }
+.foot{margin-top:40px; padding-top:18px; border-top:2px dashed var(--line); color:var(--ink-3); font-size:13.5px}
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <b>vacario <span>handbook</span></b>
+    <div class="trail" aria-hidden="true"><i id="trailFill"></i>
+      <svg class="plane" id="plane" viewBox="0 0 24 24"><path fill="currentColor" d="M2.5 13.2 21 5.5c.6-.3 1.2.3.9.9L14.8 22c-.3.6-1.2.5-1.3-.1l-1.4-6.3-6.3-1.4c-.6-.1-.7-1-.1-1.3z"/></svg>
+    </div>
+    <nav class="stopnav" id="stopnav" aria-label="Stops"></nav>
+  </div>
+</header>
+
+<div class="shell">
+  <section class="hero" id="top">
+    <div class="stamp bob" aria-hidden="true">INDIA<br>FIRST<br>FALL 2026</div>
+    <div class="te">ప్రపంచంలోని మరే దేశానికంటే ముందుగా, ప్రయాణాల కొత్త తరం భారతదేశానికి రాబోతోంది.</div>
+    <div class="en">The Next Generation of Travel is Coming to India Before Any Other Country On the Planet</div>
+    <h1>The Communications<br><em>Handbook</em></h1>
+    <p class="sub">Everything in vacario’s Fall 2026 plan, as a trip you can take in one sitting. Fourteen stops: the seven channels, the customer’s lifecycle and journey, the sales cycles, corporate travel, every workflow and every KPI. Each stop tells you what it is, why it matters and what to try on Monday.</p>
+    <div class="hero-cta">
+      <a class="chip-btn" href="#s-play" style="text-decoration:none">Play the traveller’s path</a>
+      <a class="chip-btn ghost" href="#s-channels" style="text-decoration:none">Jump to the channels</a>
+    </div>
+    <svg class="hero-scene" viewBox="0 0 1000 220" role="img" aria-label="A road trip through hills, with an auto-rickshaw driving past palms under the sun">
+      <rect width="1000" height="220" fill="color-mix(in srgb, var(--on-color) 14%, transparent)"/>
+      <circle class="glow" cx="820" cy="70" r="38" fill="var(--marigold)"/>
+      <g class="drift" fill="var(--on-color)" opacity=".85"><ellipse cx="80" cy="52" rx="42" ry="14"/><ellipse cx="108" cy="42" rx="26" ry="16"/></g>
+      <g class="drift slow" fill="var(--on-color)" opacity=".6"><ellipse cx="-60" cy="92" rx="36" ry="11"/><ellipse cx="-38" cy="84" rx="22" ry="13"/></g>
+      <path d="M0 170 C120 110 220 120 330 150 S560 100 690 140 S900 110 1000 150 V220 H0Z" fill="color-mix(in srgb, var(--leaf) 55%, var(--peacock))"/>
+      <path d="M0 190 C160 150 300 170 450 180 S760 150 1000 175 V220 H0Z" fill="color-mix(in srgb, var(--leaf) 75%, #000)" opacity=".55"/>
+      <g class="sway"><rect x="146" y="120" width="6" height="62" rx="3" fill="#6b4a2b"/><path d="M149 122 q-34 -8 -44 10 q24 -4 44 -10 q30 -18 46 0 q-24 -6 -46 0 q-10 -30 10 -40 q-4 20 -10 40" fill="var(--leaf)"/></g>
+      <g class="sway" style="animation-delay:1s"><rect x="612" y="128" width="6" height="56" rx="3" fill="#6b4a2b"/><path d="M615 130 q-30 -8 -40 9 q22 -4 40 -9 q28 -16 42 0 q-22 -6 -42 0 q-8 -26 9 -36 q-4 18 -9 36" fill="var(--leaf)"/></g>
+      <rect x="0" y="196" width="1000" height="10" fill="var(--ink)" opacity=".35"/>
+      <g stroke="var(--on-color)" stroke-width="2" stroke-dasharray="14 14" opacity=".7"><line x1="0" y1="201" x2="1000" y2="201"/></g>
+      <g class="drive"><g transform="translate(0,150)">
+        <path d="M8 40 V18 Q10 4 34 4 H62 Q76 6 80 24 V40Z" fill="var(--marigold)"/><rect x="0" y="12" width="84" height="6" rx="3" fill="var(--ink)" opacity=".75"/>
+        <path d="M40 8 H58 Q68 10 70 26 H40Z" fill="var(--on-color)" opacity=".8"/><rect x="14" y="22" width="18" height="10" rx="2" fill="var(--ink)" opacity=".5"/>
+        <g class="wheel"><circle cx="20" cy="42" r="8" fill="var(--ink)"/><rect x="18.5" y="35" width="3" height="14" fill="var(--on-color)"/></g>
+        <g class="wheel"><circle cx="68" cy="42" r="8" fill="var(--ink)"/><rect x="66.5" y="35" width="3" height="14" fill="var(--on-color)"/></g></g></g>
+    </svg>
+  </section>
+
+  <div class="route" id="route"></div>
+  <p class="foot">Built from the vacario India Fall 2026 Integrated Sales, Marketing and Promotions Plan. The channel flows are quoted from the plan; lifecycles, journeys, workflows, owners, time limits and KPI targets are proposals for the team to adjust and approve. Benchmarks describe other companies’ public programmes as checked in September 2026. The full 88-page explainer holds every detail.</p>
+</div>
+
+<script data-inline="workflow-data.js" src="workflow-data.js"></script>
+<script data-inline="explainer-data.js" src="explainer-data.js"></script>
+<script>
+/* ------------------------------------------------------------------ helpers */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const short = c => c.name.replace(' Communications', '');
+const CHM = Object.fromEntries(CH.map(c => [c.id, c]));
+const CC = {consumer:'var(--rani)', supply:'var(--chili)', creator:'var(--indigo)', destination:'var(--leaf)', corporate:'var(--peacock)', lifecycle:'var(--marigold)', internal:'var(--ink-2)'};
+function fText(k){
+  if (!Array.isArray(k.f)) return k.f;
+  const [n, d] = k.f;
+  return k.u === '%' ? `${n} ÷ ${d} × 100` : k.u === 'inv' ? `(1 − ${n} ÷ ${d}) × 100` : `${n} ÷ ${d}`;
+}
+const inr = v => Number(v).toLocaleString('en-IN', {maximumFractionDigits:0});
+const tryBox = items => `<div class="try"><h4><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg>Try this on Monday</h4><ol>${items.map(x => `<li>${x}</li>`).join('')}</ol></div>`;
+const STOPS = [];
+/* small animated spot illustrations, one per stop (simple shapes, theme colours) */
+const svgI = (label, inner) => `<svg class="ill" viewBox="0 0 220 160" role="img" aria-label="${label}">${inner}</svg>`;
+const gear = (cx, cy, r, col, cls) => `<g class="spin ${cls || ''}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${r * .42}" stroke-dasharray="${(2 * Math.PI * r / 20).toFixed(2)} ${(2 * Math.PI * r / 20).toFixed(2)}"/><circle cx="${cx}" cy="${cy}" r="${r * .78}" fill="${col}"/><circle cx="${cx}" cy="${cy}" r="${r * .28}" fill="var(--card)"/></g>`;
+const ILL = {
+  plan:() => svgI('A fan of seven postcards', `${[-24,-16,-8,0,8,16,24].map((a, i) => `<g transform="rotate(${a} 110 150)"><rect x="80" y="30" width="60" height="84" rx="6" fill="var(--card)" stroke="${['var(--rani)','var(--chili)','var(--indigo)','var(--leaf)','var(--peacock)','var(--marigold)','var(--ink-3)'][i]}" stroke-width="4"/></g>`).join('')}
+    <g class="hop"><rect x="120" y="36" width="16" height="18" rx="2" fill="var(--marigold)"/><circle cx="128" cy="45" r="4" fill="var(--card)"/></g>`),
+  system:() => svgI('Messages flowing to the traveller', `<circle cx="110" cy="80" r="26" fill="var(--peacock)"/><circle cx="110" cy="72" r="8" fill="var(--on-color)"/><path d="M96 96 q14 -18 28 0" fill="var(--on-color)"/>
+    ${[[30,30,'var(--rani)'],[190,30,'var(--chili)'],[30,130,'var(--indigo)'],[190,130,'var(--leaf)']].map(([x, y, c], i) => `<circle cx="${x}" cy="${y}" r="14" fill="${c}"/><path class="pulse" d="M${x},${y} L110,80" stroke="${c}" stroke-width="3"/>`).join('')}`),
+  lifecycle:() => svgI('A traveller going round the lifecycle', `<ellipse cx="110" cy="80" rx="80" ry="54" fill="none" stroke="var(--line)" stroke-width="4" stroke-dasharray="4 8"/>
+    <g class="spin" style="transform-origin:110px 80px"><circle cx="190" cy="80" r="10" fill="var(--marigold)"/></g>
+    ${[0,1,2,3,4,5,6,7,8].map(i => { const a = -Math.PI / 2 + i * 2 * Math.PI / 9; return `<circle cx="${(110 + 80 * Math.cos(a)).toFixed(1)}" cy="${(80 + 54 * Math.sin(a)).toFixed(1)}" r="7" fill="${i < 4 ? 'var(--peacock)' : i < 7 ? 'var(--indigo)' : 'var(--rani)'}"/>`; }).join('')}
+    <text x="110" y="86" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)" font-family="Baloo 2, sans-serif">L1–L9</text>`),
+  rules:() => svgI('A phone receiving a few friendly messages', `<rect x="70" y="10" width="80" height="140" rx="14" fill="var(--ink)"/><rect x="76" y="22" width="68" height="116" rx="6" fill="var(--card)"/>
+    <g class="bub"><rect x="82" y="32" width="46" height="18" rx="9" fill="var(--peacock)"/></g><g class="bub b2"><rect x="92" y="58" width="46" height="18" rx="9" fill="var(--well)"/></g>
+    <g class="bub b3"><rect x="82" y="84" width="54" height="18" rx="9" fill="var(--marigold)"/></g><circle cx="110" cy="128" r="5" fill="var(--line)"/>
+    <g class="hop"><circle cx="176" cy="40" r="16" fill="var(--rani)"/><path d="M169 40 l5 5 9 -10" stroke="var(--on-color)" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>`),
+  play:() => svgI('A signpost pointing to yes and no', `<rect x="104" y="30" width="10" height="120" rx="4" fill="#8a5a2b"/>
+    <g class="swing"><path d="M114 40 h66 l14 14 -14 14 h-66z" fill="var(--leaf)"/><text x="148" y="59" text-anchor="middle" font-size="17" font-weight="800" fill="var(--on-color)" font-family="Baloo 2, sans-serif">YES</text></g>
+    <g class="swing" style="animation-delay:.8s"><path d="M104 80 h-64 l-14 14 14 14 h64z" fill="var(--rani)"/><text x="70" y="99" text-anchor="middle" font-size="17" font-weight="800" fill="var(--on-color)" font-family="Baloo 2, sans-serif">NO</text></g>
+    <ellipse cx="109" cy="150" rx="40" ry="6" fill="var(--line)"/>`),
+  journey:() => svgI('A suitcase on its way', `<path d="M10 130 C60 60 110 150 160 80 S210 40 215 40" fill="none" stroke="var(--indigo)" stroke-width="4" stroke-dasharray="3 9" stroke-linecap="round"/>
+    <g class="hop"><rect x="80" y="52" width="56" height="44" rx="8" fill="var(--marigold)"/><rect x="98" y="42" width="20" height="12" rx="4" fill="none" stroke="var(--ink)" stroke-width="4"/>
+    <rect x="80" y="70" width="56" height="5" fill="var(--ink)" opacity=".4"/><circle cx="90" cy="100" r="5" fill="var(--ink)"/><circle cx="126" cy="100" r="5" fill="var(--ink)"/></g>`),
+  trip:() => svgI('A plane over the clouds', `<g class="drift-sm" fill="var(--well)"><ellipse cx="20" cy="120" rx="40" ry="14"/><ellipse cx="44" cy="110" rx="24" ry="14"/></g>
+    <g class="drift-sm" fill="var(--well)" style="animation-delay:-4s"><ellipse cx="10" cy="60" rx="30" ry="10"/></g>
+    <g class="fly2"><path d="M40 90 L170 50 c10 -3 16 6 8 12 L70 118 c-6 4 -14 0 -12 -8z" fill="var(--indigo)"/><path d="M110 70 l-26 -34 h14 l40 26z" fill="var(--peacock)"/><path d="M78 104 l-20 16 h10 l28 -12z" fill="var(--peacock)"/></g>`),
+  sales:() => svgI('A property, a travel agent ticket and a chat', `<g class="hop"><path d="M20 80 l30 -26 30 26 v44 h-60z" fill="var(--chili)"/><rect x="42" y="100" width="16" height="24" fill="var(--card)"/></g>
+    <g class="hop h2"><rect x="88" y="62" width="50" height="62" rx="6" fill="var(--indigo)"/><circle cx="88" cy="93" r="6" fill="var(--card)"/><circle cx="138" cy="93" r="6" fill="var(--card)"/><rect x="98" y="74" width="30" height="5" rx="2" fill="var(--on-color)"/><rect x="98" y="104" width="22" height="5" rx="2" fill="var(--on-color)"/></g>
+    <g class="hop h3"><path d="M150 64 h54 a8 8 0 0 1 8 8 v30 a8 8 0 0 1 -8 8 h-30 l-14 12 v-12 h-10 a8 8 0 0 1 -8 -8 v-30 a8 8 0 0 1 8 -8z" fill="var(--leaf)"/><circle cx="166" cy="87" r="4" fill="var(--on-color)"/><circle cx="178" cy="87" r="4" fill="var(--on-color)"/><circle cx="190" cy="87" r="4" fill="var(--on-color)"/></g>`),
+  'corporate-travel':() => svgI('A briefcase and a conference badge', `<g class="hop"><rect x="30" y="60" width="100" height="70" rx="10" fill="var(--peacock)"/><rect x="62" y="46" width="36" height="18" rx="5" fill="none" stroke="var(--ink)" stroke-width="5"/><rect x="30" y="86" width="100" height="6" fill="var(--ink)" opacity=".35"/><rect x="72" y="80" width="16" height="16" rx="3" fill="var(--marigold)"/></g>
+    <g class="swing"><line x1="170" y1="10" x2="170" y2="44" stroke="var(--ink-3)" stroke-width="3"/><rect x="146" y="44" width="48" height="62" rx="6" fill="var(--card)" stroke="var(--indigo)" stroke-width="4"/><circle cx="170" cy="66" r="9" fill="var(--indigo)"/><rect x="156" y="84" width="28" height="5" rx="2" fill="var(--indigo)"/><text x="170" y="100" text-anchor="middle" font-size="8" font-weight="800" fill="var(--ink)" font-family="Figtree, sans-serif">MICE</text></g>`),
+  channels:() => svgI('A megaphone sending out messages', `<g class="hop"><path d="M40 70 L120 36 V124 L40 90z" fill="var(--rani)"/><rect x="24" y="68" width="20" height="24" rx="4" fill="var(--ink)"/><path d="M50 92 l8 28 h14 l-6 -26z" fill="var(--ink)" opacity=".7"/></g>
+    <path class="wave" d="M136 56 q22 24 0 48" stroke="var(--marigold)" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path class="wave w2" d="M152 44 q34 36 0 72" stroke="var(--marigold)" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path class="wave w3" d="M168 32 q46 48 0 96" stroke="var(--marigold)" stroke-width="6" fill="none" stroke-linecap="round"/>`),
+  workflows:() => svgI('Gears turning together', gear(80, 84, 38, 'var(--peacock)') + gear(150, 56, 26, 'var(--marigold)', 'rev') + gear(160, 118, 18, 'var(--rani)', 'fast')),
+  running:() => svgI('A clock and three time zones', `<circle cx="80" cy="80" r="56" fill="var(--card)" stroke="var(--ink)" stroke-width="6"/>
+    ${[...Array(12)].map((_, i) => { const a = i * Math.PI / 6; return `<circle cx="${(80 + 44 * Math.cos(a)).toFixed(1)}" cy="${(80 + 44 * Math.sin(a)).toFixed(1)}" r="2.5" fill="var(--ink-3)"/>`; }).join('')}
+    <g class="spin" style="transform-origin:80px 80px; animation-duration:12s"><rect x="78" y="36" width="4" height="46" rx="2" fill="var(--rani)"/></g>
+    <g class="spin" style="transform-origin:80px 80px; animation-duration:60s"><rect x="77" y="52" width="6" height="30" rx="3" fill="var(--ink)"/></g><circle cx="80" cy="80" r="5" fill="var(--ink)"/>
+    ${[['CA','8:30',24,'var(--rani)'],['IN','18:00',70,'var(--peacock)'],['PH','20:30',116,'var(--indigo)']].map(([z, t, y, c], i) => `<g class="hop h${i + 1}"><rect x="150" y="${y}" width="62" height="30" rx="8" fill="${c}"/><text x="181" y="${y + 20}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--on-color)" font-family="IBM Plex Mono, monospace">${z} ${t}</text></g>`).join('')}`),
+  bench:() => svgI('A travel stamp', `<g class="spin" style="animation-duration:30s"><circle cx="110" cy="80" r="64" fill="none" stroke="var(--rani)" stroke-width="5" stroke-dasharray="8 6"/></g>
+    <circle cx="110" cy="80" r="48" fill="color-mix(in srgb, var(--rani) 14%, var(--card))" stroke="var(--rani)" stroke-width="3"/>
+    <text x="110" y="76" text-anchor="middle" font-size="20" font-weight="800" fill="var(--rani)" font-family="Baloo 2, sans-serif">BEST</text><text x="110" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="var(--rani)" font-family="Figtree, sans-serif">OF THE OTAs</text>`),
+  go:() => svgI('A flag at the summit', `<path d="M10 150 L80 60 L120 100 L160 50 L215 150z" fill="color-mix(in srgb, var(--leaf) 60%, var(--card))"/><path d="M160 50 L175 70 L168 70 L160 60 L152 72 L146 68z" fill="var(--card)"/>
+    <rect x="158" y="10" width="4" height="42" fill="var(--ink)"/><g class="swing" style="transform-origin:162px 12px"><path d="M162 12 h36 l-8 10 8 10 h-36z" fill="var(--marigold)"/></g>`)
+};
+function stop(id, title, kicker, oneline, why, body, tries, color){
+  STOPS.push({id, title});
+  return `<section class="stop" id="s-${id}" style="--c:${color || 'var(--peacock)'}">
+    <div class="pin">${String(STOPS.length).padStart(2, '0')}</div>
+    <div class="shead"><div><div class="kicker">${esc(kicker)}</div><h2>${esc(title)}</h2>
+      <p class="oneline">${oneline}</p>${why ? `<p class="why">${why}</p>` : ''}</div>${ILL[id] ? ILL[id]() : ''}</div>
+    <div class="body">${body}</div>
+    ${tries ? tryBox(tries) : ''}
+  </section>`;
+}
+const R = [];
+
+/* ------------------------------------------------------------------ 1 the plan */
+R.push(stop('plan', 'The plan in one breath', 'Stop 1 · the big picture',
+  'Every message vacario sends belongs to <mark>one of seven channels</mark>, and each channel has one job, one audience and one path.',
+  'The plan asks each channel for clear, measurable objectives and the tactics to reach them. This handbook turns that into a working system: who says what, to whom, where, in which order, and how we know it worked. The rule behind all of it comes straight from the plan: “One company, one source of truth, and one clearly defined communications path from strategy through execution.”',
+  `<div class="grid g4">${CH.map(c => `<button class="post" style="--c:${CC[c.id]}" data-go="${c.id}"><span class="n">${c.n}</span><h3>${esc(short(c))}</h3>
+    <span class="small muted">${esc(c.who.join(', '))}</span><span class="flow">${esc(c.chain.join(' → '))}</span></button>`).join('')}
+    <div class="post" style="--c:var(--ink-3)"><h3 style="color:var(--ink)">Tap a card</h3><span class="small muted">Each postcard opens its channel at stop 10: messages, workflow, lead flow and KPIs.</span></div></div>`,
+  ['Before you send any message, name its channel. If it doesn’t fit one, it probably shouldn’t go out.', 'Find your own name in the “Who owns what” grid at stop 12.', 'Bookmark stop 10 for the channel you work in.']));
+
+/* ------------------------------------------------------------------ 2 system + north star */
+R.push(stop('system', 'How it all fits together', 'Stop 2 · the system',
+  'Four channels feed the traveller’s booking, Lifecycle keeps everyone who joins, Corporate builds trust, and Internal keeps us <mark>on one set of numbers</mark>.',
+  'The arrows below are real handoffs: what one team produces, another team uses. Everything is measured against one north star, the value of trips that actually happen.',
+  `<div class="card map"><svg viewBox="0 0 700 380" role="img" aria-label="The seven channels around the traveller">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--peacock)"/></marker></defs>
+    <g font-family="Figtree, sans-serif">
+    <ellipse cx="350" cy="160" rx="140" ry="86" fill="none" stroke="var(--marigold)" stroke-width="2.5" stroke-dasharray="7 7" class="pulse"/>
+    <text x="350" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">06 Lifecycle loops around everyone who joins</text>
+    <rect x="262" y="124" width="176" height="72" rx="20" fill="var(--peacock)"/>
+    <text x="350" y="156" text-anchor="middle" font-size="19" font-weight="800" fill="var(--on-color)" font-family="Baloo 2, sans-serif">Traveller</text>
+    <text x="350" y="178" text-anchor="middle" font-size="12" fill="var(--on-color)">book · travel · review · repeat</text>
+    ${[[12,18,'consumer','ads · social · CRM · referral'],[498,18,'supply','inventory · availability · price'],[12,226,'creator','content → followers → bookings'],[498,226,'destination','in-trip offers · local content']].map(([x,y,id,b]) => `
+      <rect x="${x}" y="${y}" width="190" height="60" rx="16" fill="var(--card)" stroke="${CC[id]}" stroke-width="2.5"/>
+      <text x="${x+95}" y="${y+27}" text-anchor="middle" font-size="15" font-weight="800" fill="${CC[id]}" font-family="Baloo 2, sans-serif">${CHM[id].n} ${esc(short(CHM[id]))}</text>
+      <text x="${x+95}" y="${y+46}" text-anchor="middle" font-size="11" fill="var(--ink-2)">${b}</text>`).join('')}
+    <g stroke="var(--peacock)" stroke-width="2.5" fill="none" marker-end="url(#ah)"><path class="pulse" d="M202,60 L262,128"/><path class="pulse" d="M498,60 L438,128"/><path class="pulse" d="M202,250 L262,192"/><path class="pulse" d="M498,250 L438,192"/></g>
+    <rect x="262" y="262" width="176" height="46" rx="14" fill="var(--card)" stroke="${CC.corporate}" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="350" y="283" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink)" font-family="Baloo 2, sans-serif">05 Corporate</text>
+    <text x="350" y="299" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">investors · media · government</text>
+    <rect x="12" y="322" width="676" height="50" rx="16" fill="var(--well)"/>
+    <text x="350" y="344" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink)" font-family="Baloo 2, sans-serif">07 Internal · one source of truth</text>
+    <text x="350" y="362" text-anchor="middle" font-size="11" fill="var(--ink-2)">Canada ↔ India ↔ Philippines · meetings · one dashboard · knowledge base · escalation</text>
+    </g></svg></div>
+  <div class="card" style="margin-top:16px">
+    <span class="lbl">Our north star · try it</span>
+    <p class="small muted" style="margin-bottom:12px">Completed trips × average booking value = the value of trips people actually took. Type your own numbers; the example values are only a demonstration.</p>
+    <div class="calc">
+      <div><label for="nsTrips">Completed trips this month</label><input id="nsTrips" inputmode="numeric" value="500"></div>
+      <div><label for="nsAbv">Average booking value (₹)</label><input id="nsAbv" inputmode="numeric" value="9000"></div>
+      <div><span class="lbl">North star</span><div class="out" id="nsOut">₹45,00,000</div></div>
+    </div>
+  </div>
+  <div class="tbl card" style="margin-top:16px"><table><thead><tr><th>From</th><th>To</th><th>What moves</th></tr></thead><tbody>${HAND.map(h => `<tr><td><b>${esc(h[0])}</b></td><td style="color:var(--peacock); font-weight:700">→ ${esc(h[1])}</td><td>${esc(h[2])}</td></tr>`).join('')}</tbody></table></div>`,
+  ['Say the north star out loud in your next meeting, with this month’s number.', 'Pick one handoff your team receives. Ask the sending team what “good” looks like for them.', 'If you can’t trace your work to one of the four arrows, ask which one it serves.']));
+
+/* ------------------------------------------------------------------ 3 lifecycle loop */
+R.push(stop('lifecycle', 'The customer lifecycle', 'Stop 3 · where each traveller is',
+  'Nine stages, from first seeing vacario to recommending it. Each has <mark>a rule for getting in, a rule for getting out, and one owner</mark>.',
+  'Because every stage has an entry rule, we can count how many people are in it. Because it has an exit rule, everyone knows what “moving them on” means. Tap a stage to see its rules, messages, owner and KPIs.',
+  `<div class="loop card"><div id="loopSvg"></div><div class="detail" id="loopDetail" aria-live="polite"></div></div>`,
+  ['Pick one stage you influence. Write down how many people are in it today.', 'Check that every message you send names the stage it is for.', 'Look at the At-risk rule: who on your team calls a traveller who has gone quiet for 60 days?'], 'var(--indigo)'));
+
+/* ------------------------------------------------------------------ 4 house rules */
+const RULE_ICON = ['M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z','M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z','M5 12l5 5L20 7','M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z','M3 12h18M3 6h18M3 18h12','M4 5h16v11H8l-4 4z'];
+R.push(stop('rules', 'House rules for every message', 'Stop 4 · respect the traveller',
+  'People stay when messages feel welcome. Six rules keep them welcome, and <mark>service always beats sales</mark>.',
+  'These rules apply to every channel. Lifecycle owns the calendar of who hears what, so nobody gets five messages in one day from five teams. When travellers go quiet, the states below say exactly what happens next.',
+  `<div class="grid g3">${CONTACT_RULES.map((r, i) => `<div class="card rule" style="--c:${['var(--peacock)','var(--indigo)','var(--leaf)','var(--rani)','var(--marigold)','var(--chili)'][i]}">
+      <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${RULE_ICON[i]}"/></svg></div>
+      <div><h4>${esc(r[0])}</h4><p class="small muted">${esc(r[1])}</p></div></div>`).join('')}</div>
+    <div class="grid g3" style="margin-top:16px">${LIFE_SIDE.map(r => `<div class="card soft" style="--c:var(--rani)"><h4 style="font-size:20px">${esc(r.name)}</h4><p class="small" style="margin-top:6px"><b>When:</b> ${esc(r.rule)}</p><p class="small muted" style="margin-top:6px"><b>We:</b> ${esc(r.act)}</p></div>`).join('')}</div>`,
+  ['Count the marketing messages one test traveller got last week. More than seven? Talk to Lifecycle.', 'Check that nobody with an open complaint is on this week’s campaign list.', 'Make sure every WhatsApp list you use has recorded consent.'], 'var(--rani)'));
+
+/* ------------------------------------------------------------------ 5 yes/no game */
+const PATHS = {traveller:DECIDE.traveller, business:DECIDE.business, mice:DECIDE.mice, property:SALES[0].decide, agency:SALES[1].decide, enquiry:SALES[2].decide};
+const PATH_LBL = {traveller:'Traveller', business:'Business trip', mice:'MICE event', property:'Property onboarding', agency:'Travel agency', enquiry:'Enquiry'};
+R.push(stop('play', 'Play the path: yes or no', 'Stop 5 · every “no” has a next step',
+  'Pick a path and answer each question. Follow “yes” to move on; every “no” shows <mark>exactly what the team does next</mark>, so no one is ever left without a step.',
+  'The same yes/no logic runs through every flow in this handbook: the traveller, a business trip, a MICE event, a new property, a travel agency and an incoming enquiry. Playing it once is the fastest way to learn it.',
+  `<div class="picker" id="picker" role="group" aria-label="Choose a path">${Object.keys(PATHS).map(k => `<button data-path="${k}" aria-pressed="${k === 'traveller'}">${PATH_LBL[k]}</button>`).join('')}</div>
+   <div class="game"><div><div class="qcard" id="qcard" aria-live="polite"></div><div class="dots" id="gdots" aria-hidden="true"></div></div>
+   <div class="card"><span class="lbl">Your trail</span><ul class="log" id="glog"></ul></div></div>`,
+  ['Play the path for the flow you own and note every “no” your team handles today without a written next step.', 'Pick one “no” and put its time limit on your team board.', 'Share this stop with a new joiner on day one.'], 'var(--marigold)'));
+
+/* ------------------------------------------------------------------ 6 journey */
+R.push(stop('journey', 'The customer journey', 'Stop 6 · one trip, from their side',
+  'The lifecycle says where a traveller is; the journey says <mark>what the trip feels like to them</mark>. We design every message for the moment it arrives.',
+  'The curve shows how the traveller feels at each stage (a planning estimate to test with real research). The dips are where things go wrong, and where we have to be at our best. Tap a stage to see what they want, think and feel, and what we do about it.',
+  `<div class="card jr"><div id="feelSvg"></div>
+     <div class="jbtns" id="jbtns">${LIFE.map((s, i) => `<button data-j="${s.id}" aria-pressed="${i === 0}" style="--c:var(--indigo)">${s.n} ${esc(s.name)}</button>`).join('')}</div>
+     <div id="jcard" aria-live="polite"></div></div>`,
+  ['Read your team’s next message out loud as if you were the traveller at that stage. Does it answer what they’re thinking?', 'Find the biggest dip in the curve that your team can fix, and fix one thing this week.', 'Replace one generic message with the “What we say” line for its stage.'], 'var(--indigo)'));
+
+/* ------------------------------------------------------------------ 7 one trip */
+R.push(stop('trip', 'One trip, message by message', 'Stop 7 · timing is kindness',
+  'From booking to the next trip, a traveller hears from us at <mark>nine planned moments</mark>, and six of them decide whether they come back.',
+  'T is check-in day and C is check-out day. Each message has a job; if it has no job, it doesn’t go.',
+  `<div class="grid g2" style="align-items:start"><div class="tl">${TIMELINE.map(t => `<div class="t"><b>${esc(t[0])}</b>${esc(t[1])}<div class="small faint">${esc(t[2])}</div></div>`).join('')}</div>
+   <div class="grid" style="gap:12px">${MOMENTS.map((m, i) => `<div class="card soft" style="--c:${['var(--peacock)','var(--marigold)','var(--leaf)','var(--indigo)','var(--rani)','var(--chili)'][i]}"><h4 style="font-size:19px">${esc(m[0])}</h4><p class="small muted" style="margin-top:4px">${esc(m[1])}</p><span class="tag">${esc(m[2])}</span></div>`).join('')}</div></div>`,
+  ['Book a test stay and check you receive each of the nine messages, on time.', 'Time your support team’s reply to a test in-trip problem. Under 15 minutes?', 'Look at the last five 3-star reviews: did each get a personal reply within 48 hours?'], 'var(--indigo)'));
+
+/* ------------------------------------------------------------------ 8 sales */
+R.push(stop('sales', 'Sales lifecycles', 'Stop 8 · bringing in what travellers need',
+  'Three sales cycles feed the customer lifecycle: <mark>properties to sell, agents who sell for us, and the enquiries our campaigns generate</mark>.',
+  'Each cycle has stages with owners and time limits. Every loss is logged with a reason, and every win is handed straight to the next owner. Play any of them at stop 5.',
+  `<div class="grid g3">${SALES.map((sc, i) => `<div class="ticket" style="--c:${['var(--chili)','var(--indigo)','var(--leaf)'][i]}">
+      <div class="hd"><span>${sc.n}</span><h3>${esc(sc.name.replace(' sales cycle','').replace(' lifecycle',''))}</h3></div>
+      <div class="bd"><p class="small muted" style="margin-bottom:8px">${esc(sc.why.split('. ')[0])}.</p>
+      <ol class="stagelist">${sc.stages.map(r => `<li><div><b>${esc(r[0])}</b> <em>· ${esc(r[3])}</em></div></li>`).join('')}</ol>
+      <p class="small" style="margin-top:10px"><b>Measured by:</b> ${sc.kpi.slice(0, 3).map(k => esc(k[0])).join(' · ')}</p>
+      <button class="chip-btn" style="margin-top:12px; background:var(--c); color:var(--on-color)" data-play="${sc.id}">Play this path</button></div></div>`).join('')}</div>`,
+  ['Open your pipeline and give every open deal one of these stage names.', 'Add a “reason lost” to every deal closed this month.', 'Enquiries: time the reply to one enquiry today. Acknowledged in a minute, human reply in 15?'], 'var(--chili)'));
+
+/* ------------------------------------------------------------------ 9 corporate travel */
+R.push(stop('corporate-travel', 'Corporate travel: business trips and MICE', 'Stop 9 · a new line of business',
+  'A different customer: <mark>the company pays, an employee travels, a travel manager sets the rules</mark> and finance needs GST invoices.',
+  'Business trips are individual travel for work; MICE is group travel for meetings, incentives, conferences and exhibitions. This is a new line, separate from the plan’s Corporate Communications channel (which speaks to investors and media). Yatra’s 2024 purchase of Globe Travels, a MICE specialist, and MakeMyTrip’s myBiz show how seriously India’s OTAs take it.',
+  `<div class="grid g2">
+    <div class="ticket" style="--c:var(--peacock)"><div class="hd"><span>W8</span><h3>Business-trip lifecycle</h3></div><div class="bd"><ol class="stagelist">${CORP.trip.map(r => `<li><div><b>${esc(r[1])}</b> <em>· ${esc(r[4])}</em></div></li>`).join('')}</ol>
+      <button class="chip-btn" style="margin-top:12px; background:var(--peacock); color:var(--on-color)" data-play="business">Play this path</button></div></div>
+    <div class="ticket" style="--c:var(--indigo)"><div class="hd"><span>W9</span><h3>MICE event lifecycle</h3></div><div class="bd"><ol class="stagelist">${CORP.mice.map(r => `<li><div><b>${esc(r[1])}</b> <em>· ${esc(r[4])}</em></div></li>`).join('')}</ol>
+      <button class="chip-btn" style="margin-top:12px; background:var(--indigo); color:var(--on-color)" data-play="mice">Play this path</button></div></div></div>
+   <div class="grid g4" style="margin-top:16px">${CORP.people.slice(0, 4).map(p => `<div class="card"><h4 style="font-size:17px">${esc(p[0])}</h4><p class="small muted" style="margin-top:4px">${esc(p[1])}</p></div>`).join('')}</div>`,
+  ['List five companies in our priority cities whose teams travel monthly: they are the first business-trip prospects.', 'Write the one-page travel-policy checklist the corporate desk will check every request against.', 'Pick one supply partner who could host a 30-person offsite; ask what they would need from us.'], 'var(--peacock)'));
+
+/* ------------------------------------------------------------------ 10 channels */
+R.push(stop('channels', 'The seven channels, up close', 'Stop 10 · pick your channel',
+  'Each channel below has <mark>what we say, how the work flows, how people move through it, and how we measure it</mark>. Pick one.',
+  'Messages come as three pillars with a line you can actually use. Workflow steps show who owns each step and how long it may take. The lead flow shows the stages people move through, with the conversion measured between each.',
+  `<div class="ctabs" role="tablist" id="ctabs">${CH.map((c, i) => `<button role="tab" data-ch="${c.id}" aria-selected="${i === 0}" style="--c:${CC[c.id]}"><i>${c.n}</i>${esc(short(c))}</button>`).join('')}</div>
+   <div class="cpanel" id="cpanel" role="tabpanel"></div>`,
+  null, 'var(--rani)'));
+
+/* ------------------------------------------------------------------ 11 workflows */
+R.push(stop('workflows', 'Workflows that cross every channel', 'Stop 11 · no dropped balls',
+  'Nine workflows cover work that belongs to <mark>no single channel</mark>: leads, campaigns, referrals, reviews, support, consent, promotions, business trips and MICE.',
+  'Each is a short chain of steps, each step with one owner and a time limit. Open one to see the chain, its yes/no checkpoints and how we measure it.',
+  NEWFLOW.map(w => `<details class="acc"><summary><span class="n">${w.n}</span><div><h4>${esc(w.name)}</h4><p>${esc(w.why.split('. ')[0])}.</p></div></summary>
+    <div class="in"><p class="muted" style="margin-bottom:10px">${esc(w.why.split('. ').slice(1).join('. '))}</p>
+    <div class="chain">${w.steps.map((s, i) => `${i ? '<i>→</i>' : ''}<span>${esc(s.t)}${s.gate ? ` <b style="color:var(--marigold)">◆ ${esc(s.gate)}</b>` : ''}</span>`).join('')}</div>
+    <div class="tbl" style="margin-top:12px"><table><thead><tr><th>Step</th><th>What happens</th><th>Owner</th><th>Time allowed</th></tr></thead><tbody>${w.steps.map(s => `<tr><td><b>${esc(s.t)}</b></td><td>${esc(s.d)}</td><td>${esc(w.lanes[s.l])}</td><td class="mono small">${esc(s.sla)}</td></tr>`).join('')}</tbody></table></div>
+    <p class="small" style="margin-top:10px"><b>Measured by:</b> ${w.kpi.map(k => `${esc(k[0])} <span class="f">(${esc(k[1])})</span>`).join(' · ')}</p>
+    ${WF_BENCH[w.id] ? `<p class="bench"><b>Benchmark:</b> ${esc(WF_BENCH[w.id])}</p>` : ''}</div></details>`).join(''),
+  ['Pick the workflow closest to your job and check each step has a named person.', 'Put the time limits you own on a sticky note on your screen.', 'Next time a ball drops, find the step it dropped at and fix that step.'], 'var(--peacock)'));
+
+/* ------------------------------------------------------------------ 12 running it */
+R.push(stop('running', 'Running it week to week', 'Stop 12 · owners, rhythm, escalation',
+  '<mark>One accountable owner per channel</mark>, a fixed weekly rhythm across three time zones, and a clear ladder when something goes wrong.',
+  'A is accountable (one per channel, signs off), R does the work, C is asked before, I is told after. Canada, India and the Philippines hand over every day so nothing waits overnight.',
+  `<div class="card tbl"><table><thead><tr><th>Channel</th>${ROLES.map(r => `<th style="white-space:normal; min-width:88px">${esc(r)}</th>`).join('')}</tr></thead><tbody>
+    ${CH.map(c => `<tr><td style="white-space:nowrap"><b style="color:${CC[c.id]}">${c.n}</b> ${esc(short(c))}</td>${RACI[c.id].map(x => `<td style="text-align:center"><span class="raci ${x}">${x}</span></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+   <div class="tbl" style="margin-top:16px"><div class="week">
+    ${[['Monday',[['Dashboard out','var(--peacock)'],['Management review','var(--peacock)']]],['Tuesday',[['Marketing & social','var(--rani)'],['Tech & product','var(--indigo)']]],['Wednesday',[['Supply pipeline','var(--chili)'],['Finance & approvals','var(--ink-3)']]],['Thursday',[['Creator content','var(--indigo)'],['Destination offers','var(--leaf)']]],['Friday',[['CRM plan','var(--marigold)'],['Service & BD','var(--rani)']]]].map(([d, ev]) => `<div><h4>${d}</h4>${ev.map(e => `<span style="--c:${e[1]}">${esc(e[0])}</span>`).join('')}<span style="--c:var(--marigold)">6 pm IST handoff</span></div>`).join('')}
+   </div></div>
+   <div class="card" style="margin-top:16px"><span class="lbl">When something goes wrong</span>
+    <div class="ladder">${ESC.map((e, i) => `${i ? '<i>→</i>' : ''}<span style="--c:${i < 3 ? 'var(--rani)' : i < 6 ? 'var(--marigold)' : 'var(--leaf)'}">${esc(e)}</span>`).join('')}</div>
+    <div class="grid g3" style="margin-top:12px">${SEV.map((r, i) => `<div class="card soft" style="--c:${['var(--rani)','var(--marigold)','var(--peacock)'][i]}"><h4 style="font-size:20px">${esc(r[0])}</h4><p class="small">${esc(r[1])}</p><p class="small muted" style="margin-top:6px"><b>Answer within</b> ${esc(r[2])} · <b>to</b> ${esc(r[3])}</p></div>`).join('')}</div></div>`,
+  ['Find the one A in your channel’s row. That person signs off; go to them, not the group chat.', 'If you work in India, write tonight’s 6 pm handoff note: done, open, needs a decision.', 'Save the SEV 1 rule in your phone: CEO and function head at once, any hour.'], 'var(--ink-2)'));
+
+/* ------------------------------------------------------------------ 13 benchmarks */
+R.push(stop('bench', 'Borrowed from the best', 'Stop 13 · what India’s and the world’s OTAs teach us',
+  'We checked each flow against MakeMyTrip, Cleartrip, Yatra, EaseMyTrip, Booking.com, Expedia and Airbnb, and <mark>kept what makes vacario different</mark>.',
+  'Public information checked in September 2026; confirm before quoting outside the company.',
+  `<div class="stamps">${BENCH.map(b => `<div class="stampc"><div class="who">${esc(b.who)}</div><h4>${esc(b.area)}</h4><p class="small muted">${esc(b.they)}</p><p class="small" style="margin-top:8px"><b style="color:var(--peacock)">vacario:</b> ${esc(b.we)}</p></div>`).join('')}</div>`,
+  ['Book one stay on a competitor this month and screenshot every message you get.', 'Pick one idea from these stamps for your team to copy, and one to do better.'], 'var(--rani)'));
+
+/* ------------------------------------------------------------------ 14 rollout + quiz + words */
+const QUIZ = [
+  {q:'A guest leaves a 2-star review the day after check-out. What happens first?', o:['Send them a discount code for the next trip','Personal reply within 48 hours and a service-recovery ticket','Wait for the monthly review digest'], a:1, why:'Three stars or fewer get a personal reply and a support ticket (reviews workflow W4), then service recovery (W5). The supplier hears within a day.'},
+  {q:'A new member signed up 10 days ago and hasn’t booked. Which stage are they in?', o:['L3 Join','At-risk','L2 Explore'], a:0, why:'They have an account, so they are in Join. They become At-risk only after 60 days with no visit, or 90 days without booking.'},
+  {q:'A hot B2C enquiry arrives at 11 am. How fast should a person reply?', o:['Within 1 working day','Within 15 minutes','Within 2 hours'], a:1, why:'Acknowledge automatically within 1 minute, a human reply within 15 minutes in working hours, and a quote within 2 hours.'},
+  {q:'An employee’s business trip is within the company’s travel policy. Who approves it?', o:['Their manager, always','Nobody: it can be booked straight away','Finance'], a:1, why:'Only trips outside policy go to the approver. In-policy trips are booked directly, which is what makes corporate travel fast.'},
+  {q:'Which number is our north star?', o:['App installs','Completed trips × average booking value','Marketing spend'], a:1, why:'It counts the value of trips people actually took, which every channel contributes to.'}
+];
+R.push(stop('go', 'Your first 13 weeks, and a quick check', 'Stop 14 · go',
+  'Switch the system on in <mark>three steps: foundations, launch, then scale and learn</mark>. Then check yourself with five quick questions.',
+  '',
+  `<div class="grid g3">${ROADMAP.map((r, i) => `<div class="ticket" style="--c:${['var(--peacock)','var(--marigold)','var(--leaf)'][i]}"><div class="hd"><span>${esc(r[0])}</span><h3>${esc(r[1])}</h3></div><div class="bd"><ul class="small" style="margin:0; padding-left:18px">${r[2].map(x => `<li style="margin:4px 0">${esc(x)}</li>`).join('')}</ul></div></div>`).join('')}</div>
+   <h3 style="font-size:26px; margin:26px 0 10px">Check yourself <span class="score" id="qscore"></span></h3>
+   <div class="quiz">${QUIZ.map((q, i) => `<div class="card qz" data-q="${i}"><h4>${i + 1}. ${esc(q.q)}</h4><div class="opts">${q.o.map((o, j) => `<button data-a="${j}">${esc(o)}</button>`).join('')}</div><p class="why" hidden></p></div>`).join('')}</div>
+   <h3 style="font-size:26px; margin:26px 0 10px">Words you’ll hear</h3>
+   <div class="words">${GLOSS.concat([['MICE','Meetings, incentives, conferences and exhibitions: company group travel and events.'],['OTA','Online travel agency, such as MakeMyTrip, Cleartrip or Booking.com.']]).map(g => `<div><b>${esc(g[0])}</b>${esc(g[1])}</div>`).join('')}</div>`,
+  ['Pick the one week-1 task that is yours, and start it today.', 'Send this page to one colleague and ask them to play stop 5.'], 'var(--leaf)'));
+
+$('#route').innerHTML = R.join('');
+$('#stopnav').innerHTML = STOPS.map(s => `<a href="#s-${s.id}" title="${esc(s.title)}" aria-label="${esc(s.title)}"></a>`).join('');
+
+/* ------------------------------------------------------------------ north star calculator */
+function nsCalc(){
+  const t = Number(String($('#nsTrips').value).replace(/[, ]/g, '')), a = Number(String($('#nsAbv').value).replace(/[₹, ]/g, ''));
+  $('#nsOut').textContent = Number.isFinite(t) && Number.isFinite(a) && t >= 0 && a >= 0 ? '₹' + inr(t * a) : 'Enter two numbers';
+}
+$('#nsTrips').addEventListener('input', nsCalc); $('#nsAbv').addEventListener('input', nsCalc);
+
+/* ------------------------------------------------------------------ lifecycle loop */
+function drawLoop(){
+  const W = 640, H = 470, cx = 320, cy = 222, rx = 250, ry = 170;
+  const pts = LIFE.map((s, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / LIFE.length; return {x:cx + rx * Math.cos(a), y:cy + ry * Math.sin(a), s}; });
+  const col = i => i < 4 ? 'var(--peacock)' : i < 7 ? 'var(--indigo)' : 'var(--rani)';
+  $('#loopSvg').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Customer lifecycle loop: choose a stage">
+    <defs><path id="orbit" d="M${cx - rx},${cy} a${rx},${ry} 0 1,1 ${2 * rx},0 a${rx},${ry} 0 1,1 ${-2 * rx},0"/></defs>
+    <use href="#orbit" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 9"/>
+    <g id="orbiter"><circle r="8" fill="var(--marigold)"/><circle r="14" fill="var(--marigold)" opacity=".25"/>
+      <animateMotion dur="16s" repeatCount="indefinite"><mpath href="#orbit"/></animateMotion></g>
+    <g font-family="Figtree, sans-serif">
+      <text x="${cx}" y="${cy - 14}" text-anchor="middle" font-size="22" font-weight="800" fill="var(--ink)" font-family="Baloo 2, sans-serif">Customer lifecycle</text>
+      <text x="${cx}" y="${cy + 8}" text-anchor="middle" font-size="12" fill="var(--ink-3)">the marigold dot is a traveller on their way</text>
+      <text x="${cx}" y="${cy + 30}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--rani)">quiet 60–90 days → At-risk → win-back</text>
+      ${pts.map((p, i) => `<g class="node${i === 0 ? ' on' : ''}" data-s="${i}" tabindex="0" role="button" aria-label="${esc(p.s.n + ' ' + p.s.name)}">
+        <rect x="${p.x - 64}" y="${p.y - 23}" width="128" height="46" rx="23" fill="${col(i)}" stroke="var(--card)" stroke-width="3"/>
+        <text x="${p.x}" y="${p.y - 3}" text-anchor="middle" font-size="13" font-weight="800" fill="var(--on-color)">${p.s.n} ${esc(p.s.name)}</text>
+        <text x="${p.x}" y="${p.y + 13}" text-anchor="middle" font-size="10.5" fill="var(--on-color)" opacity=".9">${esc(p.s.who)}</text></g>`).join('')}
+    </g></svg>`;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) $('#orbiter animateMotion')?.remove();
+  showStage(0);
+}
+function showStage(i){
+  const s = LIFE[i];
+  $$('#loopSvg .node').forEach(n => n.classList.toggle('on', +n.dataset.s === i));
+  const d = $('#loopDetail');
+  d.innerHTML = `<div class="lbl">${esc(s.n)} · ${esc(s.who)}</div><h3>${esc(s.name)}</h3>
+    <p class="muted" style="margin-top:4px">${esc(s.thinks)}</p>
+    <div class="kv"><div><span class="lbl">Gets in when</span>${esc(s.entry)}</div><div><span class="lbl">Moves on when</span>${esc(s.exit)}</div>
+      <div><span class="lbl">Our job</span>${esc(s.job)}</div><div><span class="lbl">Owner</span>${esc(s.owner)}</div>
+      <div><span class="lbl">We say</span>${s.msgs.map(esc).join(' · ')}</div><div><span class="lbl">Measured by</span>${s.kpis.map(esc).join(' · ')}</div></div>
+    ${STAGE_BENCH[s.id] ? `<p class="bench"><b>Benchmark:</b> ${esc(STAGE_BENCH[s.id])}</p>` : ''}`;
+  d.classList.remove('pop'); void d.offsetWidth; d.classList.add('pop');
+}
+
+/* ------------------------------------------------------------------ yes/no game */
+const G = {path:'traveller', i:0, log:[], marks:[], detour:null};
+function renderGame(){
+  const P = PATHS[G.path], it = P.items[G.i], card = $('#qcard');
+  const n = P.items.length;
+  if (G.detour){
+    card.className = 'qcard detour';
+    card.innerHTML = `<div><div class="step">If the answer is no</div><div class="q">${esc(G.detour.no)}</div><div class="to">→ ${esc(G.detour.to)}</div></div>
+      <div class="acts"><button class="big-btn plain" data-g="back">Back to the question</button><button class="big-btn" data-g="yes">Assume it’s sorted, carry on</button></div>`;
+  } else if (it.t === 'ask'){
+    card.className = 'qcard ask';
+    card.innerHTML = `<div><div class="step">Step ${G.i + 1} of ${n} · ${esc(PATH_LBL[G.path])}</div><div class="q">${esc(it.x)}</div></div>
+      <div class="acts"><button class="big-btn" data-g="yes">Yes</button><button class="big-btn no" data-g="no">No</button></div>`;
+  } else if (it.t === 'end'){
+    card.className = 'qcard win';
+    card.innerHTML = `<div><div class="step">You made it · ${esc(PATH_LBL[G.path])}</div><div class="q">${esc(it.x)}</div></div>
+      <div class="acts"><button class="big-btn" data-g="restart">Play again</button></div>`;
+  } else {
+    card.className = 'qcard';
+    card.innerHTML = `<div><div class="step">Step ${G.i + 1} of ${n} · ${esc(PATH_LBL[G.path])}</div><div class="q">${esc(it.x)}</div></div>
+      <div class="acts"><button class="big-btn" data-g="next">Next</button></div>`;
+  }
+  card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+  $('#gdots').innerHTML = P.items.map((_, k) => `<i class="${k === G.i ? 'here' : G.marks[k] || ''}"></i>`).join('');
+  $('#glog').innerHTML = G.log.length ? G.log.map(l => `<li><b class="${l.no ? 'n' : ''}">${l.no ? 'No' : l.ask ? 'Yes' : 'Then'}</b> · ${esc(l.x)}</li>`).join('') : '<li class="faint">Your answers appear here.</li>';
+  $('#glog').scrollTop = 1e6;
+}
+function gameAct(a){
+  const P = PATHS[G.path], it = P.items[G.i];
+  if (a === 'restart'){ Object.assign(G, {i:0, log:[], marks:[], detour:null}); }
+  else if (a === 'no'){ G.detour = it; G.marks[G.i] = 'nope'; G.log.push({x:it.x + ' → ' + it.no, no:true}); }
+  else if (a === 'back'){ G.detour = null; }
+  else { if (G.detour) G.detour = null; G.log.push({x:it.x, ask:it.t === 'ask'}); if (!G.marks[G.i]) G.marks[G.i] = 'ok'; G.i = Math.min(G.i + 1, P.items.length - 1); }
+  renderGame();
+}
+function setPath(k){
+  G.path = k; Object.assign(G, {i:0, log:[], marks:[], detour:null});
+  $$('#picker button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.path === k)));
+  renderGame();
+}
+
+/* ------------------------------------------------------------------ journey */
+function drawFeel(){
+  const W = 900, H = 230, l = 56, r = 30, t = 22, b = 52, n = LIFE.length;
+  const X = i => l + i * (W - l - r) / (n - 1), Y = v => t + (5 - v) * (H - t - b) / 4;
+  const pts = LIFE.map((s, i) => [X(i), Y(JOURNEY[s.id].feel)]);
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++){ const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], mx = (x0 + x1) / 2; d += ` C${mx},${y0} ${mx},${y1} ${x1},${y1}`; }
+  $('#feelSvg').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="How the traveller feels at each stage, one to five">
+    <g font-family="Figtree, sans-serif">
+    ${[1,3,5].map(v => `<line x1="${l}" x2="${W - r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-dasharray="3 6"/><text x="${l - 10}" y="${Y(v) + 4}" text-anchor="end" font-size="12" fill="var(--ink-3)">${{1:'low',3:'okay',5:'great'}[v]}</text>`).join('')}
+    <path d="${d} L${X(n - 1)},${H - b} L${X(0)},${H - b} Z" fill="var(--indigo)" opacity=".1"/>
+    <path class="curve" id="feelPath" d="${d}" fill="none" stroke="var(--indigo)" stroke-width="4" stroke-linecap="round" stroke-dasharray="1400" stroke-dashoffset="0"/>
+    <g id="walker"><circle r="12" fill="var(--marigold)" opacity=".3"/><circle r="7" fill="var(--marigold)"/><animateMotion dur="10s" repeatCount="indefinite"><mpath href="#feelPath"/></animateMotion></g>
+    ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="7" fill="var(--card)" stroke="var(--indigo)" stroke-width="3" data-jd="${i}"/>
+      <text x="${p[0]}" y="${H - b + 20}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">${LIFE[i].n}</text>
+      <text x="${p[0]}" y="${H - b + 36}" text-anchor="middle" font-size="11" fill="var(--ink-2)">${esc(LIFE[i].name.replace('Review & share','Review'))}</text>`).join('')}
+    </g></svg>`;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) $('#walker')?.remove();
+  showJourney('discover');
+}
+function showJourney(id){
+  const s = LIFE.find(x => x.id === id), j = JOURNEY[id], m = JOURNEY_MORE[id], i = LIFE.indexOf(s);
+  $$('#jbtns button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.j === id)));
+  $$('#feelSvg circle[data-jd]').forEach(c => { c.setAttribute('r', +c.dataset.jd === i ? 11 : 7); c.setAttribute('fill', +c.dataset.jd === i ? 'var(--marigold)' : 'var(--card)'); });
+  const phase = JOURNEY_PHASES.find(p => p[1].split(' ').includes(id));
+  const box = $('#jcard');
+  box.innerHTML = `<div class="grid g2" style="align-items:start">
+    <div><div class="lbl">${esc(phase[0])} · ${esc(s.n)}</div><h3 style="font-size:28px">${esc(s.name)}</h3>
+      <p class="muted" style="margin:6px 0 12px">${esc(s.thinks)}</p>
+      <div class="kv" style="margin-top:0"><div><span class="lbl">They want</span>${esc(m.goal)}</div><div><span class="lbl">They do</span>${esc(j.doing)}</div>
+      <div><span class="lbl">They feel (${j.feel}/5)</span>${esc(m.feelWord)}</div><div><span class="lbl">Where they meet us</span>${esc(m.touch)}</div></div></div>
+    <div><div class="card soft" style="--c:var(--rani); box-shadow:none"><span class="lbl">What goes wrong</span><b>${esc(j.pain)}</b>
+      <span class="lbl" style="margin-top:10px">What we do</span>${esc(m.opp)}. ${esc(j.fix)}.</div>
+      <p class="say" style="margin-top:12px">${esc(m.say)}</p>
+      <p class="small faint" style="margin-top:8px">Measured by ${esc(m.kpi)} · owner: ${esc(s.owner)}</p></div></div>`;
+  box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
+}
+
+/* ------------------------------------------------------------------ channels */
+function showChannel(id){
+  const c = CHM[id], X = EXPL[id], M = MSG[id], col = CC[id];
+  $$('#ctabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.ch === id)));
+  const p = $('#cpanel'); p.style.setProperty('--c', col);
+  p.innerHTML = `<div class="grid g2" style="align-items:start">
+      <div><div class="kicker" style="color:${col}">Channel ${c.n} · from the plan</div><h3 style="font-size:34px; color:${col}; margin-top:4px">${esc(c.name)}</h3>
+        <p style="margin-top:8px; font-weight:600">${esc(c.sub)}</p>
+        <p class="muted" style="margin-top:8px">${esc(X.how)}</p>
+        <div style="margin-top:10px">${c.who.map(w => `<span class="tag" style="--c:${col}">${esc(w)}</span>`).join('')}</div></div>
+      <div class="story" style="--c:${col}"><span class="lbl">A worked example</span>${X.story}</div></div>
+    <h4 style="font-size:22px; margin:22px 0 10px">What we say · tone: ${esc(M.tone.split('.')[0].toLowerCase())}</h4>
+    <div class="pill3">${M.pillars.map(pl => `<div class="card" style="--c:${col}"><h4 style="font-size:19px; color:${col}">${esc(pl[0])}</h4><p class="small muted" style="margin-top:4px">${esc(pl[1])}</p><i>${esc(pl[2])}</i></div>`).join('')}</div>
+    <h4 style="font-size:22px; margin:22px 0 10px">How the work flows · ${c.steps.length} steps</h4>
+    <ol class="wsteps">${c.steps.map((s, i) => `<li><span class="sn">${i + 1}</span><h4>${esc(s.t)}</h4><p>${esc(s.acts[0])}. ${esc(s.acts[1] || '')}</p>
+      ${s.gate ? `<span class="gate">◆ ${esc(s.gate)} ${esc(s.loop || '')}</span>` : ''}<span class="m">${esc(c.lanes[s.l])} · ${esc(s.sla)}<br>gives: ${esc(s.out)}</span></li>`).join('')}</ol>
+    <h4 style="font-size:22px; margin:22px 0 10px">${id === 'internal' ? 'From strategy to execution' : 'Lead flow · how people move through'}</h4>
+    <div class="lflow">${c.flow.map((f, i) => `${i ? `<div class="cv"><span>${esc(c.conv[i - 1])}</span></div>` : ''}<div class="st">${esc(f[0])}</div>`).join('')}</div>
+    <h4 style="font-size:22px; margin:6px 0 10px">How we measure it</h4>
+    <div class="kpis">${c.kpi.map(k => `<div class="kpi"><h4>${esc(k[0])}</h4><p>${esc(KX[k[0]].w)}</p><span class="f">${esc(fText(KX[k[0]]))}</span><span class="m">${esc(k[3])} · ${esc(k[4])} · ${k[5] === 'down' ? 'lower is better' : 'higher is better'}</span></div>`).join('')}</div>
+    <div class="grid g2" style="margin-top:18px">
+      ${tryBox(X.rules.map(esc))}
+      <div class="card soft" style="--c:var(--rani); margin-top:22px"><h4 style="font-size:19px">Watch out for</h4><ul class="small" style="margin:8px 0 0; padding-left:18px">${X.breaks.map(b => `<li style="margin:5px 0"><b>${esc(b[0])}:</b> ${esc(b[1])}</li>`).join('')}</ul></div></div>`;
+}
+
+/* ------------------------------------------------------------------ events */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const node = t.closest('.node'); if (node){ showStage(+node.dataset.s); return; }
+  const g = t.closest('[data-g]'); if (g){ gameAct(g.dataset.g); return; }
+  const pk = t.closest('[data-path]'); if (pk){ setPath(pk.dataset.path); return; }
+  const pl = t.closest('[data-play]'); if (pl){ setPath(pl.dataset.play); $('#s-play').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); return; }
+  const jb = t.closest('[data-j]'); if (jb){ showJourney(jb.dataset.j); return; }
+  const jd = t.closest('[data-jd]'); if (jd){ showJourney(LIFE[+jd.dataset.jd].id); return; }
+  const cb = t.closest('[data-ch]'); if (cb){ showChannel(cb.dataset.ch); return; }
+  const go = t.closest('[data-go]'); if (go){ showChannel(go.dataset.go); $('#s-channels').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); return; }
+  const qb = t.closest('.qz button');
+  if (qb){
+    const card = qb.closest('.qz'), q = QUIZ[+card.dataset.q];
+    if (card.dataset.done) return;
+    card.dataset.done = +qb.dataset.a === q.a ? 'right' : 'wrong';
+    $$('button', card).forEach(b => { if (+b.dataset.a === q.a) b.classList.add('right'); else if (b === qb) b.classList.add('wrong'); b.disabled = true; });
+    const w = $('.why', card); w.hidden = false; w.innerHTML = `<b>${card.dataset.done === 'right' ? 'Yes!' : 'Not quite.'}</b> ${esc(q.why)}`;
+    const done = $$('.qz[data-done]'), right = done.filter(c => c.dataset.done === 'right').length;
+    $('#qscore').textContent = `${right} / ${done.length}${done.length === QUIZ.length ? (right === QUIZ.length ? ' · perfect trip!' : ' · nicely done') : ''}`;
+    if (done.length === QUIZ.length && right === QUIZ.length) confetti();
+  }
+});
+document.addEventListener('keydown', e => { const n = e.target.closest && e.target.closest('.node'); if (n && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); showStage(+n.dataset.s); } });
+
+/* ------------------------------------------------------------------ confetti for a perfect quiz */
+function confetti(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.createElement('canvas'); cv.id = 'confetti'; document.body.appendChild(cv);
+  const dpr = devicePixelRatio || 1; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement), cols = ['--peacock','--marigold','--rani','--indigo','--leaf'].map(v => cs.getPropertyValue(v).trim());
+  const bits = Array.from({length:140}, () => ({x:innerWidth / 2, y:innerHeight * .35, vx:(Math.random() - .5) * 14, vy:-Math.random() * 12 - 4, r:Math.random() * 6 + 4, c:cols[Math.floor(Math.random() * cols.length)], a:Math.random() * 6, va:(Math.random() - .5) * .4}));
+  let t = 0;
+  (function step(){
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    bits.forEach(b => { b.vy += .32; b.x += b.vx; b.y += b.vy; b.a += b.va; ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a); ctx.fillStyle = b.c; ctx.fillRect(-b.r / 2, -b.r / 4, b.r, b.r / 2); ctx.restore(); });
+    if (++t < 150) requestAnimationFrame(step); else cv.remove();
+  })();
+}
+
+/* ------------------------------------------------------------------ progress plane + reveals */
+const plane = $('#plane'), fill = $('#trailFill'), trail = plane.parentElement;
+function onScroll(){
+  const max = document.documentElement.scrollHeight - innerHeight, f = max > 0 ? Math.min(1, scrollY / max) : 0;
+  plane.style.left = (f * 100) + '%'; fill.style.width = (f * 100) + '%';
+  const links = $$('#stopnav a'); let cur = 0;
+  STOPS.forEach((s, i) => { const el = $('#s-' + s.id); if (el && el.getBoundingClientRect().top < innerHeight * .4) cur = i; });
+  links.forEach((a, i) => a.classList.toggle('on', i <= cur));
+}
+addEventListener('scroll', onScroll, {passive:true}); onScroll();
+if ('IntersectionObserver' in window){
+  const io = new IntersectionObserver(es => es.forEach(en => {
+    if (!en.isIntersecting) return;
+    en.target.classList.add('in');
+    if (en.target.id === 's-journey') $('#feelSvg .curve')?.classList.add('draw');
+    io.unobserve(en.target);
+  }), {threshold:.12});
+  $$('.stop').forEach(s => io.observe(s));
+}
+
+drawLoop(); drawFeel(); setPath('traveller'); showChannel('consumer'); nsCalc();
+</script>
