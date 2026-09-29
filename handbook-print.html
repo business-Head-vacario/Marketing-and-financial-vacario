@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vacario Communications Handbook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Noto+Sans+Telugu:wght@400;600&display=swap">
+<link rel="stylesheet" href="src/print-kit.css">
+<style>
+/* Handbook: the full explainer condensed to 20 A4 pages, one topic per page. */
+body{font-size:8.5pt; line-height:1.42}
+.ch-open{margin-bottom:3.4mm; padding-bottom:2.6mm}
+.ch-open .no{font-size:30pt}
+h1{font-size:18pt}
+h2{font-size:11.5pt; margin:4mm 0 1.8mm}
+.lead{font-size:9.2pt; margin-bottom:2.4mm}
+table{font-size:7.7pt; margin:.6mm 0 2.6mm}
+th{font-size:6.2pt; padding:1.3mm 1.6mm}
+td{padding:1.3mm 1.6mm; line-height:1.34}
+.fig{margin:1.6mm 0 2.6mm}
+.fc .nd{padding:1.5mm 2.6mm; font-size:7.9pt}
+.fc .no{padding:1.3mm 2.2mm; font-size:7.4pt}
+.fc .fv{height:5mm}
+.mm{row-gap:2.4mm}
+.mm .lv span{font-size:6.9pt; padding:.7mm 1.6mm}
+.mm .br{font-size:7.8pt; padding:1.4mm 2.2mm}
+.steps2{display:grid; grid-template-columns:1fr 1fr; gap:1.4mm 5mm; margin:1mm 0 2.4mm}
+.steps2 > div{display:grid; grid-template-columns:5mm minmax(0,1fr); gap:1.6mm; font-size:7.8pt; line-height:1.3; break-inside:avoid}
+.steps2 i{font:600 6.4pt/1 'IBM Plex Mono',monospace; font-style:normal; width:4.4mm; height:4.4mm; border-radius:50%; background:var(--c,var(--accent)); color:#fff; display:grid; place-items:center}
+.steps2 b{font-weight:600}
+.steps2 .m{display:block; color:var(--ink-3); font-size:7pt}
+.pill3{display:grid; grid-template-columns:repeat(3,1fr); gap:2.4mm; margin:1mm 0 2.4mm}
+.pill3 div{border:.3mm solid var(--rule-2); border-top:.8mm solid var(--c,var(--accent)); border-radius:1mm; padding:1.6mm 2.2mm; font-size:7.6pt}
+.pill3 b{display:block; font-size:8.2pt}
+.pill3 i{display:block; color:var(--ink-2); margin-top:.6mm}
+.three{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3.4mm}
+.three .card{padding:2.4mm 2.6mm}
+.three h3{margin:0 0 1.4mm; font-size:9.4pt}
+.slist{margin:0; padding:0; list-style:none; counter-reset:n}
+.slist li{display:grid; grid-template-columns:4mm minmax(0,1fr); gap:1.2mm; font-size:7.4pt; line-height:1.3; margin-bottom:1mm}
+.slist li::before{counter-increment:n; content:counter(n); font:600 6.2pt/1.5 'IBM Plex Mono',monospace; color:var(--c,var(--accent))}
+.slist li span{color:var(--ink-3)}
+.lflow{margin:1mm 0 7mm}
+.box-note{background:var(--paper); border-radius:1mm; padding:1.8mm 2.4mm; font-size:7.6pt; color:var(--ink-2)}
+.box-note b{color:var(--ink)}
+.cover{height:261mm}
+</style>
+</head>
+<body>
+<div id="doc"></div>
+<script src="src/workflow-data.js"></script>
+<script src="src/explainer-data.js"></script>
+<script src="src/print-kit.js"></script>
+<script>
+/* ------------------------------------------------------------------ handbook: 20 pages, one topic per page */
+const H = [];
+function page(title, lead, ey, c){
+  const n = String(TOC.length + 3).padStart(2, '0');   /* one section per page: number = page */
+  TOC.push({n, title, id:'c' + TOC.length});
+  return `<section class="chapter" id="c${TOC.length - 1}" style="${c ? '--c:' + c : ''}">
+    <div class="ch-open"><div class="no">${n}</div><div class="ey">${esc(ey)}</div><h1 data-toc="${esc(title)}">${esc(title)}</h1></div>
+    ${lead ? `<p class="lead">${lead}</p>` : ''}`;
+}
+const end = '</section>';
+const first = s => s.split(/(?<=\.)\s/)[0];
+
+/* 1 cover */
+H.push(`<section class="cover">
+  <div class="te">ప్రపంచంలోని మరే దేశానికంటే ముందుగా, ప్రయాణాల కొత్త తరం భారతదేశానికి రాబోతోంది.<br><span style="font:500 10pt 'IBM Plex Sans',sans-serif">The Next Generation of Travel is Coming to India Before Any Other Country On the Planet</span></div>
+  <h1>Communications<br>Handbook</h1>
+  <p class="sub">vacario India · Fall 2026 Integrated Sales, Marketing and Promotions Plan, in 20 pages. The seven channels, the customer lifecycle and journey, the sales cycles, corporate travel, every workflow and every KPI: what to do, who does it, how fast, and how we know it worked.</p>
+  <div class="grid">${CH.map(c => `<div><span>${c.n}</span>${esc(short(c))}</div>`).join('')}<div><span>+</span>Lifecycle, journey &amp; sales</div></div>
+  <div class="foot"><span>The Next Generation Of Travel™</span><span>Handbook · Fall 2026</span></div>
+</section>`);
+
+/* 2 contents + plan on one page */
+H.push(`<section id="toc"><div class="ch-open"><div class="no">·</div><div class="ey">Contents</div><h1>This handbook in 20 pages</h1></div>
+  <div class="toc" id="tocList"></div>
+  <div class="box-note" style="margin-top:3mm"><b>How to use it.</b> Each page answers one question and fits on one sheet. The full explainer (88 pages) has every detail behind these pages; the KPI Workspace calculates every KPI once the month’s numbers are entered. Marked <span class="added" style="margin:0">Added</span> = proposed by us for the team to approve; everything else is from the plan.</div>
+  <h2>The plan on one page</h2>
+  <div class="quote" style="margin:1mm 0 2.4mm">“One company, one source of truth, and one clearly defined communications path from strategy through execution.”<span class="src">From the plan</span></div>
+  <table><thead><tr><th style="width:7mm">#</th><th style="width:36mm">Channel</th><th>Who it talks to</th><th>The flow</th></tr></thead><tbody>
+  ${CH.map(c => `<tr><td class="mono">${c.n}</td><td class="k" style="color:${COLOR[c.id]}">${esc(short(c))}</td><td>${c.who.map(esc).join(', ')}</td><td>${esc(c.chain.join(' → '))}</td></tr>`).join('')}</tbody></table>
+</section>`);
+
+/* 3 system */
+H.push(page('How it fits together', 'Four channels feed the traveller’s booking. Lifecycle keeps everyone who joins. Corporate earns trust and capital. Internal runs underneath with one set of priorities and numbers. Everything is measured against one north star: <b>completed bookings × average booking value</b>.', 'The system'));
+H.push(`<div class="fig"><svg viewBox="0 0 700 380" style="width:100%; height:auto">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e5b5e"/></marker></defs>
+  <g font-family="IBM Plex Sans, sans-serif">
+  <ellipse cx="350" cy="160" rx="140" ry="86" fill="#6441cf" fill-opacity=".06" stroke="#6441cf" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <text x="350" y="64" text-anchor="middle" font-size="11" font-weight="700" fill="#6441cf">06 · LIFECYCLE · join → activate → engage → reward → retain</text>
+  <rect x="262" y="124" width="176" height="72" rx="5" fill="#0e5b5e"/>
+  <text x="350" y="154" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Traveller</text>
+  <text x="350" y="174" text-anchor="middle" font-size="11" fill="#cfe6e4">booking · trip · review · repeat</text>
+  ${[[12,18,'consumer','ads · social · CRM · referral'],[498,18,'supply','inventory · availability · price'],[12,226,'creator','content → followers → bookings'],[498,226,'destination','in-trip offers · local content']].map(([x,y,id,b]) => `
+    <rect x="${x}" y="${y}" width="190" height="60" rx="5" fill="#fff" stroke="${COLOR[id]}" stroke-width="1.8"/>
+    <text x="${x+95}" y="${y+26}" text-anchor="middle" font-size="13" font-weight="700" fill="${COLOR[id]}">${CHM[id].n} · ${esc(short(CHM[id]))}</text>
+    <text x="${x+95}" y="${y+45}" text-anchor="middle" font-size="10" fill="#4f5652">${b}</text>`).join('')}
+  <g stroke="#0e5b5e" stroke-width="1.8" fill="none" marker-end="url(#ah)"><path d="M202,60 L262,128"/><path d="M498,60 L438,128"/><path d="M202,250 L262,192"/><path d="M498,250 L438,192"/></g>
+  <rect x="262" y="262" width="176" height="44" rx="5" fill="#fff" stroke="${COLOR.corporate}" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <text x="350" y="281" text-anchor="middle" font-size="12.5" font-weight="700" fill="${COLOR.corporate}">05 · Corporate</text>
+  <text x="350" y="297" text-anchor="middle" font-size="9.5" fill="#4f5652">investors · media · government</text>
+  <rect x="12" y="322" width="676" height="50" rx="5" fill="#eceee7" stroke="#bfc5b8"/>
+  <text x="350" y="343" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15191a">07 · Internal — one source of truth</text>
+  <text x="350" y="361" text-anchor="middle" font-size="9.5" fill="#4f5652">Canada ↔ India ↔ Philippines · meetings · dashboards · knowledge base · escalation</text>
+  </g></svg></div>
+  <h2>Who hands what to whom</h2>
+  <table><thead><tr><th>From</th><th>To</th><th>What moves</th></tr></thead><tbody>${HAND.map(h => `<tr><td class="k">${esc(h[0])}</td><td class="k" style="color:var(--accent)">→ ${esc(h[1])}</td><td>${esc(h[2])}</td></tr>`).join('')}</tbody></table>
+  <h2>What drives the north star</h2>
+  <table><tbody>
+    <tr><td class="k" style="width:44mm">New travellers booking</td><td>Consumer · Creator</td><td>CPI, 30-day conversion, blended CAC, creator bookings</td></tr>
+    <tr><td class="k">Bookable inventory</td><td>Supply</td><td>Live listings, time to live, availability accuracy</td></tr>
+    <tr><td class="k">Revenue per trip</td><td>Destination &amp; Merchant</td><td>Redemption rate, ancillary revenue per trip</td></tr>
+    <tr><td class="k">People who stay</td><td>Lifecycle</td><td>Repeat rate, 90-day retention, NPS</td></tr>
+    <tr><td class="k">Trust, capital, speed</td><td>Corporate · Internal</td><td>Tier-1 coverage, investor meetings, action close rate</td></tr>
+  </tbody></table>`);
+H.push(end);
+
+/* 4 lifecycle */
+H.push(page('The customer lifecycle', 'Nine stages from first seeing Vacario to recommending it. Each has a rule for when someone enters, so we can count them, and an owner who is responsible for moving them to the next stage.', 'Customer lifecycle · added'));
+H.push(`${lifeLoop().replace('style="width:100%; height:auto; display:block"', 'style="width:88%; height:auto; display:block; margin:0 auto"')}
+  <table><thead><tr><th style="width:20mm">Stage</th><th>Enters when</th><th>Our job</th><th style="width:26mm">Owner</th><th style="width:28mm">KPI</th></tr></thead><tbody>
+  ${LIFE.map(s => `<tr><td class="k">${s.n} ${esc(s.name)}</td><td>${esc(s.entry)}</td><td>${esc(s.job)}</td><td>${esc(s.owner)}</td><td>${s.kpis.map(esc).join(', ')}</td></tr>`).join('')}</tbody></table>`);
+H.push(end);
+
+/* 5 lifecycle mind map + quiet states + rules */
+H.push(page('The lifecycle at a glance', 'The same nine stages as a mind map: who is in each stage, what we tell them, and what we measure. Below: what happens when customers go quiet, and the rules every message follows.', 'Customer lifecycle · added'));
+H.push(`${mindmap(MINDMAPS.lifecycle)}
+  <h2>When customers go quiet</h2>
+  <table><tbody>${LIFE_SIDE.map(r => `<tr><td class="k" style="width:22mm">${esc(r.name)}</td><td>${esc(r.rule)}</td><td>${esc(r.act)}</td></tr>`).join('')}</tbody></table>
+  <h2>Contact rules</h2>
+  <table><tbody>${CONTACT_RULES.map(r => `<tr><td class="k" style="width:28mm">${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</tbody></table>`);
+H.push(end);
+
+/* 6 traveller yes/no */
+H.push(page('The traveller’s path, yes or no', 'At every step the traveller either moves on or doesn’t. Follow “yes” down; every “no” has a defined next action, so no one is left without one.', 'Customer lifecycle · added'));
+H.push(`${flowchart(DECIDE.traveller)}
+  <h2>Who we are talking to</h2>
+  <table><tbody>${SEGMENTS.map(s => `<tr><td class="k" style="width:38mm">${esc(s[0])}</td><td>${esc(s[1])}</td><td style="width:44mm">${esc(s[2])}</td></tr>`).join('')}</tbody></table>`);
+H.push(end);
+
+/* 7 journey map */
+H.push(page('The customer journey', 'What one trip feels like from the traveller’s side, and what we do at each stage. The dips in the curve are where pain points sit and where we must be at our best.', 'Customer journey · added'));
+H.push(`${feelCurve()}
+  <table><thead><tr><th style="width:21mm">Stage</th><th>They want</th><th>Pain point</th><th>Our answer</th><th style="width:44mm">What we say</th></tr></thead><tbody>
+  ${LIFE.map(s => { const j = JOURNEY[s.id], m = JOURNEY_MORE[s.id]; return `<tr><td class="k">${s.n} ${esc(s.name)}</td><td>${esc(m.goal)}</td><td style="color:var(--bad)">${esc(j.pain)}</td><td>${esc(j.fix)}</td><td><i>${esc(m.say)}</i></td></tr>`; }).join('')}</tbody></table>`);
+H.push(end);
+
+/* 8 journey mind map + timeline */
+H.push(page('One trip, message by message', 'The journey as a mind map, then the exact messages a traveller receives from booking to the next trip, and the six moments that decide whether they come back.', 'Customer journey · added'));
+H.push(`${mindmap(MINDMAPS.journey)}
+  <table><thead><tr><th style="width:22mm">When</th><th>What the traveller gets</th><th style="width:36mm">Channel</th></tr></thead><tbody>
+  ${TIMELINE.map(t => `<tr><td class="k mono">${esc(t[0])}</td><td>${esc(t[1])}</td><td>${esc(t[2])}</td></tr>`).join('')}</tbody></table>
+  <p class="note" style="margin-top:-1.6mm">T = check-in day, C = check-out day.</p>
+  <h2>Moments of truth</h2>
+  <table><tbody>${MOMENTS.map(m => `<tr><td class="k" style="width:36mm">${esc(m[0])}</td><td>${esc(m[1])}</td><td style="width:32mm">${esc(m[2])}</td></tr>`).join('')}</tbody></table>`);
+H.push(end);
+
+/* 9 sales lifecycles */
+H.push(page('Sales lifecycles', 'Three sales cycles bring in what the customer lifecycle needs: properties to sell (S1), travel agents who sell for us (S2), and the enquiries our campaigns generate (S3). Every loss is logged with a reason; every win is handed to the next owner.', 'Sales · added', '#c96208'));
+H.push(`<div class="three">${SALES.map(sc => `<div class="card" style="--c:#c96208"><span class="lbl">${sc.n}</span><h3>${esc(sc.name.replace(' sales cycle','').replace(' lifecycle',''))}</h3>
+    <ol class="slist">${sc.stages.map(r => `<li><div><b>${esc(r[0])}</b> <span>· ${esc(r[3])}</span></div></li>`).join('')}</ol>
+    <span class="lbl" style="margin-top:2mm">Yes / no checkpoints</span>
+    <ul class="small" style="margin-bottom:1.6mm">${sc.decide.items.filter(i => i.t === 'ask').slice(0, 4).map(i => `<li>${esc(i.x)} <span class="faint">No → ${esc(i.to)}</span></li>`).join('')}</ul>
+    <span class="lbl">Measured by</span><p class="small" style="margin:0">${sc.kpi.slice(0, 4).map(k => esc(k[0])).join(' · ')}</p></div>`).join('')}</div>
+  <h2>What makes each cycle work</h2>
+  <table><tbody>
+    <tr><td class="k" style="width:40mm">Properties</td><td>Qualify on quality, location and documents before spending time; no listing goes live without a test booking; a first booking within 30 days is the real finish line.</td></tr>
+    <tr><td class="k">Travel agencies</td><td>Only GST-registered agencies; training before selling; prepaid terms until payment is proven; tiers, fam trips and quarterly reviews keep good agents growing.</td></tr>
+    <tr><td class="k">Enquiries</td><td>Acknowledge in 1 minute, talk in 15, quote in 2 hours with 2–3 options valid for 48 hours; a booked enquiry moves straight into the Prepare stage.</td></tr>
+  </tbody></table>
+  <p class="small muted"><b style="color:var(--accent-ink)">Benchmarks:</b> Booking.com lets properties register and go live themselves (Vacario adds a named account manager); Expedia’s TAAP gives agents their own platform with tiered commission; MakeMyTrip’s Myra books by conversation in Indian languages.</p>`);
+H.push(end);
+
+/* 10 corporate travel */
+H.push(page('Corporate travel: business trips and MICE', 'A different customer: the company pays, an employee travels, a travel manager sets the policy and finance needs GST invoices. Two products: business trips, and MICE (meetings, incentives, conferences, exhibitions). This is a new line, separate from the plan’s Corporate Communications channel.', 'New line · added', '#1a6fbd'));
+H.push(`<div class="cols2">
+  <div><h2 style="margin-top:0">Business-trip lifecycle</h2><ol class="slist" style="--c:#1a6fbd">${CORP.trip.map(r => `<li><div><b>${esc(r[1])}</b> <span>· ${esc(r[3])} · ${esc(r[4])}</span></div></li>`).join('')}</ol></div>
+  <div><h2 style="margin-top:0">MICE event lifecycle</h2><ol class="slist" style="--c:#1a6fbd">${CORP.mice.map(r => `<li><div><b>${esc(r[1])}</b> <span>· ${esc(r[3])} · ${esc(r[4])}</span></div></li>`).join('')}</ol></div>
+</div>
+<h2>The yes / no moments</h2>
+<table><thead><tr><th style="width:18mm">Line</th><th>Question</th><th>If no</th></tr></thead><tbody>
+${['business','mice'].flatMap(k => DECIDE[k].items.filter(i => i.t === 'ask').map(i => `<tr><td>${k === 'mice' ? 'MICE' : 'Business'}</td><td class="k">${esc(i.x)}</td><td>${esc(i.no)}</td></tr>`)).join('')}</tbody></table>
+<h2>Measured by</h2>
+<table><tbody>${CORP.kpi.map(k => `<tr><td style="width:18mm">${esc(k[0].replace('Business trips','Business'))}</td><td class="k" style="width:42mm">${esc(k[1])}</td><td class="f">${esc(k[2])}</td></tr>`).join('')}</tbody></table>`);
+H.push(end);
+
+/* 11–17 channels, one page each */
+CH.forEach(c => {
+  const X = EXPL[c.id], M = MSG[c.id], col = COLOR[c.id];
+  H.push(page(c.name, esc(X.why), 'Channel ' + c.n, col));
+  H.push(`<div class="quote" style="--c:${col}; margin:0 0 2mm; font-size:8.6pt">${esc(c.sub)}<span class="src">From the plan${c.id === 'lifecycle' || c.id === 'internal' ? ', expanded' : ''}</span></div>
+    <div class="box-note"><b>Objectives:</b> ${c.obj.map(esc).join(' · ')}</div>
+    <h2>What we say</h2>
+    <div class="pill3" style="--c:${col}">${M.pillars.map(p => `<div><b>${esc(p[0])}</b>${esc(p[1])}<i>${esc(p[2])}</i></div>`).join('')}</div>
+    <h2>The workflow, step by step</h2>
+    <div class="steps2" style="--c:${col}">${c.steps.map((s, i) => `<div><i>${i + 1}</i><div><b>${esc(s.t)}</b> — ${esc(s.acts[0])}${s.gate ? ` <span style="color:var(--gold); font-weight:600">◆ ${esc(s.gate)} ${esc(s.loop || '')}</span>` : ''}<span class="m">${esc(c.lanes[s.l])} · ${esc(s.sla)} · gives: ${esc(s.out)}</span></div></div>`).join('')}</div>
+    <h2>${c.id === 'internal' ? 'From strategy to execution' : 'Lead flow'}</h2>
+    ${lflow(c)}
+    <h2>KPIs</h2>
+    <table><thead><tr><th style="width:42mm">KPI</th><th>Formula</th><th style="width:16mm">How often</th><th style="width:30mm">Owner</th></tr></thead><tbody>
+    ${c.kpi.map(k => `<tr><td class="k">${esc(k[0])}</td><td class="f">${esc(fText(KX[k[0]]))}</td><td>${esc(k[3])}</td><td>${esc(k[4])}</td></tr>`).join('')}</tbody></table>
+    <p class="small" style="margin:0"><b>Hands off to:</b> ${c.hand.map(x => `${esc(x[0])} (${esc(x[1])})`).join(' · ')} &nbsp; <b>Reviewed:</b> ${c.cad.map(esc).join(' · ')}</p>`);
+  H.push(end);
+});
+
+/* 18 new workflows */
+H.push(page('Cross-channel workflows', 'Seven workflows that cut across every channel and had no defined path in the plan. Each has one owner per step and a time limit; the full explainer draws each one as a swimlane.', 'Workflows W1–W7 · added'));
+H.push(`<table><thead><tr><th style="width:36mm">Workflow</th><th>Why it exists</th><th>Steps</th><th style="width:34mm">Key measure</th></tr></thead><tbody>
+${NEWFLOW.map(w => `<tr><td class="k">${w.n} ${esc(w.name)}</td><td>${esc(first(w.why))}</td><td>${w.steps.map(s => esc(s.t)).join(' → ')}${w.steps.filter(s => s.gate).map(s => ` <span style="color:var(--gold); font-weight:600">◆ ${esc(s.gate)}</span>`).join('')}</td><td>${esc(w.kpi[0][0])}<div class="f">${esc(w.kpi[0][1])}</div></td></tr>`).join('')}
+<tr><td class="k">W8 Business trip</td><td>Corporate travellers need policy, approvals and GST invoices.</td><td>${CORP.tripFlow.steps.map(s => esc(s.t)).join(' → ')}</td><td>Policy compliance</td></tr>
+<tr><td class="k">W9 MICE event</td><td>Group events need contracts, deposits and cut-offs.</td><td>${CORP.miceFlow.steps.map(s => esc(s.t)).join(' → ')}</td><td>Proposal win rate</td></tr>
+</tbody></table>
+<h2>Time limits worth remembering</h2>
+<table><tbody>
+  <tr><td class="k" style="width:52mm">Booking confirmation</td><td>Within 1 minute</td><td class="k" style="width:52mm">Enquiry acknowledged</td><td>Within 1 minute</td></tr>
+  <tr><td class="k">Hot lead first reply</td><td>15 minutes (working hours)</td><td class="k">Support reply during a trip</td><td>15 minutes, 24/7</td></tr>
+  <tr><td class="k">Fix a problem during a trip</td><td>Within 2 hours</td><td class="k">Reply to every review</td><td>Within 48 hours</td></tr>
+  <tr><td class="k">Opt-out applied</td><td>Within 24 hours</td><td class="k">SEV 1 acknowledged</td><td>15 minutes, any hour</td></tr>
+</tbody></table>`);
+H.push(end);
+
+/* 19 operating model */
+H.push(page('Running it: owners, rhythm, escalation', 'One accountable owner per channel, a fixed weekly rhythm, and a clear path when something goes wrong.', 'Operating model'));
+H.push(`<table><thead><tr><th>Channel</th>${ROLES.map(r => `<th style="font-size:5.4pt; letter-spacing:.02em">${esc(r)}</th>`).join('')}</tr></thead><tbody>
+${CH.map(c => `<tr><td class="k" style="white-space:nowrap">${c.n} ${esc(short(c))}</td>${RACI[c.id].map(x => `<td style="text-align:center"><span class="raci ${x}">${x}</span></td>`).join('')}</tr>`).join('')}</tbody></table>
+<p class="note" style="margin-top:-1.6mm">A = accountable · R = does the work · C = asked before · I = told after</p>
+<h2>Meeting rhythm</h2>
+<table><tbody>
+<tr><td class="k" style="width:22mm">Daily</td><td>Operational check-ins where needed; India → Canada handoff note at 6 pm IST (8:30 am Eastern)</td></tr>
+<tr><td class="k">Monday</td><td>Dashboard published; weekly management review</td></tr>
+<tr><td class="k">Tue – Fri</td><td>Functional meetings: marketing, supply, creators, destinations, tech, finance, customer service</td></tr>
+<tr><td class="k">Monthly</td><td>Strategic review; investor update; partner statements</td></tr>
+<tr><td class="k">Quarterly</td><td>Partner, creator and sponsor reviews; message and consent reviews; KPI targets reset</td></tr></tbody></table>
+<h2>When something goes wrong</h2>
+<p class="small">${ESC.map((e, i) => `<span class="tag" style="background:${i < 3 ? 'var(--bad-soft)' : i < 6 ? 'var(--warm-soft)' : 'var(--accent-soft)'}; color:${i < 3 ? 'var(--bad)' : i < 6 ? 'var(--warm)' : 'var(--accent-ink)'}">${i + 1} ${esc(e)}</span>`).join(' ')}</p>
+<table><thead><tr><th>Level</th><th>For example</th><th>Answer within</th><th>Escalate to</th></tr></thead><tbody>${SEV.map(r => `<tr><td class="k">${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('')}</tbody></table>`);
+H.push(end);
+
+/* 20 benchmarks, rollout, glossary */
+H.push(page('Learn, launch, and the words we use', '', 'Benchmarks · rollout · glossary'));
+H.push(`<h2 style="margin-top:0">What we borrow from leading travel platforms</h2>
+<table><tbody>${BENCH.map(b => `<tr><td class="k" style="width:30mm">${esc(b.area)}<div class="faint small" style="font-weight:400">${esc(b.who)}</div></td><td>${esc(first(b.we))}</td></tr>`).join('')}</tbody></table>
+<h2>The first 13 weeks</h2>
+<div class="three">${ROADMAP.map(r => `<div class="card"><span class="lbl">${esc(r[0])}</span><h3>${esc(r[1])}</h3><ul class="small" style="margin:0">${r[2].slice(0, 4).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
+<h2>Words you’ll see</h2>
+<table><tbody>${[['GBV','Gross booking value: total value of bookings'],['CAC','Marketing spend ÷ new customers who booked'],['Cohort','A group that joined in the same month, followed over time'],['NPS','% scoring 9–10 minus % scoring 0–6'],['MICE','Meetings, incentives, conferences and exhibitions'],['OTA','Online travel agency, e.g. MakeMyTrip or Booking.com'],['DPDP Act','India’s Digital Personal Data Protection Act, 2023'],['SLA','The time allowed for a step']].reduce((rows, g, i, a) => i % 2 ? rows : rows.concat([[g, a[i + 1]]]), []).map(([a, b]) => `<tr><td class="k" style="width:18mm">${esc(a[0])}</td><td>${esc(a[1])}</td><td class="k" style="width:18mm">${esc(b[0])}</td><td>${esc(b[1])}</td></tr>`).join('')}</tbody></table>
+<p class="note">Benchmarks: other companies’ public programmes as checked in September 2026; sources listed in the full explainer. All owners, time limits and targets are proposals for the team to approve.</p>`);
+H.push(end);
+
+document.getElementById('doc').innerHTML = H.join('');
+document.getElementById('tocList').innerHTML = TOC.map(t => `<a href="#${t.id}" data-tocref="${esc(t.title)}"><b>${t.n}</b><span>${esc(t.title)}</span><em data-pg>—</em></a>`).join('');
+window.__TOC = TOC.map(t => t.title);
+</script>
+</body>
+</html>

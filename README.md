@@ -28,6 +28,17 @@ new cross-channel workflows (W1–W7), the operating model, a KPI dictionary, a 
 glossary. It renders to PDF headless (Chromium, A4, header and footer with page numbers); printing
 from Chrome also works.
 
+## Communications Handbook (20 pages)
+
+`deliverables/Vacario-Communications-Handbook.pdf` (source `handbook-print.html`) condenses the full
+explainer to 20 A4 pages, one topic per page: the plan on one page, the system, the customer lifecycle
+(loop, stage table, mind map, yes/no path), the customer journey (feeling curve, journey table, trip
+timeline, moments of truth), sales lifecycles, corporate travel and MICE, each of the seven channels on
+one page (messages, workflow steps with owner and time limit, lead flow, KPIs with formulas), the
+cross-channel workflows, the operating model, and benchmarks, rollout and glossary.
+Both printed documents share `src/print-kit.css` and `src/print-kit.js` (diagram helpers) and the
+content files in `src/`.
+
 ## KPI Workspace
 
 `kpi-workspace.html` (source: `src/kpi-workspace.html`) is the working model of the communication plan.
