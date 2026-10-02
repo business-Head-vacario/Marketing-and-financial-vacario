@@ -162,6 +162,13 @@ textarea.input{resize:vertical;line-height:1.5}
 .pagehead p{color:var(--ink-2);max-width:62ch;margin-top:6px}
 
 /* ---------- dashboard ---------- */
+.quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.qa{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:18px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.qa:hover{border-color:var(--accent);transform:translateY(-1px)}
+.qa svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px}
+.qa b{font:700 1.05rem var(--f-display)}
+.qa span{font-size:.84rem;color:var(--ink-2)}
+@media (max-width:640px){.quick{grid-template-columns:minmax(0,1fr)}.qa{flex-direction:row;align-items:center;gap:12px;padding:14px}.qa svg{margin:0}.qa span{margin-left:auto;text-align:right}}
 .kpi{display:flex;flex-direction:column;gap:6px;padding:16px 18px}
 .kpi .v{font:800 2.1rem/1 var(--f-display);letter-spacing:-.02em}
 .kpi .s{font-size:.8rem;color:var(--ink-2)}
@@ -305,12 +312,14 @@ kbd{font:600 .72rem var(--f-mono);border:1px solid var(--line-2);border-bottom-w
 .ob-body{padding:22px 26px;display:flex;flex-direction:column;gap:16px}
 .ob-foot{padding:14px 26px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface)}
 .ob-foot .grow{flex:1}
+.drop.big{padding:22px}
+.drop.big b{font-size:1.05rem}
 .inds{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .ind{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:.86rem;text-align:center}
 .ind svg{width:30px;height:30px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .ind:hover{border-color:var(--line-2)}
 .ind[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
-@media (max-width:640px){.inds{grid-template-columns:repeat(2,minmax(0,1fr))}.ob-head,.ob-body,.ob-foot{padding-left:18px;padding-right:18px}}
+@media (max-width:640px){.inds{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ind{flex-direction:row;justify-content:flex-start;padding:10px 12px;gap:10px;font-size:.84rem;text-align:left}.ind svg{width:22px;height:22px;flex:none}.ob-head,.ob-body,.ob-foot{padding-left:18px;padding-right:18px}}
 
 /* ---------- voice room ---------- */
 .iv-avatar{width:56px;height:56px;flex:none;position:relative}
@@ -325,6 +334,7 @@ kbd{font:600 .72rem var(--f-mono);border:1px solid var(--line-2);border-bottom-w
 .ans-wrap textarea{border:0;border-radius:0;font-size:1rem}
 .ans-wrap.rec{border-color:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 18%,transparent)}
 .ans-bar{display:flex;gap:12px;align-items:center;padding:8px 10px;border-top:1px solid var(--line);background:var(--well)}
+.btn.big{padding:12px 20px;font-size:1rem;border-radius:10px}
 .mic{width:52px;height:52px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;flex:none}
 .mic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 .mic.on{background:var(--bad);color:#fff;animation:pulse 1.4s ease-out infinite}
@@ -1425,7 +1435,15 @@ function vDashboard(){
   return `
   <div class="pagehead"><div class="grow"><div class="eyebrow">${esc(P_().label)} · ${esc(S.profile.role||'')}</div><h1>${name ? 'Good to see you, ' + esc(name) + '.' : 'Your job hunt at a glance'}</h1>
   <p>${due.filter(d => d.date <= today()).length ? `${due.filter(d => d.date <= today()).length} thing${due.filter(d => d.date <= today()).length>1?'s':''} need you today.` : 'Nothing overdue.'} ${active} active application${active===1?'':'s'}, ${offers} offer${offers===1?'':'s'} so far.</p></div>
-  <div class="row"><button class="btn" data-nav="resume">${ico('resume')}Check a resume</button><button class="btn" data-nav="outreach">${ico('mail')}Write outreach</button></div></div>
+</div>
+
+  <div class="quick">
+    <label class="qa" for="qa-file">${ico('upload')}<b>Check my resume</b><span>Upload it, see your gaps</span></label>
+    <input type="file" id="qa-file" class="file-hide" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+    <button class="qa" data-action="qa-interview">${ico('prep')}<b>Practise an interview</b><span>${(S.profile.level||'manager') === 'manager' ? 'Manager-level' : 'Associate-level'}, out loud</span></button>
+    <button class="qa" data-action="qa-email">${ico('mail')}<b>Write a cold email</b><span>Personal, in a minute</span></button>
+  </div>
+  ${S.settings.onboarded && ui.upload && ui.upload.state !== 'ok' ? uploadStatus() : ''}
 
   <div class="grid g4">
     <div class="panel kpi"><span class="eyebrow">Active</span><span class="v num">${active}</span><span class="s">of ${A.length} tracked</span></div>
@@ -1486,7 +1504,7 @@ function vResume(){
       <div class="panel-h" style="margin:0"><h2>2 · Job description</h2><span class="grow"></span>
         <select class="input" id="rc-app" style="width:auto;max-width:240px" aria-label="Link to application"><option value="">Not linked to an application</option>${appOpts}</select></div>
       <textarea class="input" id="rc-jd" rows="15" placeholder="Paste the full job ad, including the requirements">${esc(S.check.jd)}</textarea>
-      <div class="row"><button class="btn primary" data-action="analyze">${ico('play')}Check match</button><span class="note">Score updates as you type. Linking saves the score to that application.</span></div>
+      <p class="note">Your score updates by itself as soon as both boxes have text.</p>
     </div>
   </div>
 
@@ -1496,7 +1514,8 @@ function vResume(){
 function resultsHTML(a){
   const pack = PACKS[a.packKey];
   const st = S.suggestionStatus;
-  const sugg = a.suggestions.filter(s => ui.suggFilter === 'all' ? true : ui.suggFilter === 'open' ? !st[s.id] : !!st[s.id]);
+  const suggAll = a.suggestions.filter(s => ui.suggFilter === 'all' ? true : ui.suggFilter === 'open' ? !st[s.id] : !!st[s.id]);
+  const sugg = ui.suggMore ? suggAll : suggAll.slice(0, 5);
   const openCount = a.suggestions.filter(s => !st[s.id]).length;
   const sec = ['contact','summary','experience','education','skills','projects','certifications','languages'];
   const hasContact = a.P.email || a.P.phone;
@@ -1546,6 +1565,7 @@ function resultsHTML(a){
       <div class="tabs" role="tablist">${['open','handled','all'].map(f => `<button role="tab" aria-selected="${ui.suggFilter===f}" data-sf="${f}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}</div></div>
     ${sugg.length ? sugg.map(s => `<div class="sugg ${st[s.id]?'done':''}"><span class="pill prio-${s.prio}">${s.prio}</span><div><div class="eyebrow" style="margin-bottom:3px">${esc(s.rule)}${st[s.id] ? ' · ' + st[s.id] : ''}</div><div class="txt">${esc(s.text)}</div>${s.line ? `<div class="quote">“${esc(s.line.length > 160 ? s.line.slice(0,160)+'…' : s.line)}”</div>` : ''}</div>
       <div class="row" style="flex-wrap:nowrap">${st[s.id] ? `<button class="btn sm ghost" data-sugg="${s.id}" data-v="">Reopen</button>` : `<button class="btn sm" data-sugg="${s.id}" data-v="Done">Done</button><button class="btn sm ghost" data-sugg="${s.id}" data-v="Ignored">Ignore</button>`}</div></div>`).join('') : `<div class="empty">${ui.suggFilter==='open' ? 'All fixes handled. Nice work.' : 'Nothing here.'}</div>`}
+    ${suggAll.length > 5 ? `<div class="row" style="margin-top:10px"><button class="btn sm" data-action="sugg-more">${ui.suggMore ? 'Show top 5 only' : 'Show all ' + suggAll.length + ' fixes'}</button></div>` : ''}
   </div>
 
   ${trackHTML(a)}
@@ -1555,7 +1575,7 @@ function resultsHTML(a){
 
 function promptHelperHTML(a){
   const types = {bullets:'Rewrite my weak bullets', summary:'Tailor my summary', email:'Polish an email draft', reply:'Draft a reply to a recruiter'};
-  return `<div class="panel stack">
+  return `<details class="panel"><summary style="cursor:pointer"><b style="font-family:var(--f-display);font-size:1.1rem">Rewrite help with AI</b> <span class="muted">— get a ready-made prompt for any chat AI</span></summary><div class="stack" style="margin-top:14px">
     <div class="panel-h" style="margin:0"><h2>AI prompt helper</h2><span class="muted grow">Builds a prompt you paste into any chat AI you already use. This app makes no connection.</span></div>
     <div class="tabs" role="tablist">${Object.entries(types).map(([k,v]) => `<button role="tab" aria-selected="${ui.promptType===k}" data-pt="${k}">${v}</button>`).join('')}</div>
     ${ui.promptType === 'email' || ui.promptType === 'reply' ? `<label class="field"><span>${ui.promptType==='email' ? 'Email draft to polish' : 'Recruiter email to reply to'}</span><textarea class="input" id="pt-extra" rows="4">${esc(ui.ptExtra||'')}</textarea></label>` : ''}
@@ -1564,7 +1584,7 @@ function promptHelperHTML(a){
     <div class="hr"></div>
     <label class="field"><span>Paste the AI’s answer to keep it</span><textarea class="input" id="pt-back" rows="4" placeholder="Paste the answer here"></textarea></label>
     <div class="row"><select class="input" id="pt-app" style="width:auto;max-width:260px" aria-label="Save to application">${S.applications.map(x => `<option value="${x.id}" ${S.check.appId===x.id?'selected':''}>${esc(x.company)} — ${esc(x.role)}</option>`).join('')}</select><button class="btn" data-action="save-ai">Save to application notes</button></div>
-  </div>`;
+  </div></details>`;
 }
 function buildPrompt(a){
   const r = resumeById(S.check.resumeId);
@@ -1605,7 +1625,7 @@ function uploadStatus(){
   if(u.state === 'ok') return `<div class="upl ok" role="status">✓ Read <b>${esc(u.name)}</b> · ${esc(u.msg)}</div>`;
   return `<div class="upl err" role="alert"><b>Couldn’t read ${esc(u.name)}.</b> ${esc(u.msg)}<div class="row" style="margin-top:8px"><button class="btn sm" data-action="paste-instead">Paste the text instead</button><button class="btn sm ghost" data-action="upl-dismiss">Dismiss</button></div></div>`;
 }
-EXTRA_ACTIONS['paste-instead'] = () => { ui.upload = null; const ta = $('#ob-resume') || $('#rc-text'); render(); if(!S.settings.onboarded) renderOnboarding(true); const t = $('#ob-resume') || $('#rc-text'); if(t){ t.focus(); t.select(); } };
+EXTRA_ACTIONS['paste-instead'] = () => { ui.upload = null; const ta = $('#ob-resume') || $('#rc-text'); render(); if(!S.settings.onboarded) renderOnboarding(true); const t = $('#ob-resume') || $('#rc-text'); if(t){ const d = t.closest('details'); if(d) d.open = true; ui.ob.resume = ui.ob.resume || ' '; t.focus(); t.select(); } };
 EXTRA_ACTIONS['upl-dismiss'] = () => { ui.upload = null; render(); if(!S.settings.onboarded) renderOnboarding(true); };
 let pickerWatch = null;
 document.addEventListener('click', e => {
@@ -1629,7 +1649,7 @@ async function handleFile(f){
     if(f.size > 15e6) throw new Error('That file is over 15 MB. A resume should be well under 2 MB — re-export it without images.');
     const {text, meta} = await readFile(f);
     const r = {id:uid('r'), label:f.name.replace(/\.[^.]+$/,''), text:text.trim(), added:today(), meta};
-    S.resumes.push(r); S.check.resumeId = r.id; ui.upload = {state:'ok', name:f.name, msg:(text.match(/\S+/g)||[]).length + ' words read'}; analysisCache.key = ''; linkScore(); save(); render(); if(!S.settings.onboarded) renderOnboarding(true); toast('Resume added: ' + r.label);
+    S.resumes.push(r); S.check.resumeId = r.id; ui.upload = {state:'ok', name:f.name, msg:(text.match(/\S+/g)||[]).length + ' words read'}; analysisCache.key = ''; linkScore(); save(); if(!S.settings.onboarded){ actions['ob-finish'](null, {dataset:{}}); return; } render(); if(ui.afterUpload){ const go2 = ui.afterUpload; ui.afterUpload = null; go2(); } toast('Resume added: ' + r.label);
   } catch(err){ ui.upload = {state:'error', name:f.name, msg:(err && err.message) || 'Could not read that file.'}; render(); if(!S.settings.onboarded) renderOnboarding(true); }
 }
 function linkScore(){
@@ -1832,6 +1852,8 @@ function prepMock(p){
     return `<div class="grid" style="grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)">
       <div class="panel stack room-setup">
         <div class="row"><div class="iv-avatar" aria-hidden="true">${ivFace()}</div><div style="flex:1;min-width:200px"><div class="eyebrow">${mgr ? 'Manager-level panel' : 'Associate-level panel'} · ${esc(P_().label)}</div><h2 style="font-size:1.4rem">Voice interview room</h2><p class="muted" style="font-size:.9rem;margin-top:4px">The interviewer reads each question aloud. Answer out loud; your words are transcribed and scored. ${mgr ? 'Expect tough follow-ups that test whether you hold your ground.' : ''}</p></div></div>
+        <div class="row"><button class="btn primary big" data-action="mock-start">${ico('play')}Start interview</button><span class="note">5 questions · 2 min each${mgr ? ' · with tough follow-ups' : ''}</span></div>
+        <details><summary class="note" style="cursor:pointer">Change settings</summary><div class="stack" style="margin-top:10px">
         <div class="grid g3" style="gap:10px">
           <label class="field"><span>Questions</span><select class="input" id="mk-n">${[3,5,8].map(n => `<option ${n===5?'selected':''}>${n}</option>`).join('')}</select></label>
           <label class="field"><span>Time per answer</span><select class="input" id="mk-t"><option value="90">1.5 min</option><option value="120" selected>2 min</option><option value="180">3 min</option></select></label>
@@ -1842,11 +1864,10 @@ function prepMock(p){
           <label class="check" style="border:0"><input type="checkbox" id="mk-probe" ${mgr ? 'checked' : ''}><span>Pressure follow-ups</span></label>
           <label class="check" style="border:0"><input type="checkbox" id="mk-auto" checked><span>Mic on after each question</span></label>
         </div>
-        <details><summary class="note" style="cursor:pointer">Voice and language</summary><div class="grid g2" style="gap:10px;margin-top:10px">
+        <div class="grid g2" style="gap:10px">
           <label class="field"><span>Interviewer voice</span><select class="input" id="mk-vname"><option value="">Automatic</option>${voices.map(v => `<option ${v.name===S.settings.voiceName?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label>
           <label class="field"><span>Your accent (for transcription)</span><select class="input" id="mk-lang">${[['en-IN','English (India)'],['en-GB','English (UK)'],['en-US','English (US)'],['en-AE','English (UAE)'],['en-AU','English (Australia)']].map(([v,l]) => `<option value="${v}" ${v===(S.settings.recLang||'en-IN')?'selected':''}>${l}</option>`).join('')}</select></label>
-        </div><div class="row" style="margin-top:10px"><button class="btn sm" data-action="mk-testvoice">Test voice</button></div></details>
-        <div class="row"><button class="btn primary" data-action="mock-start">${ico('play')}Start interview</button><span class="note">${SR ? 'Allow the microphone when asked.' : 'Spoken answers need Chrome or Edge. Here, use your keyboard’s mic key or type.'}</span></div>
+        </div><div class="row"><button class="btn sm" data-action="mk-testvoice">Test voice</button><span class="note">${SR ? 'Allow the microphone when asked.' : 'Spoken answers need Chrome or Edge. Here, use your keyboard’s mic key or type.'}</span></div></div></details>
       </div>
       <div class="panel"><div class="panel-h"><h2>Your sessions</h2></div>${hist.length ? `<table class="t" style="min-width:0"><thead><tr><th>Date</th><th>Level</th><th>Qs</th><th>Score</th></tr></thead><tbody>${hist.map(h => { const sc = h.score10 != null ? h.score10 : h.avg*2; return `<tr><td>${fmtDate(h.date)}</td><td>${h.level === 'manager' ? 'Manager' : h.level ? 'Associate' : '—'}</td><td class="num">${h.count}</td><td><span class="mono num" style="font-weight:700;color:${band(sc*10)}">${sc.toFixed(1)}</span><span class="faint">/10</span></td></tr>`; }).join('')}</tbody></table>
         ${hist.length >= 2 ? sparkSVG(hist.slice().reverse().map(h => h.score10 != null ? h.score10 : h.avg*2)) : ''}` : '<div class="empty">No sessions yet. Three sessions complete this part of readiness.</div>'}</div>
@@ -1874,7 +1895,7 @@ function prepMock(p){
             <span class="note" id="iv-wc">${m.listening ? 'Listening… ' : ''}${liveStats(a[key]||'', a)}</span></div>
         </div>
         ${m.micMsg ? `<div class="upl err" role="alert" style="margin:0">${esc(m.micMsg)}</div>` : ''}
-        <div class="row"><button class="btn" data-action="mock-pause">${m.paused ? 'Resume timer' : 'Pause timer'}</button><button class="btn primary" data-action="mk-done">${inProbe || !(m.probe && q.probe) ? 'Finish answer and score it' : 'Finish answer'}</button></div>
+        <div class="row"><button class="btn primary big" data-action="mk-done">Done ✓</button><span class="note">${m.listening ? 'Speak, then tap Done.' : 'Tap the mic to answer out loud, or type.'}</span></div>
       </div></div></div>`;
 }
 function ivFace(){
@@ -1912,7 +1933,7 @@ function mockReview(m, q, a){
     </div>
     <details ${a.text ? '' : 'open'}><summary class="note" style="cursor:pointer">Your transcript</summary><div class="preview" style="margin-top:8px">${esc(a.text||'(no answer)')}${a.probeText ? '\n\nFollow-up: ' + esc(a.probeText) : ''}</div></details>
     ${sampleFn ? `<div class="stack"><div class="row"><button class="btn" data-action="mk-ai" ${a.aiBusy?'disabled':''}>${a.ai ? 'Ask Claude again' : 'Get Claude’s feedback and a stronger version'}</button><span class="note">Uses your Claude account. Claude only sees this question and your answer.</span></div>${a.ai || a.aiBusy ? `<div class="preview" id="iv-ai">${esc(a.ai || 'Thinking…')}</div>` : ''}</div>` : ''}
-    <div class="row"><button class="btn" data-action="mk-retry">Retry this question</button><span class="grow" style="flex:1"></span><button class="btn primary" data-action="mk-next">${m.i === m.qs.length-1 ? 'See interview summary' : 'Next question →'}</button></div>
+    <div class="row"><button class="btn primary big" data-action="mk-next">${m.i === m.qs.length-1 ? 'See my results' : 'Next question →'}</button><button class="btn ghost" data-action="mk-retry">Try again</button></div>
   </div>`;
 }
 function mockSummary(m){
@@ -2039,7 +2060,19 @@ function outCtx(){
     mutual: f.mutual || '', top_skills: topSkills() || ''
   };
 }
-function fill(tpl, ctx){ return tpl.replace(/\{\{(\w+)\}\}/g, (m, k) => (ctx[k] != null && String(ctx[k]).trim() !== '') ? String(ctx[k]) : m); }
+// Optional details (phone, links, languages…) quietly drop out when empty; the essentials stay highlighted.
+const OPTIONAL_PH = ['phone','portfolio_link','languages','passport','relocation','availability','top_skills'];
+function fill(tpl, ctx){
+  let out = tpl.replace(/\{\{(\w+)\}\}/g, (m, k) => (ctx[k] != null && String(ctx[k]).trim() !== '') ? String(ctx[k]) : OPTIONAL_PH.includes(k) ? '\u0000' : m);
+  out = out.split('\n').map(line => {
+    if(!line.includes('\u0000')) return line;
+    let l = line.replace(/\s*[·|,]\s*\u0000/g, '').replace(/\u0000\s*[·|,]\s*/g, '');
+    // drop a whole sentence that depended on a missing optional detail
+    l = l.split(/(?<=[.!?])\s+/).filter(sen => !sen.includes('\u0000')).join(' ');
+    return l.replace(/\u0000/g, '').trim();
+  }).join('\n').replace(/\n{3,}/g, '\n\n').replace(/\n+$/,'');
+  return out;
+}
 function unfilled(s){ return Array.from(new Set((s.match(/\{\{\w+\}\}/g)||[]))); }
 function outDraft(){
   const t = S.templates.find(x => x.id === ui.outTpl) || S.templates[0];
@@ -2116,13 +2149,12 @@ function vOutreach(){
         <label class="field"><span>Body ${ui.outDirty ? '<span class="faint">· edited by you</span>' : ''}</span><textarea class="input ${un.length?'bad':''}" id="o-body" rows="12">${esc(ui.outBody)}</textarea></label>
         ${un.length ? `<div class="preview" aria-label="Unfilled placeholders highlighted">${mark(ui.outBody)}</div>` : ''}
         <div class="row">
-          <button class="btn primary" data-action="copy-body">${ico('copy')}${un.length && ui.confirm === 'copy' ? 'Copy anyway' : 'Copy body'}</button>
-          <a class="btn" href="${mailto}" target="_blank" rel="noopener" data-action="mailto">${ico('send')}Open in mail app</a>
-          <button class="btn" data-action="log-sent">Mark as sent</button>
+          <a class="btn primary big" href="${mailto}" target="_blank" rel="noopener" data-action="send-one">${ico('send')}${un.length && ui.confirm === 'send' ? 'Send anyway' : 'Copy & open email'}</a>
+          <button class="btn ghost" data-action="copy-body">${ico('copy')}Copy only</button>
           ${ui.outDirty ? `<button class="btn ghost sm" data-action="reset-draft">Reset to template</button>` : ''}
         </div>
-        ${un.length && ui.confirm === 'copy' ? `<p class="note" style="color:var(--bad)">${un.length} placeholder${un.length>1?'s are':' is'} still unfilled: ${un.join(', ')}. Fill them, or click again to copy anyway.</p>` : ''}
-        <p class="note">“Open in mail app” uses a mailto: link to your own mail app; nothing is sent from here. “Mark as sent” logs it${app ? ' on ' + esc(app.company) + '’s timeline' : ''}.</p>
+        ${un.length && (ui.confirm === 'copy' || ui.confirm === 'send') ? `<p class="note" style="color:var(--bad)">${un.length} placeholder${un.length>1?'s are':' is'} still unfilled: ${un.join(', ')}. Fill the red boxes, or tap again to go ahead anyway.</p>` : ''}
+        <p class="note">One tap copies the email, opens your mail app with it filled in, and logs it${app ? ' on ' + esc(app.company) + '’s timeline' : ' as a tracked application'} with a follow-up in 5 days. Nothing is sent until you press send in your mail app.</p>
       </div>
     </div>
   </div>`;
@@ -2251,35 +2283,24 @@ function renderOnboarding(force){
   const host = $('#modal');
   if(S.settings.onboarded || drawerId){ const w = $('.ob-wrap', host); if(w) host.innerHTML = ''; return; }
   if(!force && $('.ob-wrap', host)) return;
-  const st = ui.ob.step, p = S.profile, pack = P_();
-  const steps = ['Your field','About you','Your resume'];
+  const p = S.profile, pack = P_();
   const r = resumeById(S.check.resumeId);
-  const pf = (k, label, type='text', ph='') => `<label class="field"><span>${label}</span><input class="input" type="${type}" data-pf="${k}" value="${esc(p[k] ?? '')}" placeholder="${esc(ph)}"></label>`;
-  let body = '';
-  if(st === 0) body = `<div class="eyebrow">Which field are you job hunting in?</div>
-    <div class="inds">${Object.entries(PACKS).map(([k,v]) => `<button type="button" class="ind" data-obind="${k}" aria-pressed="${k===pk()}"><svg viewBox="0 0 24 24" aria-hidden="true">${IND_ICON[k]}</svg>${v.label}</button>`).join('')}</div>
-    <div class="grid g2" style="gap:10px"><label class="field"><span>Target role</span><select class="input" id="ob-role">${pack.roles.map(x => `<option ${x===p.role?'selected':''}>${esc(x)}</option>`).join('')}<option value="__other" ${pack.roles.includes(p.role)?'':'selected'}>Something else…</option></select></label>
-    ${pack.roles.includes(p.role) ? '' : pf('role','Your target role','text','e.g. Spa Manager')}</div>
-    <p class="note">This loads the ${esc(pack.label)} pack: keywords, certifications (${esc(pack.certs.map(c=>c[1]).slice(0,3).join(', '))}), interview questions, assessment-day checklist and email templates. You can switch any time from the top bar.</p>`;
-  if(st === 1) body = `<div class="eyebrow">These fill your emails. They never leave this browser.</div>
-    <div class="grid g2" style="gap:10px">${pf('name','Full name','text','Priya Nair')}${pf('email','Email','email','you@example.com')}${pf('phone','Phone','tel','+91 98450 12345')}${pf('years_experience','Years of experience','number','4')}${pf('portfolio_link','LinkedIn or portfolio','text','linkedin.com/in/you')}${pf('languages','Languages you speak','text','English, Hindi')}
-    ${pack.mobility ? pf('passport','Passport valid until','text','March 2031') + pf('relocation','Relocation','text','open to relocation') : ''}${pf('availability','Can join','text','within 30 days')}</div>`;
-  if(st === 2) body = `<div class="eyebrow">Add your resume to see your gaps right away</div>
-    <label class="drop" for="ob-file">${ico('upload')}<div><b>${r ? 'Loaded: ' + esc(r.label) + ' · ' + (r.text.match(/\S+/g)||[]).length + ' words' : 'Choose a PDF, DOCX or TXT'}</b><span class="note">${r ? 'Choose another file to replace it.' : 'Text is read in your browser; the file isn’t stored.'}</span></div></label>
-    <input type="file" id="ob-file" class="file-hide" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
-    ${uploadStatus()}
-    ${r ? '' : `<label class="field"><span>Or paste your resume text <span class="faint">— works everywhere, including phones</span></span><textarea class="input" id="ob-resume" rows="5" placeholder="Open your resume, select all, copy, and paste here">${esc(ui.ob.resume||'')}</textarea></label>`}
-    <label class="field"><span>Job ad you’re targeting <span class="faint">(optional — paste it to get a match score)</span></span><textarea class="input" id="ob-jd" rows="5" placeholder="Paste the full job description">${esc(ui.ob.jd ?? S.check.jd ?? '')}</textarea></label>`;
   host.innerHTML = `<div class="ob-wrap"><div class="ob" role="dialog" aria-modal="true" aria-label="Set up CareerPrep Studio">
-    <div class="ob-head"><div class="ob-steps">${steps.map((x,i) => `<span class="${i===st?'on':i<st?'done':''}">${i<st?'✓ ':''}${i+1} · ${x}</span>`).join('')}</div>
-      <h2>${st===0 ? 'Welcome to CareerPrep Studio' : st===1 ? 'About you' : 'Your resume'}</h2>
-      <p>${st===0 ? 'Check your resume against real job ads, prepare for interviews and write outreach emails people answer. Setup takes about a minute.' : st===1 ? 'Only your name is needed now. Add the rest later in Settings.' : 'Upload or paste it. You can add more versions later.'}</p></div>
-    <div class="ob-body">${body}</div>
-    <div class="ob-foot">${st===0 ? `<button class="btn ghost" data-action="load-examples">Explore with example data</button>` : `<button class="btn ghost" data-action="ob-back">Back</button>`}<span class="grow"></span>
-      ${st===2 ? `<button class="btn ghost" data-action="ob-finish" data-skip="1">Skip for now</button>` : ''}
-      <button class="btn primary" data-action="${st===2 ? 'ob-finish' : 'ob-next'}">${st===2 ? 'Finish setup' : 'Next →'}</button></div>
+    <div class="ob-head"><h2>Welcome to CareerPrep Studio</h2><p>Pick your field and add your resume. That’s it — you’ll see your gaps straight away.</p></div>
+    <div class="ob-body">
+      <div class="inds">${Object.entries(PACKS).map(([k,v]) => `<button type="button" class="ind" data-obind="${k}" aria-pressed="${k===pk()}"><svg viewBox="0 0 24 24" aria-hidden="true">${IND_ICON[k]}</svg>${v.label}</button>`).join('')}</div>
+      <label class="drop big" for="ob-file">${ico('upload')}<div><b>${r ? '✓ ' + esc(r.label) + ' · ' + (r.text.match(/\S+/g)||[]).length + ' words' : 'Upload your resume'}</b><span class="note">${r ? 'Tap to replace it.' : 'PDF, Word or text. Read on your device, never uploaded anywhere.'}</span></div></label>
+      <input type="file" id="ob-file" class="file-hide" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+      ${uploadStatus()}
+      <div class="grid g2" style="gap:10px">
+        <label class="field"><span>Target role</span><select class="input" id="ob-role">${pack.roles.map(x => `<option ${x===p.role?'selected':''}>${esc(x)}</option>`).join('')}${pack.roles.includes(p.role) || !p.role ? '' : `<option selected>${esc(p.role)}</option>`}</select></label>
+        <label class="field"><span>Your name <span class="faint">(for emails)</span></span><input class="input" data-pf="name" value="${esc(p.name||'')}" placeholder="Priya Nair"></label>
+      </div>
+      ${r ? '' : `<details ${ui.ob.resume ? 'open' : ''}><summary class="note" style="cursor:pointer">Can’t upload? Paste the text instead</summary><textarea class="input" id="ob-resume" rows="5" style="margin-top:8px" placeholder="Open your resume, select all, copy, and paste here">${esc(ui.ob.resume||'')}</textarea></details>`}
+    </div>
+    <div class="ob-foot"><button class="btn ghost" data-action="load-examples">See an example first</button><span class="grow"></span>
+      <button class="btn primary" data-action="ob-finish">${r ? 'Show my results →' : 'Start →'}</button></div>
   </div></div>`;
-  const f = $('.ob-body input, .ob-body textarea, .ob-body button', host); if(f && st) f.focus();
 }
 EXTRA_ACTIONS['ob-next'] = () => {
   if(ui.ob.step === 1 && !(S.profile.name||'').trim()){ toast('Add your name to continue'); const n = $('[data-pf="name"]'); if(n){ n.classList.add('bad'); n.focus(); } return; }
@@ -2288,16 +2309,23 @@ EXTRA_ACTIONS['ob-next'] = () => {
 EXTRA_ACTIONS['ob-back'] = () => { ui.ob.step = Math.max(0, ui.ob.step-1); renderOnboarding(true); };
 EXTRA_ACTIONS['ob-finish'] = (e, t) => {
   const txt = ($('#ob-resume') ? $('#ob-resume').value : '').trim();
-  const jd = ($('#ob-jd') ? $('#ob-jd').value : '').trim();
-  if(!t.dataset.skip){
-    if(txt && !resumeById(S.check.resumeId)){ const r = {id:uid('r'), label:'My resume', text:txt, added:today(), meta:{source:'paste'}}; S.resumes.push(r); S.check.resumeId = r.id; }
-    if(jd) S.check.jd = jd;
-  }
+  if(txt && !resumeById(S.check.resumeId)){ const r = {id:uid('r'), label:'My resume', text:txt, added:today(), meta:{source:'paste'}}; S.resumes.push(r); S.check.resumeId = r.id; }
   S.settings.onboarded = true; S.settings.examples = false; analysisCache.key = '';
   save(); $('#modal').innerHTML = '';
   const ready = resumeById(S.check.resumeId);
   go(ready ? 'resume' : 'dashboard');
-  toast(ready && S.check.jd ? 'Your match score is ready' : ready ? 'Resume saved. Paste a job ad to score it.' : 'You’re set. Press N to add your first application.');
+  toast(ready ? 'Resume in. Paste a job ad to see your match.' : 'You’re set.');
+  if(ready) setTimeout(() => { const j = $('#rc-jd'); if(j){ j.scrollIntoView({block:'center'}); j.focus({preventScroll:true}); } }, 50);
+};
+EXTRA_ACTIONS['qa-interview'] = () => { ui.prepTab = 'mock'; ui.mock = null; go('prep'); mockStart(); };
+EXTRA_ACTIONS['qa-email'] = () => { ui.outTpl = 'c1'; ui.outDirty = false; go('outreach'); const h = $('[data-of="recruiter"]'); if(h) h.focus(); };
+EXTRA_ACTIONS['sugg-more'] = () => { ui.suggMore = !ui.suggMore; rerenderKeep(); };
+EXTRA_ACTIONS['send-one'] = (e, t) => {
+  const un = unfilled(ui.outSubject + ui.outBody);
+  if(un.length && ui.confirm !== 'send'){ e.preventDefault(); ui.confirm = 'send'; rerenderKeep(); return; }
+  ui.confirm = null;
+  copy(ui.outBody);
+  setTimeout(() => actions['log-sent'](), 400); // let the mail link open before the page re-renders
 };
 EXTRA_ACTIONS['goto-track'] = () => { const el = $('#track'); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const i = $('#tr-co'); if(i) i.focus({preventScroll:true}); } };
 function guessCompany(jd){
@@ -2374,7 +2402,7 @@ document.addEventListener('click', e => {
   if(t.dataset.obind){ S.profile.industry = t.dataset.obind; S.profile.role = PACKS[t.dataset.obind].roles[0]; analysisCache.key = ''; save(); renderPack(); renderOnboarding(true); return; }
   if(t.dataset.deltpl){ S.templates = S.templates.filter(x => x.id !== t.dataset.deltpl); save(); render(); return; }
   const act = t.dataset.action;
-  const A = actions[act]; if(A){ if(act !== 'mailto') e.preventDefault(); A(e, t); }
+  const A = actions[act]; if(A){ if(act !== 'mailto' && act !== 'send-one') e.preventDefault(); A(e, t); }
 });
 function rerenderKeep(){ const y = window.scrollY; render(); window.scrollTo(0, y); }
 
@@ -2489,6 +2517,7 @@ document.addEventListener('change', e => {
   if(t.id === 'pk-role'){ S.profile.role = t.value; save(); render(); return; }
   if(t.id === 'rc-resume'){ S.check.resumeId = t.value; analysisCache.key = ''; save(); render(); return; }
   if(t.id === 'rc-app'){ S.check.appId = t.value; const a = S.applications.find(x => x.id === t.value); if(a && a.jdText && !S.check.jd.trim()) S.check.jd = a.jdText; linkScore(); save(); render(); return; }
+  if(t.id === 'qa-file'){ const f = t.files[0]; t.value = ''; if(f){ ui.afterUpload = () => go('resume'); handleFile(f); } return; }
   if(t.id === 'rc-file'){ const f = t.files[0]; if(f) handleFile(f); t.value = ''; return; }
   if(t.id === 'mk-vname'){ S.settings.voiceName = t.value; save(); return; }
   if(t.id === 'mk-lang'){ S.settings.recLang = t.value; save(); return; }
