@@ -13,7 +13,9 @@ Data lives in this browser under the `jobtracker:v1` localStorage key; export a 
 
 **Edit:** `src/app.html` is the source; run `./build.sh` to regenerate `index.html`
 (the build drops the Google Fonts link so the local copy stays fully offline) and
-`CareerPrep-Studio.html` (the single-file edition).
+`CareerPrep-Studio.html` (the single-file edition), plus `dist/artifact.html` for the hosted page.
+The PDF and Word readers are embedded in both, so uploads need no extra files; `index.html`
+loads them from `lib/` and falls back to a CDN.
 
 | Screen | What it does |
 |---|---|

@@ -178,6 +178,15 @@ textarea.input{resize:vertical;line-height:1.5}
 /* ---------- resume check ---------- */
 .drop{border:1.5px dashed var(--line-2);border-radius:12px;padding:18px;display:flex;gap:14px;align-items:center;background:var(--well);cursor:pointer;transition:border-color .15s, background .15s}
 .drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.file-hide{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.file-hide:focus-visible + .upl, .drop:focus-within{outline:2px solid var(--accent)}
+.upl{border-radius:10px;padding:10px 12px;font-size:.88rem;display:block}
+.upl.busy{background:var(--well);border:1px solid var(--line)}
+.upl.ok{background:var(--good-soft);color:var(--good)}
+.upl.err{background:var(--bad-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent)}
+.upl.err b{color:var(--bad)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;margin-right:8px;vertical-align:-1px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .drop svg{flex:none;width:38px;height:38px;stroke:var(--accent);fill:none;stroke-width:1.6}
 .drop b{display:block}
 .gaugewrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:center}
@@ -928,18 +937,48 @@ function suggest(r, pack, jd){
 
 /* ---------- file extraction (pdf.js / mammoth, loaded on demand from lib/) ---------- */
 const loaded = {};
+const EXTRA_ACTIONS = {};
+// Libraries are normally embedded in the page (single-file and hosted editions). If not,
+// try the lib/ folder next to index.html, then a public CDN as a last resort.
+const LIB_GLOBAL = {'lib/pdf.min.js':'pdfjsLib', 'lib/pdf.worker.min.js':'pdfjsWorker', 'lib/mammoth.browser.min.js':'mammoth'};
+const LIB_CDN = {
+  'lib/pdf.min.js':'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  'lib/pdf.worker.min.js':'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  'lib/mammoth.browser.min.js':'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js'
+};
+function injectSrc(url, ok){
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = url;
+    const timer = setTimeout(() => rej(new Error('timed out')), 20000);
+    s.onload = () => { clearTimeout(timer); ok() ? res() : rej(new Error('loaded but unusable')); };
+    s.onerror = () => { clearTimeout(timer); s.remove(); rej(new Error('blocked or missing')); };
+    document.head.appendChild(s);
+  });
+}
 function loadScript(src){
+  const g = LIB_GLOBAL[src], ok = () => !!(g && window[g]);
+  if(ok()) return Promise.resolve();
   if(loaded[src]) return loaded[src];
   const inl = document.getElementById('lib:' + src);
-  if(inl){ const s = document.createElement('script'); s.textContent = inl.textContent; document.head.appendChild(s); inl.remove(); return (loaded[src] = Promise.resolve()); }
-  loaded[src] = new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => { loaded[src] = null; rej(new Error('Could not load ' + src + '. Keep the lib folder next to index.html.')); }; document.head.appendChild(s); });
+  if(inl){ try { const s = document.createElement('script'); s.textContent = inl.textContent; document.head.appendChild(s); } catch(e) {} if(ok()) return Promise.resolve(); }
+  loaded[src] = injectSrc(src, ok).catch(() => injectSrc(LIB_CDN[src], ok)).catch(() => {
+    loaded[src] = null;
+    throw new Error('The ' + (g === 'mammoth' ? 'Word' : 'PDF') + ' reader could not load here. Open CareerPrep-Studio.html (single file) instead, or paste your resume text into the box below.');
+  });
   return loaded[src];
 }
 async function readPdf(file){
   await loadScript('lib/pdf.min.js');
   await loadScript('lib/pdf.worker.min.js'); // defines globalThis.pdfjsWorker so pdf.js runs on the main thread under file://
   const lib = window.pdfjsLib;
-  const doc = await lib.getDocument({data: new Uint8Array(await file.arrayBuffer()), isEvalSupported:false}).promise;
+  let doc;
+  try { doc = await lib.getDocument({data: new Uint8Array(await file.arrayBuffer()), isEvalSupported:false}).promise; }
+  catch(err){
+    const n = (err && err.name) || '';
+    if(n === 'PasswordException') throw new Error('This PDF is password-protected. Open it, use Print → Save as PDF to make an unlocked copy, then upload that — or paste the text.');
+    if(n === 'InvalidPDFException') throw new Error('This file isn’t a readable PDF (it may be damaged or mislabelled). Re-export it from Word, Google Docs or Canva and try again.');
+    throw new Error('Couldn’t open this PDF (' + (err && err.message || 'unknown error') + '). Paste the text instead.');
+  }
   let text = '', colLines = 0, totLines = 0, images = false;
   for(let p=1; p<=doc.numPages; p++){
     const page = await doc.getPage(p);
@@ -958,7 +997,7 @@ async function readPdf(file){
       try { const ops = await page.getOperatorList(); if(ops.fnArray.some(f => f === lib.OPS.paintImageXObject || f === lib.OPS.paintInlineImageXObject || f === lib.OPS.paintJpegXObject)) images = true; } catch(e) {}
     }
   }
-  if(text.replace(/\s/g,'').length < 40) throw new Error('This PDF has no selectable text (it may be a scan). Paste the text instead.');
+  if(text.replace(/\s/g,'').length < 40) throw new Error('This PDF is an image with no text layer (a scan, a photo, or Canva/Photoshop with text flattened). ATS tools can’t read it either. Export it again as text — in Canva untick “Flatten PDF”; in Word use Save as PDF — or paste the text below.');
   return {text, meta:{source:'pdf', pages:doc.numPages, columns: totLines > 8 && colLines/totLines > .25, images}};
 }
 async function readDocx(file){
@@ -1339,7 +1378,8 @@ function vResume(){
         ${S.resumes.length ? `<select class="input" id="rc-resume" style="width:auto;max-width:220px" aria-label="Resume version">${S.resumes.map(x => `<option value="${x.id}" ${x.id===S.check.resumeId?'selected':''}>${esc(x.label)}</option>`).join('')}</select>` : ''}
       </div>
       <label class="drop" id="drop" for="rc-file">${ico('upload')}<div><b>Drop a PDF, DOCX or TXT here, or click to choose</b><span class="note">Text is extracted in your browser. The file itself is never stored or sent.</span></div></label>
-      <input type="file" id="rc-file" accept=".pdf,.docx,.txt,.md" hidden>
+      <input type="file" id="rc-file" class="file-hide" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+      ${uploadStatus()}
       <label class="field"><span>Or paste / edit the resume text ${r ? `<span class="faint">· ${r.meta && r.meta.source ? r.meta.source.toUpperCase() : 'TEXT'} · ${(r.text.match(/\S+/g)||[]).length} words</span>` : ''}</span>
         <textarea class="input mono" id="rc-text" rows="11" style="font-size:.8rem" placeholder="Paste your resume text">${esc(r ? r.text : '')}</textarea></label>
       <div class="row"><input class="input" id="rc-label" placeholder="Version label, e.g. Cabin crew v2" style="flex:1;min-width:160px" value=""><button class="btn" data-action="save-resume-new">Save as new version</button>${r ? `<button class="btn ghost sm danger" data-action="del-resume">Delete version</button>` : ''}</div>
@@ -1455,13 +1495,23 @@ after.resume = function(){
     drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
   }
 };
+function uploadStatus(){
+  const u = ui.upload; if(!u) return '';
+  if(u.state === 'busy') return `<div class="upl busy" role="status"><span class="spin" aria-hidden="true"></span>Reading <b>${esc(u.name)}</b>…</div>`;
+  if(u.state === 'ok') return `<div class="upl ok" role="status">✓ Read <b>${esc(u.name)}</b> · ${esc(u.msg)}</div>`;
+  return `<div class="upl err" role="alert"><b>Couldn’t read ${esc(u.name)}.</b> ${esc(u.msg)}<div class="row" style="margin-top:8px"><button class="btn sm" data-action="paste-instead">Paste the text instead</button><button class="btn sm ghost" data-action="upl-dismiss">Dismiss</button></div></div>`;
+}
+EXTRA_ACTIONS['paste-instead'] = () => { ui.upload = null; const ta = $('#ob-resume') || $('#rc-text'); render(); if(!S.settings.onboarded) renderOnboarding(true); const t = $('#ob-resume') || $('#rc-text'); if(t){ t.focus(); t.select(); } };
+EXTRA_ACTIONS['upl-dismiss'] = () => { ui.upload = null; render(); if(!S.settings.onboarded) renderOnboarding(true); };
 async function handleFile(f){
-  toast('Reading ' + f.name + '…');
+  ui.upload = {state:'busy', name:f.name, msg:''};
+  render(); if(!S.settings.onboarded) renderOnboarding(true);
   try {
+    if(f.size > 15e6) throw new Error('That file is over 15 MB. A resume should be well under 2 MB — re-export it without images.');
     const {text, meta} = await readFile(f);
     const r = {id:uid('r'), label:f.name.replace(/\.[^.]+$/,''), text:text.trim(), added:today(), meta};
-    S.resumes.push(r); S.check.resumeId = r.id; save(); render(); if(!S.settings.onboarded) renderOnboarding(true); toast('Resume added: ' + r.label);
-  } catch(err){ toast(err.message || 'Could not read that file.'); }
+    S.resumes.push(r); S.check.resumeId = r.id; ui.upload = {state:'ok', name:f.name, msg:(text.match(/\S+/g)||[]).length + ' words read'}; analysisCache.key = ''; linkScore(); save(); render(); if(!S.settings.onboarded) renderOnboarding(true); toast('Resume added: ' + r.label);
+  } catch(err){ ui.upload = {state:'error', name:f.name, msg:(err && err.message) || 'Could not read that file.'}; render(); if(!S.settings.onboarded) renderOnboarding(true); }
 }
 function linkScore(){
   const a = currentAnalysis();
@@ -1804,7 +1854,6 @@ function renderDrawer(){
 /* =====================================================================
    FIRST-RUN SETUP + TRACK THIS JOB
    ===================================================================== */
-const EXTRA_ACTIONS = {};
 const IND_ICON = {
   hospitality:'<path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6M3 14h18M3 18v2M21 18v2"/><path d="M6 10V7a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>',
   tourism:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
@@ -1832,7 +1881,8 @@ function renderOnboarding(force){
     ${pack.mobility ? pf('passport','Passport valid until','text','March 2031') + pf('relocation','Relocation','text','open to relocation') : ''}${pf('availability','Can join','text','within 30 days')}</div>`;
   if(st === 2) body = `<div class="eyebrow">Add your resume to see your gaps right away</div>
     <label class="drop" for="ob-file">${ico('upload')}<div><b>${r ? 'Loaded: ' + esc(r.label) + ' · ' + (r.text.match(/\S+/g)||[]).length + ' words' : 'Choose a PDF, DOCX or TXT'}</b><span class="note">${r ? 'Choose another file to replace it.' : 'Text is read in your browser; the file isn’t stored.'}</span></div></label>
-    <input type="file" id="ob-file" accept=".pdf,.docx,.txt,.md" hidden>
+    <input type="file" id="ob-file" class="file-hide" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+    ${uploadStatus()}
     ${r ? '' : `<label class="field"><span>Or paste your resume text</span><textarea class="input" id="ob-resume" rows="5">${esc(ui.ob.resume||'')}</textarea></label>`}
     <label class="field"><span>Job ad you’re targeting <span class="faint">(optional — paste it to get a match score)</span></span><textarea class="input" id="ob-jd" rows="5" placeholder="Paste the full job description">${esc(ui.ob.jd ?? S.check.jd ?? '')}</textarea></label>`;
   host.innerHTML = `<div class="ob-wrap"><div class="ob" role="dialog" aria-modal="true" aria-label="Set up CareerPrep Studio">

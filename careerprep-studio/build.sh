@@ -20,15 +20,27 @@ echo "built $OUT from $SRC ($(wc -l < "$OUT") lines)"
 
 # Single-file edition: same page with pdf.js and mammoth embedded, so one .html file
 # works on its own (email it, put it on a USB stick, double-click). Libraries are kept
-# as inert text blocks and only run when a PDF or DOCX is first uploaded.
+# after the app script, so the interface paints first and uploads need no extra files.
 SINGLE="CareerPrep-Studio.html"
 node -e '
 const fs = require("fs");
 const page = fs.readFileSync(process.argv[1], "utf8");
 const libs = ["lib/pdf.min.js", "lib/pdf.worker.min.js", "lib/mammoth.browser.min.js"].map(p => {
   const js = fs.readFileSync(p, "utf8").replace(/<\/script/gi, "<\\/script").replace(/<!--/g, "\\x3C!--");
-  return `<script type="text/plain" id="lib:${p}">${js}</script>`;
+  return `<script data-lib="${p}">${js}</script>`;
 }).join("\n");
 fs.writeFileSync(process.argv[2], page.replace("\n</body>", "\n" + libs + "\n</body>"));
 ' "$OUT" "$SINGLE"
 echo "built $SINGLE ($(du -h "$SINGLE" | cut -f1), libraries embedded)"
+
+# Hosted (claude.ai artifact) edition: the page fragment with the same embedded libraries.
+mkdir -p dist
+node -e '
+const fs = require("fs");
+const libs = ["lib/pdf.min.js", "lib/pdf.worker.min.js", "lib/mammoth.browser.min.js"].map(p => {
+  const js = fs.readFileSync(p, "utf8").replace(/<\/script/gi, "<\\/script").replace(/<!--/g, "\\x3C!--");
+  return `<script data-lib="${p}">${js}</script>`;
+}).join("\n");
+fs.writeFileSync("dist/artifact.html", fs.readFileSync("src/app.html", "utf8") + "\n" + libs + "\n");
+'
+echo "built dist/artifact.html ($(du -h dist/artifact.html | cut -f1))"
