@@ -1796,6 +1796,8 @@ function vSettings(){
 }
 function exportData(){
   S.settings.lastBackup = today(); save();
+  let framed = false; try { framed = window.top !== window; } catch(e) { framed = true; }
+  if(framed){ copy(JSON.stringify(S)); toast('Downloads are blocked in this preview — backup copied as text instead'); render(); return; }
   const ok = download('jobtracker-backup-' + today() + '.json', JSON.stringify(S, null, 2));
   toast(ok ? 'Backup downloaded' : 'Download blocked here — use “Copy backup as text”');
   render();
