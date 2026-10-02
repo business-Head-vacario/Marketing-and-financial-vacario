@@ -1486,23 +1486,43 @@ function buildPrompt(a){
   }
   return `Draft a short, professional reply to this recruiter email. Confirm any dates or times they mention, answer their questions, and keep it under 120 words.\n\n${rule}\n\nRECRUITER EMAIL:\n${ui.ptExtra || '(paste the email above)'}\n\nMY RESUME:\n${r ? r.text : ''}\n\nJOB DESCRIPTION:\n${jd}`;
 }
+document.addEventListener('dragover', e => { const d = e.target.closest && e.target.closest('.drop'); if(d){ e.preventDefault(); d.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const d = e.target.closest && e.target.closest('.drop'); if(d) d.classList.remove('over'); });
+document.addEventListener('drop', e => { const d = e.target.closest && e.target.closest('.drop'); if(!d) return; e.preventDefault(); d.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
+document.addEventListener('paste', e => { const f = e.clipboardData && e.clipboardData.files && e.clipboardData.files[0]; if(f && /\.(pdf|docx|txt|md)$/i.test(f.name)){ e.preventDefault(); handleFile(f); } });
 after.resume = function(){
   animateGauges($('#view'));
-  const drop = $('#drop');
-  if(drop){
-    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-    drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
-  }
-};
+  };
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
+const IS_FILE = location.protocol === 'file:' || location.protocol === 'content:';
 function uploadStatus(){
   const u = ui.upload; if(!u) return '';
+  if(u.state === 'nopicker') return `<div class="upl err" role="alert"><b>No file picker opened?</b> The app you opened this in can’t show one${IS_ANDROID && IS_FILE ? ' (Android’s built-in HTML viewer and file previews block it)' : ''}. Two ways round it:
+    <ol style="margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px">
+      ${IS_ANDROID ? '<li><b>Open in Chrome:</b> in your Files app, long-press <span class="mono">CareerPrep-Studio.html</span> → ⋮ → <i>Open with</i> → <b>Chrome</b>. Or open the CareerPrep link in Chrome. Uploads work there.</li>' : '<li><b>Open it in a full browser</b> such as Chrome, Edge, Firefox or Safari. Uploads work there.</li>'}
+      <li><b>Paste the text:</b> open your resume${IS_ANDROID ? ' in Google Drive or Docs' : ''}, select all, copy, then paste it into the box.</li>
+    </ol><div class="row" style="margin-top:8px"><button class="btn sm" data-action="paste-instead">Paste the text instead</button><button class="btn sm ghost" data-action="upl-dismiss">Dismiss</button></div></div>`;
   if(u.state === 'busy') return `<div class="upl busy" role="status"><span class="spin" aria-hidden="true"></span>Reading <b>${esc(u.name)}</b>…</div>`;
   if(u.state === 'ok') return `<div class="upl ok" role="status">✓ Read <b>${esc(u.name)}</b> · ${esc(u.msg)}</div>`;
   return `<div class="upl err" role="alert"><b>Couldn’t read ${esc(u.name)}.</b> ${esc(u.msg)}<div class="row" style="margin-top:8px"><button class="btn sm" data-action="paste-instead">Paste the text instead</button><button class="btn sm ghost" data-action="upl-dismiss">Dismiss</button></div></div>`;
 }
 EXTRA_ACTIONS['paste-instead'] = () => { ui.upload = null; const ta = $('#ob-resume') || $('#rc-text'); render(); if(!S.settings.onboarded) renderOnboarding(true); const t = $('#ob-resume') || $('#rc-text'); if(t){ t.focus(); t.select(); } };
 EXTRA_ACTIONS['upl-dismiss'] = () => { ui.upload = null; render(); if(!S.settings.onboarded) renderOnboarding(true); };
+let pickerWatch = null;
+document.addEventListener('click', e => {
+  const lab = e.target.closest('label.drop, label[for="imp-file"]');
+  if(!lab) return;
+  let moved = false;
+  const mark = () => { moved = true; };
+  window.addEventListener('blur', mark, {once:true});
+  document.addEventListener('visibilitychange', mark, {once:true});
+  clearTimeout(pickerWatch);
+  pickerWatch = setTimeout(() => {
+    window.removeEventListener('blur', mark); document.removeEventListener('visibilitychange', mark);
+    if(!moved && document.hasFocus() && !(ui.upload && ui.upload.state === 'busy')){ ui.upload = {state:'nopicker', name:'', msg:''}; render(); if(!S.settings.onboarded) renderOnboarding(true); }
+  }, 2500);
+}, true);
+document.addEventListener('change', e => { if(e.target.type === 'file') clearTimeout(pickerWatch); }, true);
 async function handleFile(f){
   ui.upload = {state:'busy', name:f.name, msg:''};
   render(); if(!S.settings.onboarded) renderOnboarding(true);
@@ -1883,7 +1903,7 @@ function renderOnboarding(force){
     <label class="drop" for="ob-file">${ico('upload')}<div><b>${r ? 'Loaded: ' + esc(r.label) + ' · ' + (r.text.match(/\S+/g)||[]).length + ' words' : 'Choose a PDF, DOCX or TXT'}</b><span class="note">${r ? 'Choose another file to replace it.' : 'Text is read in your browser; the file isn’t stored.'}</span></div></label>
     <input type="file" id="ob-file" class="file-hide" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
     ${uploadStatus()}
-    ${r ? '' : `<label class="field"><span>Or paste your resume text</span><textarea class="input" id="ob-resume" rows="5">${esc(ui.ob.resume||'')}</textarea></label>`}
+    ${r ? '' : `<label class="field"><span>Or paste your resume text <span class="faint">— works everywhere, including phones</span></span><textarea class="input" id="ob-resume" rows="5" placeholder="Open your resume, select all, copy, and paste here">${esc(ui.ob.resume||'')}</textarea></label>`}
     <label class="field"><span>Job ad you’re targeting <span class="faint">(optional — paste it to get a match score)</span></span><textarea class="input" id="ob-jd" rows="5" placeholder="Paste the full job description">${esc(ui.ob.jd ?? S.check.jd ?? '')}</textarea></label>`;
   host.innerHTML = `<div class="ob-wrap"><div class="ob" role="dialog" aria-modal="true" aria-label="Set up CareerPrep Studio">
     <div class="ob-head"><div class="ob-steps">${steps.map((x,i) => `<span class="${i===st?'on':i<st?'done':''}">${i<st?'✓ ':''}${i+1} · ${x}</span>`).join('')}</div>
