@@ -276,6 +276,27 @@ table.t{width:100%;border-collapse:collapse;font-size:.88rem;min-width:780px}
 @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 kbd{font:600 .72rem var(--f-mono);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:var(--well)}
 
+
+/* ---------- first-run setup ---------- */
+.ob-wrap{position:fixed;inset:0;z-index:70;background:color-mix(in srgb,var(--board) 82%,transparent);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:max(24px,env(safe-area-inset-top,0px)) 16px 40px}
+.ob{background:var(--bg);border-radius:18px;width:min(760px,100%);box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:hidden;animation:pop .25s ease-out}
+.ob-head{background:var(--board);color:#e6ecf3;padding:22px 26px;display:flex;flex-direction:column;gap:14px}
+.ob-head h2{color:#fff;font-size:1.6rem;font-weight:800}
+.ob-head p{color:#b8c4d2;max-width:60ch}
+.ob-steps{display:flex;gap:6px;font:600 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;flex-wrap:wrap}
+.ob-steps span{padding:5px 9px;border-radius:5px;background:var(--board-2);color:var(--board-dim)}
+.ob-steps span.on{background:var(--board-ink);color:var(--board)}
+.ob-steps span.done{color:var(--board-ink)}
+.ob-body{padding:22px 26px;display:flex;flex-direction:column;gap:16px}
+.ob-foot{padding:14px 26px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+.ob-foot .grow{flex:1}
+.inds{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ind{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:.86rem;text-align:center}
+.ind svg{width:30px;height:30px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ind:hover{border-color:var(--line-2)}
+.ind[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+@media (max-width:640px){.inds{grid-template-columns:repeat(2,minmax(0,1fr))}.ob-head,.ob-body,.ob-foot{padding-left:18px;padding-right:18px}}
+
 @media (max-width:1180px){
   .out{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .out .tplcol{grid-column:1 / -1}
@@ -629,7 +650,7 @@ function freshState(){
     resumes:[], applications:[], templates:JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)),
     outreach:[], suggestionStatus:{}, prep:{general:{star:{},checklist:{},mocks:[],research:''}},
     check:{resumeId:null,jd:'',appId:''},
-    settings:{followUpDays:7,ghostedDays:21,lastBackup:null,theme:null,examples:false}
+    settings:{followUpDays:7,ghostedDays:21,lastBackup:null,theme:null,examples:false,onboarded:false}
   };
 }
 let S = load();
@@ -642,13 +663,14 @@ function load(){
       if(d && Array.isArray(d.applications)) return migrate(d);
     } catch(e) { setTimeout(()=>toast('Saved data was unreadable. Started fresh — import a backup from Settings.'), 400); }
   }
-  return seed(freshState());
+  return freshState();
 }
 function migrate(d){
   const f = freshState();
   const out = Object.assign(f, d);
   out.profile = Object.assign(f.profile, d.profile||{});
   out.settings = Object.assign(freshState().settings, d.settings||{});
+  if(!d.settings || d.settings.onboarded == null) out.settings.onboarded = true;
   out.prep = d.prep || {general:{star:{},checklist:{},mocks:[],research:''}};
   out.check = Object.assign({resumeId:null,jd:'',appId:''}, d.check||{});
   out.suggestionStatus = d.suggestionStatus || {};
@@ -666,6 +688,7 @@ function save(){
 function seed(s){
   const t = today();
   s.settings.examples = true;
+  s.settings.onboarded = true;
   Object.assign(s.profile, {name:'Priya Nair',email:'priya.nair@example.com',phone:'+91 98450 12345',portfolio_link:'linkedin.com/in/priya-example',years_experience:4,languages:'English, Hindi, Malayalam and basic French',passport:'March 2031'});
   s.resumes.push({id:'r1',label:'Cabin crew v1 (example)',text:SAMPLE_RESUME,added:t,meta:{source:'paste'}});
   s.check = {resumeId:'r1', jd:SAMPLE_JD, appId:'a1'};
@@ -901,6 +924,8 @@ function suggest(r, pack, jd){
 const loaded = {};
 function loadScript(src){
   if(loaded[src]) return loaded[src];
+  const inl = document.getElementById('lib:' + src);
+  if(inl){ const s = document.createElement('script'); s.textContent = inl.textContent; document.head.appendChild(s); inl.remove(); return (loaded[src] = Promise.resolve()); }
   loaded[src] = new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => { loaded[src] = null; rej(new Error('Could not load ' + src + '. Keep the lib folder next to index.html.')); }; document.head.appendChild(s); });
   return loaded[src];
 }
@@ -1201,6 +1226,7 @@ function applyTheme(){ if(S.settings.theme) document.documentElement.setAttribut
 
 function go(v){ view = v; try { history.replaceState(null,'','#'+v); } catch(e){} render(); $('#view').focus({preventScroll:true}); window.scrollTo(0,0); }
 function render(){
+  setTimeout(renderOnboarding, 0);
   renderNav(); renderPack(); renderBanners(); renderBoard(false);
   const fn = {dashboard:vDashboard, resume:vResume, prep:vPrep, outreach:vOutreach, applications:vApps, settings:vSettings}[view];
   $('#view').innerHTML = fn();
@@ -1335,6 +1361,7 @@ function resultsHTML(a){
   const outcomePct = a.P.bullets.length ? Math.round(a.outcomeBul.length / a.P.bullets.length * 100) : 0;
   return `
   <div class="panel">
+    ${!S.check.appId ? `<div class="banner info" style="margin:0 0 16px"><span class="grow"><b>Applying to this one?</b> Track it so the score, JD and follow-ups stay together.</span><a class="btn sm" href="#track" data-action="goto-track">Track this job</a></div>` : ''}
     <div class="gaugewrap">
       <div class="gauge">${gaugeSVG(a.score, {animate:true})}</div>
       <div class="stack">
@@ -1376,6 +1403,8 @@ function resultsHTML(a){
     ${sugg.length ? sugg.map(s => `<div class="sugg ${st[s.id]?'done':''}"><span class="pill prio-${s.prio}">${s.prio}</span><div><div class="eyebrow" style="margin-bottom:3px">${esc(s.rule)}${st[s.id] ? ' · ' + st[s.id] : ''}</div><div class="txt">${esc(s.text)}</div>${s.line ? `<div class="quote">“${esc(s.line.length > 160 ? s.line.slice(0,160)+'…' : s.line)}”</div>` : ''}</div>
       <div class="row" style="flex-wrap:nowrap">${st[s.id] ? `<button class="btn sm ghost" data-sugg="${s.id}" data-v="">Reopen</button>` : `<button class="btn sm" data-sugg="${s.id}" data-v="Done">Done</button><button class="btn sm ghost" data-sugg="${s.id}" data-v="Ignored">Ignore</button>`}</div></div>`).join('') : `<div class="empty">${ui.suggFilter==='open' ? 'All fixes handled. Nice work.' : 'Nothing here.'}</div>`}
   </div>
+
+  ${trackHTML(a)}
 
   ${promptHelperHTML(a)}`;
 }
@@ -1425,7 +1454,7 @@ async function handleFile(f){
   try {
     const {text, meta} = await readFile(f);
     const r = {id:uid('r'), label:f.name.replace(/\.[^.]+$/,''), text:text.trim(), added:today(), meta};
-    S.resumes.push(r); S.check.resumeId = r.id; save(); render(); toast('Resume added: ' + r.label);
+    S.resumes.push(r); S.check.resumeId = r.id; save(); render(); if(!S.settings.onboarded) renderOnboarding(true); toast('Resume added: ' + r.label);
   } catch(err){ toast(err.message || 'Could not read that file.'); }
 }
 function linkScore(){
@@ -1765,6 +1794,93 @@ function renderDrawer(){
 /* =====================================================================
    VIEW: SETTINGS
    ===================================================================== */
+
+/* =====================================================================
+   FIRST-RUN SETUP + TRACK THIS JOB
+   ===================================================================== */
+const EXTRA_ACTIONS = {};
+const IND_ICON = {
+  hospitality:'<path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6M3 14h18M3 18v2M21 18v2"/><path d="M6 10V7a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>',
+  tourism:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  fm:'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 10h4a1 1 0 0 1 1 1v10M3 21h18M8 8h3M8 12h3M8 16h3"/>',
+  events:'<path d="M4 8h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M14 8v10" stroke-dasharray="2 2"/>',
+  aviation:'<path d="M21 15.5 13 11V5.5a1.5 1.5 0 0 0-3 0V11l-8 4.5V17l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4.5l8 2.5z"/>'
+};
+ui.ob = {step:0};
+function renderOnboarding(force){
+  const host = $('#modal');
+  if(S.settings.onboarded || drawerId){ const w = $('.ob-wrap', host); if(w) host.innerHTML = ''; return; }
+  if(!force && $('.ob-wrap', host)) return;
+  const st = ui.ob.step, p = S.profile, pack = P_();
+  const steps = ['Your field','About you','Your resume'];
+  const r = resumeById(S.check.resumeId);
+  const pf = (k, label, type='text', ph='') => `<label class="field"><span>${label}</span><input class="input" type="${type}" data-pf="${k}" value="${esc(p[k] ?? '')}" placeholder="${esc(ph)}"></label>`;
+  let body = '';
+  if(st === 0) body = `<div class="eyebrow">Which field are you job hunting in?</div>
+    <div class="inds">${Object.entries(PACKS).map(([k,v]) => `<button type="button" class="ind" data-obind="${k}" aria-pressed="${k===pk()}"><svg viewBox="0 0 24 24" aria-hidden="true">${IND_ICON[k]}</svg>${v.label}</button>`).join('')}</div>
+    <div class="grid g2" style="gap:10px"><label class="field"><span>Target role</span><select class="input" id="ob-role">${pack.roles.map(x => `<option ${x===p.role?'selected':''}>${esc(x)}</option>`).join('')}<option value="__other" ${pack.roles.includes(p.role)?'':'selected'}>Something else…</option></select></label>
+    ${pack.roles.includes(p.role) ? '' : pf('role','Your target role','text','e.g. Spa Manager')}</div>
+    <p class="note">This loads the ${esc(pack.label)} pack: keywords, certifications (${esc(pack.certs.map(c=>c[1]).slice(0,3).join(', '))}), interview questions, assessment-day checklist and email templates. You can switch any time from the top bar.</p>`;
+  if(st === 1) body = `<div class="eyebrow">These fill your emails. They never leave this browser.</div>
+    <div class="grid g2" style="gap:10px">${pf('name','Full name','text','Priya Nair')}${pf('email','Email','email','you@example.com')}${pf('phone','Phone','tel','+91 98450 12345')}${pf('years_experience','Years of experience','number','4')}${pf('portfolio_link','LinkedIn or portfolio','text','linkedin.com/in/you')}${pf('languages','Languages you speak','text','English, Hindi')}
+    ${pack.mobility ? pf('passport','Passport valid until','text','March 2031') + pf('relocation','Relocation','text','open to relocation') : ''}${pf('availability','Can join','text','within 30 days')}</div>`;
+  if(st === 2) body = `<div class="eyebrow">Add your resume to see your gaps right away</div>
+    <label class="drop" for="ob-file">${ico('upload')}<div><b>${r ? 'Loaded: ' + esc(r.label) + ' · ' + (r.text.match(/\S+/g)||[]).length + ' words' : 'Choose a PDF, DOCX or TXT'}</b><span class="note">${r ? 'Choose another file to replace it.' : 'Text is read in your browser; the file isn’t stored.'}</span></div></label>
+    <input type="file" id="ob-file" accept=".pdf,.docx,.txt,.md" hidden>
+    ${r ? '' : `<label class="field"><span>Or paste your resume text</span><textarea class="input" id="ob-resume" rows="5">${esc(ui.ob.resume||'')}</textarea></label>`}
+    <label class="field"><span>Job ad you’re targeting <span class="faint">(optional — paste it to get a match score)</span></span><textarea class="input" id="ob-jd" rows="5" placeholder="Paste the full job description">${esc(ui.ob.jd ?? S.check.jd ?? '')}</textarea></label>`;
+  host.innerHTML = `<div class="ob-wrap"><div class="ob" role="dialog" aria-modal="true" aria-label="Set up CareerPrep Studio">
+    <div class="ob-head"><div class="ob-steps">${steps.map((x,i) => `<span class="${i===st?'on':i<st?'done':''}">${i<st?'✓ ':''}${i+1} · ${x}</span>`).join('')}</div>
+      <h2>${st===0 ? 'Welcome to CareerPrep Studio' : st===1 ? 'About you' : 'Your resume'}</h2>
+      <p>${st===0 ? 'Check your resume against real job ads, prepare for interviews and write outreach emails people answer. Setup takes about a minute.' : st===1 ? 'Only your name is needed now. Add the rest later in Settings.' : 'Upload or paste it. You can add more versions later.'}</p></div>
+    <div class="ob-body">${body}</div>
+    <div class="ob-foot">${st===0 ? `<button class="btn ghost" data-action="load-examples">Explore with example data</button>` : `<button class="btn ghost" data-action="ob-back">Back</button>`}<span class="grow"></span>
+      ${st===2 ? `<button class="btn ghost" data-action="ob-finish" data-skip="1">Skip for now</button>` : ''}
+      <button class="btn primary" data-action="${st===2 ? 'ob-finish' : 'ob-next'}">${st===2 ? 'Finish setup' : 'Next →'}</button></div>
+  </div></div>`;
+  const f = $('.ob-body input, .ob-body textarea, .ob-body button', host); if(f && st) f.focus();
+}
+EXTRA_ACTIONS['ob-next'] = () => {
+  if(ui.ob.step === 1 && !(S.profile.name||'').trim()){ toast('Add your name to continue'); const n = $('[data-pf="name"]'); if(n){ n.classList.add('bad'); n.focus(); } return; }
+  ui.ob.step++; save(); renderOnboarding(true);
+};
+EXTRA_ACTIONS['ob-back'] = () => { ui.ob.step = Math.max(0, ui.ob.step-1); renderOnboarding(true); };
+EXTRA_ACTIONS['ob-finish'] = (e, t) => {
+  const txt = ($('#ob-resume') ? $('#ob-resume').value : '').trim();
+  const jd = ($('#ob-jd') ? $('#ob-jd').value : '').trim();
+  if(!t.dataset.skip){
+    if(txt && !resumeById(S.check.resumeId)){ const r = {id:uid('r'), label:'My resume', text:txt, added:today(), meta:{source:'paste'}}; S.resumes.push(r); S.check.resumeId = r.id; }
+    if(jd) S.check.jd = jd;
+  }
+  S.settings.onboarded = true; S.settings.examples = false; analysisCache.key = '';
+  save(); $('#modal').innerHTML = '';
+  const ready = resumeById(S.check.resumeId);
+  go(ready ? 'resume' : 'dashboard');
+  toast(ready && S.check.jd ? 'Your match score is ready' : ready ? 'Resume saved. Paste a job ad to score it.' : 'You’re set. Press N to add your first application.');
+};
+EXTRA_ACTIONS['goto-track'] = () => { const el = $('#track'); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const i = $('#tr-co'); if(i) i.focus({preventScroll:true}); } };
+function guessCompany(jd){
+  const first = (jd||'').split(/\n/).find(l => l.trim()) || '';
+  const m = first.match(/[–—-]\s*([^()–—-]+?)\s*(\(|$)/) || (jd||'').match(/\b(?:at|join)\s+([A-Z][\w&.]*(?:\s+[A-Z][\w&.]*){0,3})/);
+  return m ? m[1].trim() : '';
+}
+function trackHTML(a){
+  if(S.check.appId){ const app = S.applications.find(x => x.id === S.check.appId); return app ? `<div class="banner info" style="margin:0"><span class="grow">Score <b>${a.score}</b> saved to <b>${esc(app.company)} — ${esc(app.role)}</b> (${app.status}).</span><button class="btn sm" data-open="${app.id}">Open application</button><button class="btn sm" data-action="d-email-from-check">Draft email</button></div>` : ''; }
+  return `<div class="panel stack" id="track"><div class="panel-h" style="margin:0"><h2>Track this job</h2><span class="muted grow">Saves the job ad, this score and your resume version, and sets up the follow-up.</span></div>
+    <div class="grid g3" style="gap:10px;align-items:end"><label class="field"><span>Company</span><input class="input" id="tr-co" value="${esc(guessCompany(S.check.jd))}" placeholder="Company name"></label><label class="field"><span>Role</span><input class="input" id="tr-role" value="${esc(S.profile.role||'')}"></label>
+    <div class="row"><button class="btn" data-action="track-job" data-st="Saved">Save for later</button><button class="btn primary" data-action="track-job" data-st="Applied">I’ve applied</button></div></div></div>`;
+}
+EXTRA_ACTIONS['track-job'] = (e, t) => {
+  const co = $('#tr-co').value.trim(), role = $('#tr-role').value.trim();
+  if(!co){ toast('Add the company name'); $('#tr-co').classList.add('bad'); $('#tr-co').focus(); return; }
+  const a0 = currentAnalysis();
+  const app = {id:uid('a'), company:co, role:role||S.profile.role||'', jobLink:'', jdText:S.check.jd, resumeId:S.check.resumeId||'', atsScore:a0 ? a0.score : 0, status:'Saved', dateApplied:'', contact:{name:'',email:''}, salaryRange:'', notes:'', nextAction:{text:'Send application', date:today()}, timeline:[{type:'status_change', date:today(), content:'Saved from Resume Check (ATS ' + (a0 ? a0.score : '—') + ')'}], prep:{star:{},checklist:{},mocks:[],research:''}, maxStage:0};
+  S.applications.unshift(app); S.check.appId = app.id;
+  if(t.dataset.st === 'Applied'){ app.nextAction = {text:'',date:''}; setStatus(app, 'Applied'); }
+  save(); rerenderKeep(); toast(co + ' is now tracked' + (t.dataset.st === 'Applied' ? ' — follow-up set for ' + fmtDate(app.nextAction.date) : ''));
+};
+EXTRA_ACTIONS['d-email-from-check'] = () => { const a = S.applications.find(x => x.id === S.check.appId); ui.outApp = S.check.appId; ui.outFields = {}; ui.outDirty = false; ui.outTpl = a && a.status === 'Saved' ? 't1' : a && a.status === 'Applied' ? 't2' : 'c1'; go('outreach'); };
+
 function vSettings(){
   const p = S.profile;
   const f = (k, label, type='text', ph='') => `<label class="field"><span>${label}</span><input class="input" type="${type}" data-pf="${k}" value="${esc(p[k] ?? '')}" placeholder="${esc(ph)}"></label>`;
@@ -1801,7 +1917,7 @@ function exportData(){
    EVENTS (delegated)
    ===================================================================== */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-nav],[data-action],[data-open],[data-sugg],[data-sf],[data-pt],[data-q],[data-prept],[data-rate],[data-tpl],[data-proof],[data-mode],[data-sort],[data-deltpl]');
+  const t = e.target.closest('[data-nav],[data-action],[data-open],[data-sugg],[data-sf],[data-pt],[data-q],[data-prept],[data-rate],[data-tpl],[data-proof],[data-mode],[data-sort],[data-deltpl],[data-obind]');
   if(!t) return;
   if(t.dataset.nav){ go(t.dataset.nav); return; }
   if(t.dataset.open && !t.closest('.drawer')){ openApp(t.dataset.open); return; }
@@ -1815,6 +1931,7 @@ document.addEventListener('click', e => {
   if(t.dataset.proof){ ui.outFields.proof_point = t.dataset.proof; ui.outDirty = false; render(); return; }
   if(t.dataset.mode){ ui.appsMode = t.dataset.mode; render(); return; }
   if(t.dataset.sort){ const k = t.dataset.sort; ui.sort = {k, dir: ui.sort.k === k ? -ui.sort.dir : 1}; render(); return; }
+  if(t.dataset.obind){ S.profile.industry = t.dataset.obind; S.profile.role = PACKS[t.dataset.obind].roles[0]; analysisCache.key = ''; save(); renderPack(); renderOnboarding(true); return; }
   if(t.dataset.deltpl){ S.templates = S.templates.filter(x => x.id !== t.dataset.deltpl); save(); render(); return; }
   const act = t.dataset.action;
   const A = actions[act]; if(A){ if(act !== 'mailto') e.preventDefault(); A(e, t); }
@@ -1823,7 +1940,7 @@ function rerenderKeep(){ const y = window.scrollY; render(); window.scrollTo(0, 
 
 const actions = {
   'new-app': () => newApp(),
-  'clear-examples': () => { S.applications = S.applications.filter(a => !a.example); S.resumes = S.resumes.filter(r => r.id !== 'r1'); S.outreach = []; S.settings.examples = false; if(!resumeById(S.check.resumeId)) S.check = {resumeId: S.resumes[0] ? S.resumes[0].id : null, jd:'', appId:''}; S.profile = Object.assign(freshState().profile, {industry:S.profile.industry, role:S.profile.role}); save(); render(); toast('Examples cleared. Add your profile in Settings.'); },
+  'clear-examples': () => { S.applications = S.applications.filter(a => !a.example); S.resumes = S.resumes.filter(r => r.id !== 'r1'); S.outreach = []; S.settings.examples = false; if(!resumeById(S.check.resumeId)) S.check = {resumeId: S.resumes[0] ? S.resumes[0].id : null, jd:'', appId:''}; S.profile = Object.assign(freshState().profile, {industry:S.profile.industry, role:S.profile.role}); S.settings.onboarded = false; ui.ob = {step:0}; save(); render(); toast('Examples cleared. Let’s set up your own.'); },
   'export': () => exportData(),
   'copy-json': () => { S.settings.lastBackup = today(); save(); copy(JSON.stringify(S)); render(); },
   'analyze': () => { syncResumeText(); analysisCache.key = ''; linkScore(); render(); const g = $('.gauge'); if(g) g.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); },
@@ -1872,7 +1989,7 @@ const actions = {
   'del-app': () => { if(ui.confirm !== 'del-app'){ ui.confirm = 'del-app'; renderDrawer(); return; } S.applications = S.applications.filter(x => x.id !== drawerId); drawerId = null; ui.confirm = null; $('#modal').innerHTML = ''; save(); render(); toast('Application deleted'); },
   'import-merge': () => { const d = ui.importData; const ids = new Set(S.applications.map(a => a.id)); d.applications.forEach(a => { if(!ids.has(a.id)) S.applications.push(a); }); const rids = new Set(S.resumes.map(r => r.id)); (d.resumes||[]).forEach(r => { if(!rids.has(r.id)) S.resumes.push(r); }); S = migrate(S); ui.importData = null; save(); render(); toast('Backup merged'); },
   'import-replace': () => { S = migrate(ui.importData); S.settings.examples = false; ui.importData = null; save(); applyTheme(); render(); toast('Backup restored'); },
-  'reset-all': () => { if(ui.confirm !== 'reset'){ ui.confirm = 'reset'; render(); return; } ui.confirm = null; S = freshState(); save(); render(); toast('All data erased'); },
+  'reset-all': () => { if(ui.confirm !== 'reset'){ ui.confirm = 'reset'; render(); return; } ui.confirm = null; S = freshState(); ui.ob = {step:0}; save(); render(); toast('All data erased'); },
   'load-examples': () => { const keep = S.applications.filter(a => !a.example); S = seed(Object.assign(freshState(), {applications:keep})); save(); render(); toast('Example data loaded'); }
 };
 
@@ -1893,6 +2010,8 @@ document.addEventListener('input', e => {
     inputTimer = setTimeout(() => { analysisCache.key = ''; linkScore(); const res = $('#view'); const y = window.scrollY; const act = document.activeElement && document.activeElement.id; const pos = document.activeElement && document.activeElement.selectionStart; render(); window.scrollTo(0, y); if(act){ const el = document.getElementById(act); if(el){ el.focus({preventScroll:true}); try { el.setSelectionRange(pos, pos); } catch(_){} } } }, 700);
     return;
   }
+  if(t.id === 'ob-resume'){ ui.ob.resume = t.value; return; }
+  if(t.id === 'ob-jd'){ ui.ob.jd = t.value; return; }
   if(t.id === 'pt-extra'){ ui.ptExtra = t.value; const out = $('#pt-out'); const a = currentAnalysis(); if(out && a) out.value = buildPrompt(a); return; }
   if(t.dataset.star){ const p = prepFor(ui.prepApp); p.star = p.star || {}; p.star[ui.qSel] = p.star[ui.qSel] || {s:'',t:'',a:'',r:''}; p.star[ui.qSel][t.dataset.star] = t.value; save(); clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 900); return; }
   if(t.id === 'prep-research'){ prepFor(ui.prepApp).research = t.value; save(); clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 900); return; }
@@ -1916,6 +2035,8 @@ function softRerender(){
 document.addEventListener('change', e => {
   const t = e.target;
   if(t.id === 'pk-ind'){ S.profile.industry = t.value; S.profile.role = PACKS[t.value].roles[0]; analysisCache.key = ''; ui.qSel = null; save(); render(); toast(PACKS[t.value].label + ' pack loaded'); return; }
+  if(t.id === 'ob-role'){ if(t.value === '__other'){ S.profile.role = ''; } else S.profile.role = t.value; save(); renderPack(); renderOnboarding(true); return; }
+  if(t.id === 'ob-file'){ const f = t.files[0]; t.value = ''; if(f) handleFile(f); return; }
   if(t.id === 'pk-role'){ S.profile.role = t.value; save(); render(); return; }
   if(t.id === 'rc-resume'){ S.check.resumeId = t.value; analysisCache.key = ''; save(); render(); return; }
   if(t.id === 'rc-app'){ S.check.appId = t.value; const a = S.applications.find(x => x.id === t.value); if(a && a.jdText && !S.check.jd.trim()) S.check.jd = a.jdText; linkScore(); save(); render(); return; }
@@ -1932,7 +2053,7 @@ document.addEventListener('change', e => {
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && drawerId){ closeDrawer(); return; }
   const tag = (e.target.tagName||'').toLowerCase();
-  if((e.key === 'n' || e.key === 'N') && !e.metaKey && !e.ctrlKey && !e.altKey && !['input','textarea','select'].includes(tag) && !e.target.isContentEditable && !drawerId){ e.preventDefault(); newApp(); }
+  if((e.key === 'n' || e.key === 'N') && !e.metaKey && !e.ctrlKey && !e.altKey && !['input','textarea','select'].includes(tag) && !e.target.isContentEditable && !drawerId && S.settings.onboarded){ e.preventDefault(); newApp(); }
   if(e.key === 'Enter' && e.target.matches && e.target.matches('tr[data-open]')) openApp(e.target.dataset.open);
 });
 $('#theme-btn').addEventListener('click', () => {
@@ -1943,6 +2064,7 @@ window.addEventListener('hashchange', () => { const v = location.hash.slice(1); 
 document.addEventListener('visibilitychange', () => {});
 
 /* ---------- boot ---------- */
+Object.assign(actions, EXTRA_ACTIONS);
 applyTheme();
 if(S.check.appId) linkScore();
 render();
