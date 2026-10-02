@@ -21,7 +21,7 @@ loads them from `lib/` and falls back to a CDN.
 |---|---|
 | Dashboard | Departures-board "next action", KPIs, flight-path pipeline, today list, ATS vs outcome, weekly activity |
 | Resume Check | PDF/DOCX/TXT upload, *Track this job* (saves JD + score, sets follow-up), 0–100 ATS-style score with 5-part breakdown, matched/missing keywords, industry gap map, rule-based fixes (Done/Ignore), AI prompt helper |
-| Interview Prep | Industry + JD-derived question bank, STAR builder with quality checks, timed mock interview, assessment-day checklist, per-application readiness ring |
+| Interview Prep | **Voice interview room**: spoken questions, voice or typed answers, pressure follow-ups, instant scoring (structure, evidence, ownership, leadership, delivery) with coaching, optional Claude feedback on the hosted page. Manager-level bank (leadership + each industry) or associate level. Industry + JD-derived question bank, STAR builder with quality checks, timed mock interview, assessment-day checklist, per-application readiness ring |
 | Outreach | Cold outreach + application-flow + industry templates, hook/proof-point personalisation, personalisation meter, unfilled placeholder highlighting, copy / mailto / log to timeline, template editor |
 | Applications | Drag-and-drop board and sortable table, ghosted flags, detail drawer with timeline and paste-a-reply status + date detection |
 | Settings | Profile, reminder thresholds, theme, JSON export/import (merge or replace), reset |

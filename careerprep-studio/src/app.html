@@ -306,6 +306,25 @@ kbd{font:600 .72rem var(--f-mono);border:1px solid var(--line-2);border-bottom-w
 .ind[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 @media (max-width:640px){.inds{grid-template-columns:repeat(2,minmax(0,1fr))}.ob-head,.ob-body,.ob-foot{padding-left:18px;padding-right:18px}}
 
+/* ---------- voice room ---------- */
+.iv-avatar{width:56px;height:56px;flex:none;position:relative}
+.iv-avatar svg{width:100%;height:100%;display:block}
+.iv-avatar.lg{width:120px;height:120px}
+.wave{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);display:flex;gap:3px;align-items:flex-end;height:22px;padding:3px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);opacity:0;transition:opacity .2s}
+.wave.on{opacity:1}
+.wave i{width:3px;height:6px;background:var(--accent);border-radius:2px;animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.12s}.wave i:nth-child(3){animation-delay:.24s}.wave i:nth-child(4){animation-delay:.36s}.wave i:nth-child(5){animation-delay:.48s}
+@keyframes wv{0%,100%{height:5px}50%{height:15px}}
+.ans-wrap{border:1px solid var(--line-2);border-radius:12px;background:var(--surface);overflow:hidden}
+.ans-wrap textarea{border:0;border-radius:0;font-size:1rem}
+.ans-wrap.rec{border-color:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 18%,transparent)}
+.ans-bar{display:flex;gap:12px;align-items:center;padding:8px 10px;border-top:1px solid var(--line);background:var(--well)}
+.mic{width:52px;height:52px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.mic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.mic.on{background:var(--bad);color:#fff;animation:pulse 1.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--bad) 55%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.room .mock-stage{grid-template-columns:170px minmax(0,1fr)}
+details>summary{list-style-position:inside}
 @media (max-width:1180px){
   .out{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .out .tplcol{grid-column:1 / -1}
@@ -322,7 +341,7 @@ kbd{font:600 .72rem var(--f-mono);border:1px solid var(--line-2);border-bottom-w
   #view{padding:16px 16px 100px}
   .topbar{padding:12px 16px}
   .board,.banner{margin-left:16px;margin-right:16px}
-  .g2,.g3,.out,.gaugewrap,.mock-stage,.readiness{grid-template-columns:minmax(0,1fr)}
+  .g2,.g3,.out,.gaugewrap,.mock-stage,.readiness,.room .mock-stage,.room>.grid,.panel>.grid{grid-template-columns:minmax(0,1fr)!important}
   .gauge{margin:0 auto}
   .mock-stage>div:first-child{max-width:200px;margin:0 auto}
 }
@@ -533,6 +552,75 @@ const CHECKLISTS = {
   events:['Portfolio of three events: photos, budgets, attendee counts','A run-of-show sample','Your vendor list and how you rate vendors','A budget sheet example','A crisis story with the outcome','Know the company’s recent events'],
   aviation:['Passport valid 6+ months, plus copies','CV and photos (passport size and full length if requested)','Certificates: education, first aid, any IATA courses','Grooming to airline standard; check visible tattoo policy','Formal business attire and polished shoes','Practise the reach test','Swim test preparation if required','Practise group exercises: speak, listen, include others','Research the fleet, routes and values']
 };
+/* Manager-level bank. look = what a strong answer covers (scored); probe = the follow-up a tough panel asks. */
+const MGR = {
+  lead:[
+    {q:'Your department missed its budget by 12% last quarter. Walk me through exactly what you did about it.', look:['budget','variance','cost','forecast','revenue','plan','review'], probe:'Which cost did you refuse to cut, and why?'},
+    {q:'Tell me about a time you had to let someone go. How did you handle it?', look:['performance','documented','warning','coaching','hr','policy','fair'], probe:'Looking back, did you wait too long? Be honest.'},
+    {q:'Your best performer is damaging the rest of the team. What do you do?', look:['behaviour','feedback','expectations','team','consequence','document','culture'], probe:'What if letting them go costs you your biggest client?'},
+    {q:'You are appointed over a colleague who is older, more experienced and wanted your job. How do you manage them?', look:['respect','one-to-one','expectations','involve','authority','feedback','trust'], probe:'They go over your head to your boss. Now what?'},
+    {q:'Describe a decision you made with incomplete information that turned out to be wrong.', look:['decision','data','risk','trade-off','learned','changed','owned'], probe:'What exactly would you do differently, step by step?'},
+    {q:'Your GM asks you to cut headcount by 15% without hurting service scores. Talk me through your plan.', look:['headcount','roster','productivity','cross-train','service','data','communicate'], probe:'Who goes first, and how do you tell them?'},
+    {q:'How do you set KPIs for your team, and what do you do when someone keeps missing them?', look:['kpi','target','measure','review','coaching','plan','consequence'], probe:'Give me the actual numbers from your last team.'},
+    {q:'Tell me about a time you disagreed with your boss and turned out to be right.', look:['data','disagree','escalate','respect','outcome','proposal','result'], probe:'Now tell me about a time you disagreed and were wrong.'},
+    {q:'Why should we hire you over an internal candidate who already knows our systems?', look:['result','fresh','track record','90 days','team','numbers','learn'], probe:'What will you have changed by day 90, and how will I measure it?'},
+    {q:'Describe the worst crisis you have managed. What did you do in the first hour?', look:['first','safety','communicate','escalate','team','decision','after'], probe:'Who did you inform, and in what order?'},
+    {q:'Your team’s engagement score dropped 20 points in a year. What is your diagnosis and plan?', look:['survey','listen','one-to-one','root cause','action plan','recognition','measure'], probe:'Your own manager is part of the problem. How do you raise it?'},
+    {q:'Tell me about the most expensive mistake you made as a manager.', look:['cost','owned','fixed','process','learned','prevent','told'], probe:'Who else knew about it, and when did you tell them?'}
+  ],
+  hospitality:[
+    {q:'Occupancy is 85% but RevPAR is below the comp set. What is going wrong and what do you change?', look:['adr','rate','comp set','channel mix','ota','segmentation','upsell','revpar'], probe:'The owner refuses to touch OTA commissions. Now what?'},
+    {q:'Your TripAdvisor ranking slipped from #3 to #11 in six months. What is your 90-day plan?', look:['reviews','themes','training','recovery','respond','gss','measure'], probe:'Which department would you look at first, and why?'},
+    {q:'F&B cost is running at 38% against a 30% target. Where do you look first?', look:['food cost','wastage','menu engineering','procurement','portion','inventory','yield'], probe:'The chef says quality will drop. How do you handle him?'},
+    {q:'How would you cut housekeeping labour cost without hurting room inspection scores?', look:['productivity','rooms per attendant','roster','occupancy','inspection','training','overtime'], probe:'Give me the rooms-per-attendant figure you would target.'},
+    {q:'A guest’s food-poisoning complaint goes viral on social media. What do you do in the first 24 hours?', look:['guest','haccp','investigate','respond','owner','legal','pr','samples'], probe:'The lab report clears the kitchen. Do you still apologise publicly?'},
+    {q:'Staff turnover is 60% a year. How do you bring it down?', look:['exit interviews','pay','training','career path','recognition','roster','measure'], probe:'You have no budget for pay rises. What then?'},
+    {q:'A VIP’s booking was lost and they arrive tonight to a full house. Walk me through it.', look:['walk','relocate','upgrade','compensate','apologise','root cause','follow up'], probe:'They demand the GM, who is on leave. What do you say?'},
+    {q:'You failed the last brand audit. How do you make sure you pass the next one?', look:['standards','gap analysis','training','owners','mock audit','checklist','accountability'], probe:'Which three standards fail most often in hotels, in your experience?'}
+  ],
+  tourism:[
+    {q:'Bookings for your key destination are down 25% year on year. What do you do this month?', look:['data','segment','pricing','campaign','partners','product','conversion'], probe:'Marketing has no budget left. What then?'},
+    {q:'An airline collapses mid-season with 300 of your clients abroad. What are your first steps?', look:['clients','rebook','insurance','communicate','partners','cost','escalate'], probe:'Who pays for the extra nights, and how do you decide?'},
+    {q:'How do you negotiate allotments and release dates with hotels for peak season?', look:['allotment','release','rates','volume','history','penalty','relationship'], probe:'You are stuck with 40 unsold rooms at release. What do you do?'},
+    {q:'Your margin per passenger keeps shrinking because of OTA competition. What is your strategy?', look:['margin','value add','b2b','packaging','niche','service','repeat'], probe:'Which product would you stop selling altogether?'},
+    {q:'A top B2B partner owes you ₹40 lakh, well past due. How do you recover it without losing them?', look:['credit','terms','escalate','payment plan','relationship','legal','stop sale'], probe:'They are 30% of your revenue. Do you stop selling to them?'},
+    {q:'How do you measure and raise your consultants’ conversion rate?', look:['conversion','enquiries','follow up','crm','coaching','targets','incentive'], probe:'One consultant converts at half the team average. What do you do?'},
+    {q:'The visa rejection rate on your group departures has jumped. Diagnose it.', look:['documents','checklist','consulate','profile','process','audit','training'], probe:'A client blames you publicly for their rejection. How do you respond?'},
+    {q:'How would you launch a new destination product with a fixed marketing budget?', look:['target','pricing','partners','channels','launch','measure','fam trip'], probe:'After eight weeks you have sold four packages. Kill it or keep going?'}
+  ],
+  fm:[
+    {q:'The client threatens to end the contract over repeated SLA breaches. How do you run your first meeting with them?', look:['sla','root cause','data','action plan','accountability','reporting','penalty'], probe:'They ask for a 10% fee cut as compensation. What do you say?'},
+    {q:'Energy cost is 18% over budget. Walk me through your reduction plan.', look:['bms','audit','hvac','setpoints','lighting','metering','savings','payback'], probe:'Occupants complain the building is now too warm. What do you change?'},
+    {q:'A contractor is injured on site under your management. What happens in the next 48 hours?', look:['first aid','incident report','investigation','permit','rca','client','statutory'], probe:'You find the permit-to-work was signed by your supervisor without a check. What now?'},
+    {q:'You have 30 days to take over a 500,000 sq ft site from the outgoing FM vendor. What is your plan?', look:['transition','asset register','staff','tupe','ppm','handover','risk'], probe:'The outgoing vendor will not share the asset register. Now what?'},
+    {q:'PPM completion is stuck at 70%. How do you get it above 95%?', look:['ppm','scheduling','cafm','manpower','spares','reporting','backlog'], probe:'Which assets would you deliberately deprioritise, and why?'},
+    {q:'How do you justify capex for a chiller replacement to a cost-focused client?', look:['lifecycle','payback','energy','risk','downtime','roi','options'], probe:'The client says to run it to failure. How do you respond?'},
+    {q:'Soft-services attrition is driving complaints. How do you fix it?', look:['attrition','wages','training','supervision','recognition','vendor','kpi'], probe:'The vendor says it is a market problem. Do you change vendor?'},
+    {q:'An AMC is 20% above market rate. How do you renegotiate it?', look:['benchmark','scope','sla','tender','volume','term','relationship'], probe:'The vendor is the only OEM-authorised service provider. What leverage do you have?'}
+  ],
+  events:[
+    {q:'Two weeks out, your sponsor pulls 40% of the budget. What do you cut?', look:['budget','priorities','client','vendors','contracts','experience','renegotiate'], probe:'The client still expects the headline act. What do you tell them?'},
+    {q:'Registrations are at 45% of target three weeks before the conference. What is your plan?', look:['campaign','partners','pricing','segments','data','outreach','forecast'], probe:'Do you discount tickets? Who might that upset?'},
+    {q:'The venue’s power fails during the keynote. What do you do in the first five minutes?', look:['safety','backup','communicate','venue','av','run of show','calm'], probe:'Power is out for 45 minutes. How do you rework the day?'},
+    {q:'How do you price a proposal so you win the pitch and still make a margin?', look:['margin','cost','markup','scope','options','value','contingency'], probe:'The client wants 15% off. Where does it come from?'},
+    {q:'A client keeps changing the scope without paying for it. How do you handle it?', look:['scope','change order','contract','cost','communicate','escalate','sign-off'], probe:'They are your agency’s biggest account. Does that change your answer?'},
+    {q:'How do you manage 15 vendors and a 200-person crew for a three-day festival?', look:['run of show','briefing','roles','radio','escalation','schedule','contingency'], probe:'Your production manager walks off on day two. What happens?'},
+    {q:'Your post-event NPS came back at 22. What do you change?', look:['feedback','themes','root cause','vendors','experience','measure','debrief'], probe:'The client blames you for their own speaker choices. How do you handle the debrief?'},
+    {q:'How would you build the crowd-safety plan for a 10,000-person event?', look:['risk assessment','capacity','exits','security','medical','police','briefing'], probe:'The client wants to oversell by 10%. What do you say?'}
+  ],
+  aviation:[
+    {q:'On-time performance at your station has dropped from 88% to 74%. Diagnose and fix it.', look:['otp','root cause','delay codes','turnaround','boarding','staffing','data'], probe:'Most delays are coded to ground handling — your own team. What now?'},
+    {q:'A flight diverts with 180 passengers and no hotel rooms nearby. You are duty manager. Go.', look:['passengers','care','communicate','hotels','transport','ops control','priorities'], probe:'Social media is already filling up with complaints. Who speaks to the press?'},
+    {q:'A crew member reports a senior colleague for a safety breach. How do you handle it?', look:['safety','report','investigate','just culture','confidential','sms','protect'], probe:'The senior colleague is your friend. Does that change anything?'},
+    {q:'An audit finds a DGR violation on your shift. What happens next?', look:['dgr','report','authority','investigate','training','root cause','corrective'], probe:'The violation was by a contractor, not your staff. Is it still your problem?'},
+    {q:'Mishandled-baggage rate is twice the network average. What is your plan?', look:['baggage','data','transfer','process','training','handling agent','measure'], probe:'Which single number would you report weekly to your boss?'},
+    {q:'How would you roster to cut overtime by 20% without breaching duty-time limits?', look:['roster','duty time','peaks','part-time','fatigue','data','overtime'], probe:'The union rejects your new roster. What next?'},
+    {q:'A VIP passenger is denied boarding and threatens to go to the press. Handle it.', look:['policy','calm','options','escalate','compensation','document','communicate'], probe:'The VIP was right — the denial was a staff error. What do you do now?'},
+    {q:'How would you lead your team through a merger with another airline’s ground staff?', look:['communicate','culture','sops','integration','training','fair','retain'], probe:'Your best people are being poached by a rival. How do you keep them?'}
+  ]
+};
+const MGR_VOCAB = ['team','budget','p&l','kpi','target','stakeholder','owner','gm','decided','decision','trade-off','prioritised','prioritized','delegated','coached','escalated','hired','trained','forecast','cost','revenue','risk','policy','process','sop','accountable','plan','reviewed','data','root cause','measured','margin','roster','headcount'];
+
 const CHECK_GENERAL = ['Route and timing planned; arrive 15 minutes early','Three printed CV copies','Three questions for the interviewer','Salary range researched','Thank-you email drafted'];
 
 const DEFAULT_TEMPLATES = [
@@ -1094,9 +1182,9 @@ function gaugeSVG(score, opts={}){
     ${ticks}${bands}
     <path d="${arc(a0, a0+sweep, r)}" stroke="var(--well)" stroke-width="16" fill="none" stroke-linecap="round"/>
     <path class="g-fill" d="${arc(a0, a0+sweep, r)}" stroke="${band(score)}" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="${opts.animate ? len.toFixed(1) : off.toFixed(1)}" data-off="${off.toFixed(1)}" style="transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)"/>
-    <text x="${cx}" y="${cy+8}" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="58" fill="var(--ink)" class="num">${score}</text>
-    <text x="${cx}" y="${cy+34}" text-anchor="middle" font-family="var(--f-mono)" font-size="11" letter-spacing="1.5" fill="var(--ink-2)">ATS MATCH / 100</text>
-    <text x="${cx}" y="${cy+82}" text-anchor="middle" font-family="var(--f-body)" font-weight="700" font-size="14" fill="${band(score)}">${bandWord(score)}</text>
+    <text x="${cx}" y="${cy+8}" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="${opts.display ? 50 : 58}" fill="var(--ink)" class="num">${opts.display || score}</text>
+    <text x="${cx}" y="${cy+34}" text-anchor="middle" font-family="var(--f-mono)" font-size="11" letter-spacing="1.5" fill="var(--ink-2)">${opts.label || 'ATS MATCH / 100'}</text>
+    <text x="${cx}" y="${cy+82}" text-anchor="middle" font-family="var(--f-body)" font-weight="700" font-size="14" fill="${band(score)}">${opts.word || bandWord(score)}</text>
   </svg>`;
 }
 function animateGauges(root){ requestAnimationFrame(() => requestAnimationFrame(() => $$('.g-fill', root).forEach(p => p.setAttribute('stroke-dashoffset', p.dataset.off)))); }
@@ -1171,10 +1259,16 @@ function prepFor(appId){
 function questionSet(appId){
   const a = S.applications.find(x => x.id === appId);
   const qs = [];
-  const add = (cat, list) => list.forEach((q, i) => qs.push({id: cat + i, cat, q}));
-  add('General', QUESTIONS.general);
-  add('Behavioural', QUESTIONS.behavioural);
-  add(P_().label, QUESTIONS[pk()]);
+  const mgr = (S.profile.level || 'manager') === 'manager';
+  const add = (cat, list, pre) => list.forEach((q, i) => qs.push(typeof q === 'string' ? {id: (pre||cat) + i, cat, q} : Object.assign({id: (pre||cat) + i, cat}, q)));
+  if(mgr){
+    add('Leadership under pressure', MGR.lead, 'mlead');
+    add(P_().label + ' management', MGR[pk()], 'm' + pk());
+  } else {
+    add('General', QUESTIONS.general);
+    add('Behavioural', QUESTIONS.behavioural);
+    add(P_().label, QUESTIONS[pk()]);
+  }
   const jd = a && a.jdText ? a.jdText : (S.check.jd || '');
   if(jd.trim()){
     const r = resumeById(a && a.resumeId || S.check.resumeId);
@@ -1182,7 +1276,11 @@ function questionSet(appId){
     const nres = r ? normalize(r.text) : '';
     kws.slice(0, 6).forEach((k, i) => {
       const have = nres && countOcc(nres, k.term) > 0;
-      qs.push({id:'jd-' + k.term.replace(/\W+/g,'_'), cat:'From the job ad', q: have ? `Walk me through a time you used ${k.term}.` : `The role asks for ${k.term}. How would you get up to speed quickly?`});
+      const id = (mgr ? 'mjd-' : 'jd-') + k.term.replace(/\W+/g,'_');
+      if(mgr) qs.push(have
+        ? {id, cat:'From the job ad', q:`You list ${k.term} on your CV. Tell me about the hardest ${k.term} problem you have owned as a manager, with the numbers before and after.`, look:[k.term,'team','before','after','result'], probe:'What would your team say you got wrong in that?'}
+        : {id, cat:'From the job ad', q:`This role needs ${k.term} and your CV doesn’t show it. Convince me that won’t be a problem in your first 90 days.`, look:[k.term,'plan','90 days','learn','team','transferable'], probe:'What would you need from me to get there?'});
+      else qs.push({id, cat:'From the job ad', q: have ? `Walk me through a time you used ${k.term}.` : `The role asks for ${k.term}. How would you get up to speed quickly?`});
     });
   }
   return qs;
@@ -1219,7 +1317,7 @@ const VIEWS = [
 ];
 let view = (location.hash||'').slice(1);
 if(!VIEWS.some(v => v.id === view)) view = 'dashboard';
-const ui = {appsMode:'board', sort:{k:'dateApplied',dir:-1}, filter:'', statusFilter:'', prepApp:'a1', prepTab:'questions', qSel:null, outTpl:'c1', outApp:'', outFields:{}, outDirty:false, editTpl:false, promptType:'bullets', mock:null, suggFilter:'open', confirm:null};
+const ui = {appsMode:'board', sort:{k:'dateApplied',dir:-1}, filter:'', statusFilter:'', prepApp:'a1', prepTab:'mock', qSel:null, outTpl:'c1', outApp:'', outFields:{}, outDirty:false, editTpl:false, promptType:'bullets', mock:null, suggFilter:'open', confirm:null};
 
 function renderNav(){
   const due = dueItems().filter(d => d.date <= today()).length;
@@ -1484,6 +1582,7 @@ document.addEventListener('dragover', e => { const d = e.target.closest && e.tar
 document.addEventListener('dragleave', e => { const d = e.target.closest && e.target.closest('.drop'); if(d) d.classList.remove('over'); });
 document.addEventListener('drop', e => { const d = e.target.closest && e.target.closest('.drop'); if(!d) return; e.preventDefault(); d.classList.remove('over'); const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
 document.addEventListener('paste', e => { const f = e.clipboardData && e.clipboardData.files && e.clipboardData.files[0]; if(f && /\.(pdf|docx|txt|md)$/i.test(f.name)){ e.preventDefault(); handleFile(f); } });
+after.prep = function(){ animateGauges($('#view')); };
 after.resume = function(){
   animateGauges($('#view'));
   };
@@ -1542,10 +1641,12 @@ function vPrep(){
   const app = S.applications.find(a => a.id === ui.prepApp);
   const p = prepFor(ui.prepApp);
   const rd = readiness(ui.prepApp);
-  const tabs = {questions:'Questions & STAR', mock:'Mock interview', checklist:'Assessment day', research:'Research notes'};
+  const tabs = {mock:'Voice interview room', questions:'Questions & STAR', checklist:'Assessment day', research:'Research notes'};
+  const lvl = S.profile.level || 'manager';
   return `
-  <div class="pagehead"><div class="grow"><div class="eyebrow">${esc(P_().label)} · role-specific</div><h1>Interview Prep</h1>
-  <p>Build STAR stories for the questions you’ll actually get, run a timed mock, and tick off the assessment-day list. Readiness is scored per application.</p></div>
+  <div class="pagehead"><div class="grow"><div class="eyebrow">${esc(P_().label)} · ${lvl === 'manager' ? 'manager level' : 'associate level'}</div><h1>Interview Prep</h1>
+  <p>${lvl === 'manager' ? 'Train for the hard questions panels ask managers: budgets, people decisions, crises and the follow-up that tests if you hold your ground.' : 'Build STAR stories for the questions you’ll actually get and rehearse them out loud.'} Readiness is scored per application.</p>
+  <div class="tabs" role="tablist" aria-label="Interview level" style="display:inline-flex;margin-top:10px">${[['manager','Manager level'],['associate','Associate level']].map(([k,v]) => `<button role="tab" aria-selected="${lvl===k}" data-action="set-level" data-level="${k}">${v}</button>`).join('')}</div></div>
   <label class="field" style="min-width:260px"><span>Preparing for</span><select class="input" id="prep-app"><option value="general" ${ui.prepApp==='general'?'selected':''}>General practice</option>${S.applications.filter(a => !['Rejected','Withdrawn'].includes(a.status)).map(a => `<option value="${a.id}" ${a.id===ui.prepApp?'selected':''}>${esc(a.company)} — ${esc(a.role)}${a.status==='Interview'?' ★':''}</option>`).join('')}</select></label></div>
 
   <div class="panel readiness">
@@ -1583,31 +1684,6 @@ function prepQuestions(p){
       <div class="row"><button class="btn" data-action="copy-star">${ico('copy')}Copy answer</button><span class="note">Saved automatically. Stories with all four parts count toward readiness.</span></div>
     </div></div>`;
 }
-function prepMock(p){
-  const m = ui.mock;
-  const hist = (p.mocks||[]).slice().reverse();
-  if(!m || m.done){
-    const last = m && m.done ? m : null;
-    return `<div class="grid g2">
-      <div class="panel stack"><h2>Timed mock interview</h2><p class="muted">Questions are drawn at random from this application’s bank. Answer out loud, then rate yourself honestly. Rehearsing aloud is what moves the needle.</p>
-        <div class="row"><label class="field"><span>Questions</span><select class="input" id="mk-n">${[3,5,8].map(n => `<option ${n===5?'selected':''}>${n}</option>`).join('')}</select></label>
-        <label class="field"><span>Time per answer</span><select class="input" id="mk-t"><option value="60">1 min</option><option value="90" selected>1.5 min</option><option value="120">2 min</option></select></label></div>
-        <div><button class="btn primary" data-action="mock-start">${ico('play')}Start mock interview</button></div>
-        ${last ? `<div class="banner info" style="margin:0"><span class="grow"><b>Session saved.</b> ${last.qs.length} questions, average self-rating ${(last.ratings.reduce((s,x)=>s+x,0)/Math.max(1,last.ratings.filter(Boolean).length)).toFixed(1)} / 5.</span></div>` : ''}
-      </div>
-      <div class="panel"><div class="panel-h"><h2>History</h2></div>${hist.length ? `<table class="t" style="min-width:0"><thead><tr><th>Date</th><th>Questions</th><th>Avg rating</th></tr></thead><tbody>${hist.map(h => `<tr><td>${fmtDate(h.date)}</td><td class="num">${h.count}</td><td><span class="meter" style="width:120px;display:inline-flex">${[1,2,3,4,5].map(i => `<i class="${i <= Math.round(h.avg) ? 'on' : ''}" style="${i <= Math.round(h.avg) ? 'background:var(--accent)' : ''}"></i>`).join('')}</span> <span class="mono num">${h.avg.toFixed(1)}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No sessions yet. Three sessions max out this part of readiness.</div>'}</div>
-    </div>`;
-  }
-  const q = m.qs[m.i];
-  return `<div class="panel stack">
-    <div class="row"><span class="eyebrow">Question ${m.i+1} of ${m.qs.length} · ${esc(q.cat)}</span><span class="grow" style="flex:1"></span><button class="btn sm ghost" data-action="mock-stop">End session</button></div>
-    <div class="mock-stage"><div id="mk-timer">${timerSVG(m.left, m.total)}</div>
-      <div class="stack"><div class="mock-q">${esc(q.q)}</div>
-        <textarea class="input" id="mk-note" rows="3" placeholder="Optional: jot key points as you speak">${esc(m.notes[m.i]||'')}</textarea>
-        <div class="row"><span class="muted" style="font-size:.85rem">How did that go?</span><div class="rate">${[1,2,3,4,5].map(n => `<button data-rate="${n}" aria-pressed="${m.ratings[m.i]===n}">${n}</button>`).join('')}</div></div>
-        <div class="row"><button class="btn" data-action="mock-pause">${m.paused ? 'Resume timer' : 'Pause timer'}</button><button class="btn primary" data-action="mock-next">${m.i === m.qs.length-1 ? 'Finish and save' : 'Next question →'}</button></div>
-      </div></div></div>`;
-}
 function prepChecklist(p){
   const items = (CHECKLISTS[pk()]||[]).concat(CHECK_GENERAL);
   p.checklist = p.checklist || {};
@@ -1621,33 +1697,322 @@ function prepResearch(p, app){
     <textarea class="input" id="prep-research" rows="9" placeholder="Fleet / properties / clients, recent news, values, people you’ll meet…">${esc(p.research||'')}</textarea>
     <div class="row"><span class="note">${(p.research||'').trim().length} characters</span>${app ? `<button class="btn sm" data-action="research-hook">Use as outreach hook</button>` : ''}</div></div>`;
 }
+/* ---------- voice interview room ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+const HAS_TTS = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+const FILLERS = /\b(um+|uh+|erm+|ah+|basically|actually|you know|sort of|kind of|like)\b/gi;
+let sampleFn = null;
+try { if(window.claude && typeof window.claude.use === 'function') window.claude.use('sample').then(f => { sampleFn = f || null; if(sampleFn && view === 'prep' && ui.mock && ui.mock.phase === 'review') render(); }).catch(() => {}); } catch(e) {}
+
+function voiceFor(){
+  if(!HAS_TTS) return null;
+  const vs = speechSynthesis.getVoices();
+  const want = S.settings.voiceName;
+  return vs.find(v => v.name === want) || vs.find(v => /en[-_]IN/i.test(v.lang)) || vs.find(v => /en[-_]GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+}
+function speak(text, done){
+  const m = ui.mock;
+  if(!HAS_TTS || (m && !m.voice)){ done && done(); return; }
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voiceFor(); if(v){ u.voice = v; u.lang = v.lang; }
+    u.rate = S.settings.voiceRate || 0.97; u.pitch = 1;
+    let fired = false; const fin = () => { if(fired) return; fired = true; setSpeaking(false); done && done(); };
+    u.onend = fin; u.onerror = fin;
+    // some engines never fire onend; fall back to an estimate
+    setTimeout(fin, 1500 + text.split(/\s+/).length * 520 / (u.rate || 1));
+    setSpeaking(true);
+    speechSynthesis.speak(u);
+  } catch(e){ done && done(); }
+}
+function setSpeaking(on){ const el = $('#iv-wave'); if(el) el.classList.toggle('on', on); if(ui.mock) ui.mock.speaking = on; }
+
+let rec = null;
+function micStart(){
+  const m = ui.mock; if(!m) return;
+  if(!SR){ m.micMsg = 'Spoken answers need Chrome or Edge. Tap the mic key on your keyboard to dictate instead, or type.'; render(); return; }
+  try { speechSynthesis && speechSynthesis.cancel(); } catch(e) {}
+  const key = m.phase === 'probe' ? 'probeText' : 'text';
+  const cur = m.answers[m.i];
+  const base = (cur[key] || '').trim();
+  rec = new SR(); rec.lang = S.settings.recLang || 'en-IN'; rec.continuous = true; rec.interimResults = true;
+  let finals = '';
+  rec.onresult = ev => {
+    let interim = '';
+    for(let i = ev.resultIndex; i < ev.results.length; i++){
+      const r = ev.results[i];
+      const tx = (r[0] && r[0].transcript) || ''; if(r.isFinal) finals += tx.trim() + ' '; else interim += tx;
+    }
+    cur[key] = (base ? base + ' ' : '') + finals + interim;
+    const ta = $('#iv-ans'); if(ta){ ta.value = cur[key]; ta.scrollTop = ta.scrollHeight; }
+    const wc = $('#iv-wc'); if(wc) wc.textContent = liveStats(cur[key], cur);
+  };
+  rec.onerror = ev => {
+    const map = {'not-allowed':'Microphone blocked here. Allow it in your browser’s site settings, or tap your keyboard’s mic key to dictate.', 'service-not-allowed':'Microphone isn’t available in this view. Open the app in Chrome, or use your keyboard’s mic key.', 'network':'Voice answers need an internet connection (Chrome sends audio to Google to transcribe). Type, or use keyboard dictation.', 'audio-capture':'No microphone found.'};
+    if(map[ev.error]){ m.micMsg = map[ev.error]; m.listening = false; render(); }
+  };
+  rec.onend = () => { if(m.listening && rec){ try { rec.start(); } catch(e) { m.listening = false; render(); } } };
+  try { rec.start(); m.listening = true; m.micMsg = ''; cur.t0 = cur.t0 || Date.now(); render(); }
+  catch(e){ m.micMsg = 'Could not start the microphone. Type or use keyboard dictation.'; render(); }
+}
+function micStop(){
+  const m = ui.mock; if(m) m.listening = false;
+  if(rec){ try { rec.onend = null; rec.stop(); } catch(e) {} rec = null; }
+}
+function liveStats(text, a){
+  const w = (text.match(/\S+/g)||[]).length;
+  const secs = a && a.t0 ? Math.max(1, (Date.now() - a.t0)/1000) : 0;
+  const f = (text.match(FILLERS)||[]).length;
+  return `${w} words${secs > 10 ? ' · ' + Math.round(w/secs*60) + ' wpm' : ''}${f ? ' · ' + f + ' filler' + (f>1?'s':'') : ''}`;
+}
+
+function scoreAnswer(q, a){
+  const text = ((a.text||'') + ' ' + (a.probeText||'')).trim();
+  const low = ' ' + text.toLowerCase() + ' ';
+  const words = (text.match(/\S+/g)||[]).length;
+  const tips = [];
+  const cue = {
+    S: /\b(when i|at (my|the)|while|during|last year|in 20\d\d|the situation|we had|there was|i joined|i was (the|a)\b)/i,
+    T: /\b(my (role|job|responsibility|goal|task|target)|i was (asked|responsible|tasked|brought in)|needed to|had to|the target|the goal)\b/i,
+    A: /\bI (led|decided|built|set|introduced|negotiated|met|called|reviewed|changed|trained|restructured|created|cut|hired|coached|escalated|analy[sz]ed|implemented|launched|ran|spoke|brought|asked|took|rebuilt|rostered|audited|moved|stopped|started|agreed|presented|ordered|redesigned|renegotiated)\b/,
+    R: /\b(as a result|result(ed)?|outcome|which (meant|led)|increased|reduced|improved|saved|grew|dropped|went from|cut .* by|by \d|to \d|%)/i
+  };
+  const have = Object.keys(cue).filter(k => cue[k].test(text));
+  const structure = have.length / 4;
+  if(!have.includes('S')) tips.push('Open with the situation in one sentence: where, when, how big (team size, rooms, budget).');
+  if(!have.includes('A')) tips.push('Say what YOU did with strong verbs: “I restructured the roster”, “I renegotiated the contract”.');
+  if(!have.includes('R')) tips.push('Finish with a result. Managers are hired on outcomes: “cost fell from 38% to 31% in two quarters”.');
+  const nums = (text.match(/(₹|\$|£|€)?\s?\d[\d,.]*\s*(%|percent|lakh|crore|k\b|million|rooms|pax|guests|staff|people|days|weeks|months|hours|minutes|points|sq ?ft)?/gi)||[]).length;
+  const evidence = clamp(nums / 3, 0, 1);
+  if(nums < 2) tips.push(`Only ${nums} figure${nums===1?'':'s'}. Add at least three: team size, the starting number and the end number.`);
+  const iCount = (text.match(/\b(I|my|me|I’m|I've|I’d)\b/g)||[]).length;
+  const weCount = (text.match(/\b(we|our|us)\b/gi)||[]).length;
+  const ownR = iCount + weCount ? iCount / (iCount + weCount) : 0.3;
+  const ownership = clamp(ownR / 0.6, 0, 1);
+  if(weCount > iCount) tips.push(`You said “we/our” ${weCount}× and “I/my” ${iCount}×. The panel can’t tell what you personally did.`);
+  const look = (q.look || []);
+  const hitLook = look.filter(k => low.includes(k.toLowerCase()));
+  const hitVocab = MGR_VOCAB.filter(k => low.includes(k));
+  const leadership = clamp((look.length ? hitLook.length / Math.max(3, Math.ceil(look.length * .6)) : .5) * .6 + clamp(hitVocab.length / 6, 0, 1) * .4, 0, 1);
+  const missLook = look.filter(k => !hitLook.includes(k));
+  if(missLook.length && hitLook.length < Math.ceil(look.length * .5)) tips.push('A strong answer here usually covers: ' + missLook.slice(0, 4).join(', ') + '.');
+  if(hitVocab.length < 3) tips.push('Sound like a manager: mention the budget, the KPI you tracked, the stakeholder you managed and the trade-off you made.');
+  const fill = (text.match(FILLERS)||[]);
+  const fRate = words ? fill.length / words * 100 : 0;
+  const lenS = words < 60 ? .3 : words < 120 ? .7 : words <= 380 ? 1 : .6;
+  const fillS = fRate < 2 ? 1 : fRate < 5 ? .6 : .3;
+  const secs = a.secs || 0, wpm = secs > 10 ? Math.round(words / secs * 60) : 0;
+  const paceS = !wpm ? 1 : (wpm >= 110 && wpm <= 175 ? 1 : .6);
+  const delivery = (lenS + fillS + paceS) / 3;
+  if(words < 120) tips.push(`Only ${words} words. A manager-level answer runs about 1.5–2.5 minutes (200–350 words).`);
+  if(words > 420) tips.push(`${words} words is long. Cut the background and get to your action sooner.`);
+  if(fill.length >= 3){ const c = {}; fill.forEach(f => { const k = f.toLowerCase(); c[k] = (c[k]||0) + 1; }); tips.push('Fillers: ' + Object.entries(c).map(([k,v]) => `“${k}” ×${v}`).join(', ') + '. Pause instead.'); }
+  if(wpm && wpm > 175) tips.push(`${wpm} words a minute is fast. Slow to about 140 so the panel can take notes.`);
+  if(wpm && wpm < 110) tips.push(`${wpm} words a minute is slow. Prepare your opening line so you start strong.`);
+  if(q.probe && a.probeAsked && (a.probeText||'').trim().split(/\s+/).length < 25) tips.push('Your follow-up answer was thin. Tough panels judge you most on the follow-up: hold your position and give a reason.');
+  const dims = {Structure:structure, Evidence:evidence, Ownership:ownership, Leadership:leadership, Delivery:delivery};
+  const W = {Structure:2.5, Evidence:2, Ownership:1.5, Leadership:2.5, Delivery:1.5};
+  const total = Math.round(Object.keys(dims).reduce((s,k) => s + dims[k]*W[k], 0) * 10) / 10;
+  return {total: words < 15 ? Math.min(total, 2) : total, dims, tips: tips.slice(0, 5), hitLook, missLook, words, wpm, fillers: fill.length};
+}
+
+function prepMock(p){
+  const m = ui.mock;
+  const hist = (p.mocks||[]).slice().reverse();
+  const mgr = (S.profile.level || 'manager') === 'manager';
+  if(!m){
+    const voices = HAS_TTS ? speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)) : [];
+    return `<div class="grid" style="grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)">
+      <div class="panel stack room-setup">
+        <div class="row"><div class="iv-avatar" aria-hidden="true">${ivFace()}</div><div style="flex:1;min-width:200px"><div class="eyebrow">${mgr ? 'Manager-level panel' : 'Associate-level panel'} · ${esc(P_().label)}</div><h2 style="font-size:1.4rem">Voice interview room</h2><p class="muted" style="font-size:.9rem;margin-top:4px">The interviewer reads each question aloud. Answer out loud; your words are transcribed and scored. ${mgr ? 'Expect tough follow-ups that test whether you hold your ground.' : ''}</p></div></div>
+        <div class="grid g3" style="gap:10px">
+          <label class="field"><span>Questions</span><select class="input" id="mk-n">${[3,5,8].map(n => `<option ${n===5?'selected':''}>${n}</option>`).join('')}</select></label>
+          <label class="field"><span>Time per answer</span><select class="input" id="mk-t"><option value="90">1.5 min</option><option value="120" selected>2 min</option><option value="180">3 min</option></select></label>
+          <label class="field"><span>Focus</span><select class="input" id="mk-f"><option value="mix">Mixed</option><option value="lead">${mgr ? 'Leadership under pressure' : 'General & behavioural'}</option><option value="ind">${esc(P_().label)}${mgr ? ' management' : ''}</option><option value="jd">From the job ad</option></select></label>
+        </div>
+        <div class="grid g3" style="gap:10px">
+          <label class="check" style="border:0"><input type="checkbox" id="mk-voice" ${HAS_TTS ? 'checked' : 'disabled'}><span>Interviewer speaks${HAS_TTS ? '' : ' <span class="faint">(not supported here)</span>'}</span></label>
+          <label class="check" style="border:0"><input type="checkbox" id="mk-probe" ${mgr ? 'checked' : ''}><span>Pressure follow-ups</span></label>
+          <label class="check" style="border:0"><input type="checkbox" id="mk-auto" checked><span>Mic on after each question</span></label>
+        </div>
+        <details><summary class="note" style="cursor:pointer">Voice and language</summary><div class="grid g2" style="gap:10px;margin-top:10px">
+          <label class="field"><span>Interviewer voice</span><select class="input" id="mk-vname"><option value="">Automatic</option>${voices.map(v => `<option ${v.name===S.settings.voiceName?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label>
+          <label class="field"><span>Your accent (for transcription)</span><select class="input" id="mk-lang">${[['en-IN','English (India)'],['en-GB','English (UK)'],['en-US','English (US)'],['en-AE','English (UAE)'],['en-AU','English (Australia)']].map(([v,l]) => `<option value="${v}" ${v===(S.settings.recLang||'en-IN')?'selected':''}>${l}</option>`).join('')}</select></label>
+        </div><div class="row" style="margin-top:10px"><button class="btn sm" data-action="mk-testvoice">Test voice</button></div></details>
+        <div class="row"><button class="btn primary" data-action="mock-start">${ico('play')}Start interview</button><span class="note">${SR ? 'Allow the microphone when asked.' : 'Spoken answers need Chrome or Edge. Here, use your keyboard’s mic key or type.'}</span></div>
+      </div>
+      <div class="panel"><div class="panel-h"><h2>Your sessions</h2></div>${hist.length ? `<table class="t" style="min-width:0"><thead><tr><th>Date</th><th>Level</th><th>Qs</th><th>Score</th></tr></thead><tbody>${hist.map(h => { const sc = h.score10 != null ? h.score10 : h.avg*2; return `<tr><td>${fmtDate(h.date)}</td><td>${h.level === 'manager' ? 'Manager' : h.level ? 'Associate' : '—'}</td><td class="num">${h.count}</td><td><span class="mono num" style="font-weight:700;color:${band(sc*10)}">${sc.toFixed(1)}</span><span class="faint">/10</span></td></tr>`; }).join('')}</tbody></table>
+        ${hist.length >= 2 ? sparkSVG(hist.slice().reverse().map(h => h.score10 != null ? h.score10 : h.avg*2)) : ''}` : '<div class="empty">No sessions yet. Three sessions complete this part of readiness.</div>'}</div>
+    </div>`;
+  }
+  if(m.phase === 'done') return mockSummary(m);
+  const q = m.qs[m.i], a = m.answers[m.i];
+  const inProbe = m.phase === 'probe';
+  const key = inProbe ? 'probeText' : 'text';
+  const prompt = inProbe ? q.probe : q.q;
+  if(m.phase === 'review') return mockReview(m, q, a);
+  return `<div class="panel stack room">
+    <div class="row"><span class="eyebrow">Question ${m.i+1} of ${m.qs.length} · ${esc(q.cat)}</span>${inProbe ? '<span class="pill prio-High">Follow-up</span>' : ''}<span class="grow" style="flex:1"></span><button class="btn sm ghost" data-action="mock-stop">End interview</button></div>
+    <div class="mock-stage">
+      <div class="stack" style="align-items:center;gap:14px">
+        <div class="iv-avatar lg" aria-hidden="true">${ivFace()}<div class="wave ${m.speaking?'on':''}" id="iv-wave"><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div id="mk-timer" style="width:150px">${timerSVG(m.left, m.total)}</div>
+      </div>
+      <div class="stack">
+        <div class="mock-q">${esc(prompt)}</div>
+        <div class="row"><button class="btn sm ghost" data-action="mk-replay" ${HAS_TTS && m.voice ? '' : 'hidden'}>↻ Repeat question</button>${m.speaking ? '<span class="note">Interviewer speaking…</span>' : ''}</div>
+        <div class="ans-wrap ${m.listening ? 'rec' : ''}">
+          <textarea class="input" id="iv-ans" rows="7" placeholder="${SR ? 'Tap the mic and answer out loud — or type here.' : 'Type here, or tap the mic key on your keyboard to dictate.'}">${esc(a[key]||'')}</textarea>
+          <div class="ans-bar"><button class="mic ${m.listening ? 'on' : ''}" data-action="mk-mic" aria-pressed="${!!m.listening}" aria-label="${m.listening ? 'Stop recording' : 'Answer by voice'}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+            <span class="note" id="iv-wc">${m.listening ? 'Listening… ' : ''}${liveStats(a[key]||'', a)}</span></div>
+        </div>
+        ${m.micMsg ? `<div class="upl err" role="alert" style="margin:0">${esc(m.micMsg)}</div>` : ''}
+        <div class="row"><button class="btn" data-action="mock-pause">${m.paused ? 'Resume timer' : 'Pause timer'}</button><button class="btn primary" data-action="mk-done">${inProbe || !(m.probe && q.probe) ? 'Finish answer and score it' : 'Finish answer'}</button></div>
+      </div></div></div>`;
+}
+function ivFace(){
+  return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="var(--board)"/><circle cx="32" cy="25" r="10" fill="var(--board-ink)"/><path d="M13 54c3-11 11-16 19-16s16 5 19 16" fill="var(--board-ink)"/><rect x="26" y="40" width="12" height="4" rx="1" fill="var(--board)"/></svg>`;
+}
+function sparkSVG(vals){
+  const W = 300, H = 70, n = vals.length, x = i => 10 + i * (W - 20) / Math.max(1, n - 1), y = v => H - 12 - (v / 10) * (H - 24);
+  const pts = vals.map((v,i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return `<div class="eyebrow" style="margin-top:14px">Trend</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Score trend">
+    <line x1="10" x2="${W-10}" y1="${y(7.5)}" y2="${y(7.5)}" stroke="var(--good)" stroke-dasharray="3 4" opacity=".6"/><text x="${W-10}" y="${y(7.5)-4}" text-anchor="end" font-size="9" font-family="var(--f-mono)" fill="var(--good)">7.5 hire bar</text>
+    <polyline points="10,${H-12} ${pts} ${x(n-1).toFixed(1)},${H-12}" fill="var(--accent-soft)" stroke="none"/>
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="${x(n-1)}" cy="${y(vals[n-1])}" r="4.5" fill="var(--accent)"/><text x="${x(n-1)-8}" y="${y(vals[n-1])-8}" text-anchor="end" font-size="11" font-weight="700" font-family="var(--f-mono)" fill="var(--ink)">${vals[n-1].toFixed(1)}</text></svg>`;
+}
+const DIM_COL = {Structure:'var(--s3)', Evidence:'var(--s2)', Ownership:'var(--s4)', Leadership:'var(--s1)', Delivery:'var(--s5)'};
+function dimBars(dims){
+  return `<div class="bars">${Object.entries(dims).map(([k,v]) => `<div class="bar"><div class="lbl"><b>${k}</b><span class="mono num">${Math.round(v*10)}/10</span></div><div class="track"><div class="fill" style="width:${Math.round(v*100)}%;background:${DIM_COL[k]}"></div></div></div>`).join('')}</div>`;
+}
+function mockReview(m, q, a){
+  const sc = a.score;
+  return `<div class="panel stack room">
+    <div class="row"><span class="eyebrow">Question ${m.i+1} of ${m.qs.length} · scored</span><span class="grow" style="flex:1"></span><button class="btn sm ghost" data-action="mock-stop">End interview</button></div>
+    <div class="grid" style="grid-template-columns:200px minmax(0,1fr);gap:22px;align-items:start">
+      <div class="gauge" style="width:200px">${gaugeSVG(Math.round(sc.total*10), {animate:true, display:sc.total.toFixed(1), label:'ANSWER / 10', word: sc.total >= 7.5 ? 'Hire-ready' : sc.total >= 5 ? 'Getting there' : 'Needs work'})}</div>
+      <div class="stack">
+        <div class="mock-q" style="font-size:1.1rem">${esc(q.q)}</div>
+        ${dimBars(sc.dims)}
+        <p class="note">${sc.words} words${sc.wpm ? ' · ' + sc.wpm + ' wpm' : ''} · ${sc.fillers} filler${sc.fillers===1?'':'s'}. Scores are a coaching guide, not a hiring verdict.</p>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="stack"><h3>Coaching</h3>${sc.tips.length ? `<ul class="checks">${sc.tips.map(t => `<li><span class="mk n">!</span><span>${esc(t)}</span></li>`).join('')}</ul>` : '<p class="muted">Strong answer. Practise saying it in under two minutes.</p>'}</div>
+      <div class="stack"><h3>What the panel listens for</h3><div class="chips">${(q.look||[]).map(k => `<span class="chip ${sc.hitLook.includes(k)?'ok':'miss'}">${sc.hitLook.includes(k)?'✓ ':''}${esc(k)}</span>`).join('') || '<span class="note">Structure, numbers and ownership.</span>'}</div>
+        ${q.probe ? `<p class="note">Follow-up a tough panel asks: <b>${esc(q.probe)}</b></p>` : ''}</div>
+    </div>
+    <details ${a.text ? '' : 'open'}><summary class="note" style="cursor:pointer">Your transcript</summary><div class="preview" style="margin-top:8px">${esc(a.text||'(no answer)')}${a.probeText ? '\n\nFollow-up: ' + esc(a.probeText) : ''}</div></details>
+    ${sampleFn ? `<div class="stack"><div class="row"><button class="btn" data-action="mk-ai" ${a.aiBusy?'disabled':''}>${a.ai ? 'Ask Claude again' : 'Get Claude’s feedback and a stronger version'}</button><span class="note">Uses your Claude account. Claude only sees this question and your answer.</span></div>${a.ai || a.aiBusy ? `<div class="preview" id="iv-ai">${esc(a.ai || 'Thinking…')}</div>` : ''}</div>` : ''}
+    <div class="row"><button class="btn" data-action="mk-retry">Retry this question</button><span class="grow" style="flex:1"></span><button class="btn primary" data-action="mk-next">${m.i === m.qs.length-1 ? 'See interview summary' : 'Next question →'}</button></div>
+  </div>`;
+}
+function mockSummary(m){
+  const scored = m.answers.filter(a => a.score);
+  const avg = scored.length ? scored.reduce((s,a) => s + a.score.total, 0) / scored.length : 0;
+  const dims = {}; ['Structure','Evidence','Ownership','Leadership','Delivery'].forEach(k => dims[k] = scored.length ? scored.reduce((s,a) => s + a.score.dims[k], 0) / scored.length : 0);
+  const weakest = Object.entries(dims).sort((a,b) => a[1]-b[1])[0];
+  const advice = {Structure:'Drill the STAR shape: one sentence of situation, one of task, most of your time on action, end on a number.', Evidence:'Before every interview, write five numbers you can quote: team size, budget, the KPI you moved, by how much, in how long.', Ownership:'Practise answering with “I”. Say what the team did once, then what you decided.', Leadership:'Name the budget, the stakeholder and the trade-off in every answer. That is what separates a manager from a senior associate.', Delivery:'Record yourself and cut fillers. Aim for about 140 words a minute and two minutes per answer.'};
+  return `<div class="panel stack">
+    <div class="row"><div><div class="eyebrow">Interview complete · saved</div><h2 style="font-size:1.5rem">${avg >= 7.5 ? 'You would be on the shortlist.' : avg >= 5 ? 'Close — tighten the weak spots.' : 'Keep training — you’re building the muscle.'}</h2></div><span class="grow" style="flex:1"></span><button class="btn" data-action="mock-stop">Back to setup</button><button class="btn primary" data-action="mock-start-again">Go again</button></div>
+    <div class="grid" style="grid-template-columns:200px minmax(0,1fr);gap:22px;align-items:center">
+      <div class="gauge" style="width:200px">${gaugeSVG(Math.round(avg*10), {animate:true, display:avg.toFixed(1), label:'INTERVIEW / 10', word: avg >= 7.5 ? 'Hire-ready' : avg >= 5 ? 'Getting there' : 'Needs work'})}</div>
+      <div class="stack">${dimBars(dims)}<div class="banner warn" style="margin:0"><span class="grow"><b>Train next: ${weakest[0]}.</b> ${advice[weakest[0]]}</span></div></div>
+    </div>
+    <table class="t" style="min-width:0"><thead><tr><th>Question</th><th>Score</th><th></th></tr></thead><tbody>${m.qs.map((q,i) => { const s = m.answers[i].score; return `<tr><td>${esc(q.q)}</td><td class="num"><b style="color:${s ? band(s.total*10) : 'var(--ink-3)'}">${s ? s.total.toFixed(1) : '—'}</b></td><td><button class="btn sm ghost" data-action="mk-star" data-qid="${q.id}">Build STAR answer</button></td></tr>`; }).join('')}</tbody></table>
+  </div>`;
+}
+
 let mockTimer = null;
 function mockTick(){
-  const m = ui.mock; if(!m || m.done || m.paused) return;
+  const m = ui.mock; if(!m || m.paused || !['answer','probe'].includes(m.phase) || m.speaking) return;
   if(document.hidden) return;
   m.left = Math.max(0, m.left - 1);
   const el = $('#mk-timer'); if(el) el.innerHTML = timerSVG(m.left, m.total);
-  if(m.left === 0){ clearInterval(mockTimer); toast('Time’s up — rate the answer and move on'); }
+  if(m.left === 0 && !m.overtimeWarned){ m.overtimeWarned = true; toast('Time’s up — wrap up in one sentence'); }
 }
-function mockStart(){
-  const n = +($('#mk-n')||{value:5}).value, t = +($('#mk-t')||{value:90}).value;
-  const all = questionSet(ui.prepApp);
-  const pool = all.filter(q => q.cat !== 'General' || Math.random() < .5);
-  const qs = pool.sort(() => Math.random() - .5).slice(0, n);
-  ui.mock = {qs, i:0, total:t, left:t, ratings:[], notes:[], paused:false, done:false};
-  clearInterval(mockTimer); mockTimer = setInterval(mockTick, 1000);
+function askCurrent(){
+  const m = ui.mock; const q = m.qs[m.i];
+  m.left = m.total; m.overtimeWarned = false; m.paused = false;
   render();
+  speak(m.phase === 'probe' ? q.probe : q.q, () => { if(ui.mock !== m) return; render(); if(m.autoMic && SR && !m.micBlocked) micStart(); });
 }
-function mockNext(){
-  const m = ui.mock; const note = $('#mk-note'); if(note) m.notes[m.i] = note.value;
-  if(m.i < m.qs.length - 1){ m.i++; m.left = m.total; m.paused = false; clearInterval(mockTimer); mockTimer = setInterval(mockTick, 1000); render(); return; }
-  clearInterval(mockTimer); m.done = true;
-  const rated = m.ratings.filter(Boolean);
+function mockStart(again){
+  const prev = ui.mock && ui.mock.cfg;
+  const cfg = again && prev ? prev : {
+    n: +($('#mk-n')||{value:5}).value, t: +($('#mk-t')||{value:120}).value, f: ($('#mk-f')||{value:'mix'}).value,
+    voice: !!($('#mk-voice')||{}).checked, probe: !!($('#mk-probe')||{}).checked, autoMic: !!($('#mk-auto')||{}).checked
+  };
+  const all = questionSet(ui.prepApp);
+  const lead = all.filter(q => q.cat === 'Leadership under pressure' || q.cat === 'General' || q.cat === 'Behavioural');
+  const ind = all.filter(q => /management$/.test(q.cat) || q.cat === P_().label);
+  const jd = all.filter(q => q.cat === 'From the job ad');
+  let pool = cfg.f === 'lead' ? lead : cfg.f === 'ind' ? ind : cfg.f === 'jd' ? (jd.length ? jd : all) : all;
+  const shuffled = pool.slice().sort(() => Math.random() - .5);
+  // mixed: make sure industry and leadership both appear
+  const qs = cfg.f === 'mix' ? interleave(shuffle(ind), shuffle(lead), shuffle(jd)).slice(0, cfg.n) : shuffled.slice(0, cfg.n);
+  ui.mock = {cfg, qs, i:0, total:cfg.t, left:cfg.t, answers: qs.map(() => ({text:'', probeText:''})), phase:'answer', voice:cfg.voice && HAS_TTS, probe:cfg.probe, autoMic:cfg.autoMic, listening:false, micMsg:'', level:S.profile.level || 'manager'};
+  clearInterval(mockTimer); mockTimer = setInterval(mockTick, 1000);
+  askCurrent();
+}
+function shuffle(a){ return a.slice().sort(() => Math.random() - .5); }
+function interleave(...lists){ const out = []; for(let i = 0; lists.some(l => i < l.length); i++) lists.forEach(l => { if(i < l.length) out.push(l[i]); }); return out; }
+function finishAnswer(){
+  const m = ui.mock; const q = m.qs[m.i]; const a = m.answers[m.i];
+  const ta = $('#iv-ans'); if(ta) a[m.phase === 'probe' ? 'probeText' : 'text'] = ta.value;
+  micStop(); try { HAS_TTS && speechSynthesis.cancel(); } catch(e) {}
+  a.secs = (a.secs || 0) + (m.total - m.left);
+  if(m.phase === 'answer' && m.probe && q.probe && (a.text||'').trim()){
+    a.probeAsked = true; m.phase = 'probe'; askCurrent(); return;
+  }
+  a.score = scoreAnswer(q, a);
+  m.phase = 'review'; render();
+}
+function mockNextQ(){
+  const m = ui.mock;
+  if(m.i < m.qs.length - 1){ m.i++; m.phase = 'answer'; askCurrent(); return; }
+  clearInterval(mockTimer); micStop();
+  m.phase = 'done';
+  const scored = m.answers.filter(a => a.score);
+  const avg = scored.length ? scored.reduce((s,a) => s + a.score.total, 0) / scored.length : 0;
   const p = prepFor(ui.prepApp); p.mocks = p.mocks || [];
-  p.mocks.push({date:today(), count:m.qs.length, avg: rated.length ? rated.reduce((s,x)=>s+x,0)/rated.length : 0});
+  p.mocks.push({date:today(), count:m.qs.length, score10: Math.round(avg*10)/10, avg: avg/2, level:m.level});
   const app = S.applications.find(a => a.id === ui.prepApp);
-  if(app) app.timeline.push({type:'note', date:today(), content:`Mock interview: ${m.qs.length} questions, avg self-rating ${(rated.length ? rated.reduce((s,x)=>s+x,0)/rated.length : 0).toFixed(1)}/5`});
-  save(); render(); toast('Mock interview saved');
+  if(app) app.timeline.push({type:'note', date:today(), content:`Voice mock interview (${m.level}): ${m.qs.length} questions, score ${avg.toFixed(1)}/10`});
+  save(); render(); toast('Interview saved');
+  if(m.voice) speak(avg >= 7.5 ? 'Thank you. That was a strong interview.' : 'Thank you. That is the end of the interview.');
+}
+async function askClaude(){
+  const m = ui.mock; const q = m.qs[m.i]; const a = m.answers[m.i];
+  if(!sampleFn || a.aiBusy) return;
+  a.aiBusy = true; a.ai = ''; render();
+  const prompt = `You are a demanding hiring panel interviewing a candidate for a ${m.level === 'manager' ? 'manager-level' : 'associate-level'} ${S.profile.role || ''} role in ${P_().noun}.
+
+QUESTION: ${q.q}
+${a.probeAsked ? 'FOLLOW-UP ASKED: ' + q.probe + '\n' : ''}CANDIDATE'S ANSWER (spoken, transcribed): ${a.text || '(none)'}
+${a.probeAsked ? "CANDIDATE'S FOLLOW-UP ANSWER: " + (a.probeText || '(none)') + '\n' : ''}
+Reply in plain text under 220 words, in exactly this shape:
+Score: X/10
+What worked:
+- (one line)
+- (one line)
+What the panel will push on:
+- (one line)
+- (one line)
+Stronger version:
+(Rewrite the answer in under 130 words in the first person, STAR order, ending on a measurable result. Use ONLY facts the candidate gave; put [number] or [detail] where a fact is missing. Do not invent experience.)`;
+  try {
+    const {text} = await sampleFn(prompt, {onText: ({text}) => { a.ai = text; const el = $('#iv-ai'); if(el) el.textContent = text; }});
+    a.ai = text;
+  } catch(e){
+    a.ai = e && e.text ? e.text : '';
+    if(e && e.code === 'not_granted'){ sampleFn = null; toast('Claude feedback was declined. Rule-based coaching still works.'); }
+    else if(e && e.code === 'rate_limited') toast('Too many requests. Try again in a minute.');
+    else if(!(e && e.code === 'cancelled')) toast('Claude couldn’t answer just now.');
+  }
+  a.aiBusy = false; render();
 }
 
 /* =====================================================================
@@ -1996,7 +2361,6 @@ document.addEventListener('click', e => {
   if(t.dataset.pt){ ui.promptType = t.dataset.pt; rerenderKeep(); return; }
   if(t.dataset.q){ ui.qSel = t.dataset.q; render(); return; }
   if(t.dataset.prept){ ui.prepTab = t.dataset.prept; render(); return; }
-  if(t.dataset.rate){ ui.mock.ratings[ui.mock.i] = +t.dataset.rate; const n = $('#mk-note'); if(n) ui.mock.notes[ui.mock.i] = n.value; render(); return; }
   if(t.dataset.tpl){ ui.outTpl = t.dataset.tpl; ui.outDirty = false; ui.confirm = null; render(); return; }
   if(t.dataset.proof){ ui.outFields.proof_point = t.dataset.proof; ui.outDirty = false; render(); return; }
   if(t.dataset.mode){ ui.appsMode = t.dataset.mode; render(); return; }
@@ -2020,9 +2384,18 @@ const actions = {
   'save-ai': () => { const v = $('#pt-back').value.trim(); const a = S.applications.find(x => x.id === $('#pt-app').value); if(!v || !a){ toast('Paste an answer and pick an application'); return; } a.notes = (a.notes ? a.notes + '\n\n' : '') + 'AI (' + today() + '):\n' + v; a.timeline.push({type:'note', date:today(), content:'Saved AI answer to notes'}); save(); $('#pt-back').value = ''; toast('Saved to ' + a.company); },
   'copy-star': () => { const p = prepFor(ui.prepApp); const s = (p.star||{})[ui.qSel] || {}; const q = questionSet(ui.prepApp).find(x => x.id === ui.qSel); copy(`${q ? q.q : ''}\n\nSituation: ${s.s||''}\nTask: ${s.t||''}\nAction: ${s.a||''}\nResult: ${s.r||''}`); },
   'mock-start': () => mockStart(),
-  'mock-next': () => mockNext(),
-  'mock-stop': () => { clearInterval(mockTimer); ui.mock = null; render(); },
-  'mock-pause': () => { ui.mock.paused = !ui.mock.paused; const n = $('#mk-note'); if(n) ui.mock.notes[ui.mock.i] = n.value; render(); },
+  'mock-start-again': () => mockStart(true),
+  'mock-stop': () => { clearInterval(mockTimer); micStop(); try { HAS_TTS && speechSynthesis.cancel(); } catch(e) {} ui.mock = null; render(); },
+  'mock-pause': () => { const m = ui.mock; const ta = $('#iv-ans'); if(ta) m.answers[m.i][m.phase === 'probe' ? 'probeText' : 'text'] = ta.value; m.paused = !m.paused; if(m.paused) micStop(); render(); },
+  'mk-mic': () => { const m = ui.mock; const ta = $('#iv-ans'); if(ta) m.answers[m.i][m.phase === 'probe' ? 'probeText' : 'text'] = ta.value; if(m.listening) { micStop(); render(); } else micStart(); },
+  'mk-done': () => finishAnswer(),
+  'mk-next': () => mockNextQ(),
+  'mk-retry': () => { const m = ui.mock; m.answers[m.i] = {text:'', probeText:''}; m.phase = 'answer'; askCurrent(); },
+  'mk-replay': () => { const m = ui.mock; const q = m.qs[m.i]; micStop(); speak(m.phase === 'probe' ? q.probe : q.q, () => { render(); if(m.autoMic && SR) micStart(); }); render(); },
+  'mk-ai': () => askClaude(),
+  'mk-star': (e, t) => { ui.qSel = t.dataset.qid; ui.prepTab = 'questions'; render(); window.scrollTo(0,0); },
+  'mk-testvoice': () => { const v = $('#mk-vname'); if(v) S.settings.voiceName = v.value; save(); if(!HAS_TTS){ toast('This browser can’t speak text aloud.'); return; } const keep = ui.mock; ui.mock = {voice:true}; speak('Good morning. Thank you for coming in. Let’s start with a difficult one.', () => {}); ui.mock = keep; },
+  'set-level': (e, t) => { S.profile.level = t.dataset.level; ui.qSel = null; ui.mock = null; save(); render(); },
   'research-hook': () => { const p = prepFor(ui.prepApp); ui.outApp = ui.prepApp; ui.outFields = {hook: (p.research||'').split(/(?<=[.!?])\s/)[0]}; ui.outDirty = false; go('outreach'); },
   'edit-templates': () => { ui.editTpl = true; render(); },
   'done-templates': () => { ui.editTpl = false; ui.confirm = null; render(); },
@@ -2085,7 +2458,7 @@ document.addEventListener('input', e => {
   if(t.id === 'pt-extra'){ ui.ptExtra = t.value; const out = $('#pt-out'); const a = currentAnalysis(); if(out && a) out.value = buildPrompt(a); return; }
   if(t.dataset.star){ const p = prepFor(ui.prepApp); p.star = p.star || {}; p.star[ui.qSel] = p.star[ui.qSel] || {s:'',t:'',a:'',r:''}; p.star[ui.qSel][t.dataset.star] = t.value; save(); clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 900); return; }
   if(t.id === 'prep-research'){ prepFor(ui.prepApp).research = t.value; save(); clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 900); return; }
-  if(t.id === 'mk-note' && ui.mock){ ui.mock.notes[ui.mock.i] = t.value; return; }
+  if(t.id === 'iv-ans' && ui.mock && ui.mock.answers){ const m = ui.mock; m.answers[m.i][m.phase === 'probe' ? 'probeText' : 'text'] = t.value; const wc = $('#iv-wc'); if(wc) wc.textContent = liveStats(t.value, m.answers[m.i]); return; }
   if(t.dataset.of){ ui.outFields[t.dataset.of] = t.value; ui.outDirty = false; ui.confirm = null; clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 350); return; }
   if(t.id === 'o-subj' || t.id === 'o-body'){ ui.outDirty = true; if(t.id === 'o-subj') ui.outSubject = t.value; else ui.outBody = t.value; clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 600); return; }
   if(t.dataset.tf){ const card = t.closest('[data-tid]'); const tp = S.templates.find(x => x.id === card.dataset.tid); if(tp){ tp[t.dataset.tf] = t.value; if(t.dataset.tf === 'group') tp.cold = t.value === 'Cold outreach'; save(); } return; }
@@ -2111,7 +2484,9 @@ document.addEventListener('change', e => {
   if(t.id === 'rc-resume'){ S.check.resumeId = t.value; analysisCache.key = ''; save(); render(); return; }
   if(t.id === 'rc-app'){ S.check.appId = t.value; const a = S.applications.find(x => x.id === t.value); if(a && a.jdText && !S.check.jd.trim()) S.check.jd = a.jdText; linkScore(); save(); render(); return; }
   if(t.id === 'rc-file'){ const f = t.files[0]; if(f) handleFile(f); t.value = ''; return; }
-  if(t.id === 'prep-app'){ ui.prepApp = t.value; ui.mock = null; clearInterval(mockTimer); ui.qSel = null; render(); return; }
+  if(t.id === 'mk-vname'){ S.settings.voiceName = t.value; save(); return; }
+  if(t.id === 'mk-lang'){ S.settings.recLang = t.value; save(); return; }
+  if(t.id === 'prep-app'){ ui.prepApp = t.value; micStop(); ui.mock = null; clearInterval(mockTimer); ui.qSel = null; render(); return; }
   if(t.dataset.chk !== undefined){ const p = prepFor(ui.prepApp); p.checklist = p.checklist || {}; p.checklist[t.dataset.chk] = t.checked; save(); render(); return; }
   if(t.id === 'o-app'){ ui.outApp = t.value; ui.outFields = {}; ui.outDirty = false; render(); return; }
   if(t.id === 'ap-status'){ ui.statusFilter = t.value; render(); return; }
