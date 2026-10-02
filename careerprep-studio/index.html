@@ -1,0 +1,1959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Offline resume checker, interview prep, cold outreach writer and job tracker for hospitality, tourism, FM, events and aviation.">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>CareerPrep Studio</title>
+
+<style>
+/* Layout: a concierge desk. Fixed left rail, a split-flap departures strip that always shows the next move, and working panels below. */
+:root{
+  color-scheme: light;
+  --bg:#eceff3; --surface:#ffffff; --well:#f4f6f9; --line:#d8dee6; --line-2:#c3ccd7;
+  --ink:#122033; --ink-2:#4f5d70; --ink-3:#7f8b9b;
+  --accent:#0b6e69; --accent-ink:#ffffff; --accent-soft:#d5ecea; --accent-deep:#074c49;
+  --brass:#a8742a; --brass-soft:#f5e8d2;
+  --good:#1b7f47; --good-soft:#dcf1e4; --warn:#a96a0e; --warn-soft:#fbecd2; --bad:#bf3a33; --bad-soft:#f9dfdc;
+  --board:#121a24; --board-2:#1b2633; --board-ink:#f3c14f; --board-dim:#8a96a6;
+  --s1:#0b6e69; --s2:#a8742a; --s3:#3b6fb6; --s4:#8a4fa3; --s5:#1b7f47;
+  --shadow:0 1px 2px rgba(18,32,51,.06), 0 10px 24px -14px rgba(18,32,51,.28);
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0b1119; --surface:#121b26; --well:#18222f; --line:#243244; --line-2:#334459;
+    --ink:#e6ecf3; --ink-2:#a3b0c0; --ink-3:#6f7f93;
+    --accent:#3cc0b4; --accent-ink:#06201e; --accent-soft:#103a38; --accent-deep:#7fdcd2;
+    --brass:#e0ae5f; --brass-soft:#3a2c17;
+    --good:#4cc683; --good-soft:#12301f; --warn:#e9a93c; --warn-soft:#352711; --bad:#f07067; --bad-soft:#3a1715;
+    --board:#070b10; --board-2:#111923; --board-ink:#f3c14f; --board-dim:#7d8a9b;
+    --s1:#3cc0b4; --s2:#e0ae5f; --s3:#6f9de0; --s4:#c08ad6; --s5:#4cc683;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 28px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0b1119; --surface:#121b26; --well:#18222f; --line:#243244; --line-2:#334459;
+  --ink:#e6ecf3; --ink-2:#a3b0c0; --ink-3:#6f7f93;
+  --accent:#3cc0b4; --accent-ink:#06201e; --accent-soft:#103a38; --accent-deep:#7fdcd2;
+  --brass:#e0ae5f; --brass-soft:#3a2c17;
+  --good:#4cc683; --good-soft:#12301f; --warn:#e9a93c; --warn-soft:#352711; --bad:#f07067; --bad-soft:#3a1715;
+  --board:#070b10; --board-2:#111923; --board-ink:#f3c14f; --board-dim:#7d8a9b;
+  --s1:#3cc0b4; --s2:#e0ae5f; --s3:#6f9de0; --s4:#c08ad6; --s5:#4cc683;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 28px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.9rem;font-weight:800;line-height:1.1}
+h2{font-size:1.25rem;font-weight:700}
+h3{font-size:1.02rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.faint{color:var(--ink-3)}
+.eyebrow{font:600 .7rem/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+.rail{background:var(--board);color:#dfe6ee;padding:22px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.brand svg{flex:none}
+.brand b{font:800 1.08rem/1.05 var(--f-display);color:#fff;display:block}
+.brand small{font:500 .64rem/1 var(--f-mono);letter-spacing:.14em;color:var(--board-dim);text-transform:uppercase}
+.navlist{display:flex;flex-direction:column;gap:2px}
+.navbtn{display:flex;align-items:center;gap:11px;padding:10px 12px;border:0;background:transparent;color:#b8c4d2;border-radius:8px;cursor:pointer;text-align:left;font-weight:500}
+.navbtn svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.navbtn:hover{background:var(--board-2);color:#fff}
+.navbtn[aria-current="page"]{background:var(--board-2);color:var(--board-ink);box-shadow:inset 3px 0 0 var(--board-ink)}
+.navbtn .count{margin-left:auto;font:600 .7rem var(--f-mono);background:#2a3646;color:#dfe6ee;padding:2px 7px;border-radius:99px}
+.rail-foot{margin-top:auto;font-size:.75rem;color:var(--board-dim);padding:0 8px;line-height:1.45}
+.rail-foot .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4cc683;margin-right:6px;vertical-align:1px}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 28px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.pack{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pack label{font:600 .68rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.topbar .spacer{flex:1}
+.board{background:var(--board);border-radius:10px;padding:10px 14px;display:flex;gap:14px;align-items:center;overflow:hidden;color:var(--board-ink);font:600 .82rem/1 var(--f-mono);letter-spacing:.06em;min-width:0;margin:18px 28px 0}
+.board .tag{color:var(--board-dim);font-size:.68rem;letter-spacing:.14em;flex:none}
+.flap{display:flex;gap:2px;flex-wrap:wrap;min-width:0}
+.flap span{display:inline-block;min-width:.9em;text-align:center;background:var(--board-2);padding:6px 2px;border-radius:3px;position:relative;text-transform:uppercase}
+.flap span::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.55)}
+.flap span.sp{background:transparent;min-width:.55em}
+.flap span.sp::after{display:none}
+.board .status{margin-left:auto;flex:none;padding:5px 9px;border-radius:4px;background:#1f3a2a;color:#7fe0a6;font-size:.7rem}
+.board .status.late{background:#3f1d1b;color:#ff9f97}
+#view{padding:22px 28px 60px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.banner{margin:16px 28px 0;padding:10px 14px;border-radius:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.banner.warn{background:var(--warn-soft);color:var(--ink)}
+.banner.info{background:var(--accent-soft);color:var(--ink)}
+.banner .grow{flex:1;min-width:200px}
+
+/* ---------- primitives ---------- */
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:var(--surface);padding:8px 13px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.88rem;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--well)}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.btn.sm{padding:5px 9px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:.78rem;font-weight:600;color:var(--ink-2)}
+.input,select.input,textarea.input{width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:8px 10px;min-width:0}
+textarea.input{resize:vertical;line-height:1.5}
+.input:focus{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:0;border-color:var(--accent)}
+.input.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.panel-h .grow{flex:1}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:.78rem;font-weight:600;border:1px solid transparent;line-height:1.5}
+.chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.miss{background:var(--bad-soft);color:var(--bad)}
+.chip.neutral{background:var(--well);color:var(--ink-2);border-color:var(--line)}
+.chip.brass{background:var(--brass-soft);color:var(--brass)}
+.chip .w{font:600 .66rem var(--f-mono);opacity:.75}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font:600 .68rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:5px;display:inline-block;white-space:nowrap}
+.st-Saved{background:var(--well);color:var(--ink-2)}
+.st-Applied{background:color-mix(in srgb,var(--s3) 18%,transparent);color:var(--s3)}
+.st-Replied{background:color-mix(in srgb,var(--s4) 18%,transparent);color:var(--s4)}
+.st-Interview{background:var(--brass-soft);color:var(--brass)}
+.st-Offer{background:var(--good-soft);color:var(--good)}
+.st-Rejected{background:var(--bad-soft);color:var(--bad)}
+.st-Ghosted{background:var(--well);color:var(--ink-3);border:1px dashed var(--line-2)}
+.st-Withdrawn{background:var(--well);color:var(--ink-3)}
+.prio-High{background:var(--bad-soft);color:var(--bad)}
+.prio-Medium{background:var(--warn-soft);color:var(--warn)}
+.prio-Low{background:var(--well);color:var(--ink-2)}
+.tabs{display:flex;gap:4px;background:var(--well);padding:4px;border-radius:10px;border:1px solid var(--line);flex-wrap:wrap}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;cursor:pointer;font-weight:600;font-size:.85rem;color:var(--ink-2)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.empty{padding:22px;text-align:center;color:var(--ink-2);border:1px dashed var(--line-2);border-radius:12px;font-size:.92rem}
+.note{font-size:.8rem;color:var(--ink-3)}
+.hr{height:1px;background:var(--line);margin:4px 0}
+.scroll-x{overflow-x:auto}
+
+/* ---------- page header ---------- */
+.pagehead{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+.pagehead .grow{flex:1;min-width:240px}
+.pagehead p{color:var(--ink-2);max-width:62ch;margin-top:6px}
+
+/* ---------- dashboard ---------- */
+.kpi{display:flex;flex-direction:column;gap:6px;padding:16px 18px}
+.kpi .v{font:800 2.1rem/1 var(--f-display);letter-spacing:-.02em}
+.kpi .s{font-size:.8rem;color:var(--ink-2)}
+.route svg{width:100%;height:auto;display:block}
+.today li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.today li:last-child{border-bottom:0}
+.today ul{list-style:none;margin:0;padding:0}
+.datebox{flex:none;width:48px;text-align:center;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;font-family:var(--f-mono)}
+.datebox b{display:block;font-size:1.05rem;padding:3px 0 1px}
+.datebox i{display:block;font-style:normal;font-size:.62rem;letter-spacing:.1em;background:var(--well);padding:2px 0;color:var(--ink-2)}
+.datebox.late{border-color:var(--bad)}
+.datebox.late i{background:var(--bad);color:#fff}
+
+/* ---------- resume check ---------- */
+.drop{border:1.5px dashed var(--line-2);border-radius:12px;padding:18px;display:flex;gap:14px;align-items:center;background:var(--well);cursor:pointer;transition:border-color .15s, background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop svg{flex:none;width:38px;height:38px;stroke:var(--accent);fill:none;stroke-width:1.6}
+.drop b{display:block}
+.gaugewrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:center}
+.gauge{width:220px;max-width:100%}
+.gauge svg{width:100%;height:auto;display:block}
+.bars{display:flex;flex-direction:column;gap:11px}
+.bar .lbl{display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:4px;gap:10px}
+.bar .lbl b{font-weight:600}
+.bar .track{height:9px;background:var(--well);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.bar .fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.gapmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.gaptile{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:var(--well);min-width:0}
+.gaptile .k{font-size:.74rem;color:var(--ink-2);font-weight:600}
+.gaptile .v{font-weight:700;font-size:.92rem;overflow-wrap:anywhere}
+.gaptile.ok{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 30%,transparent)}
+.gaptile.miss{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 30%,transparent)}
+.gaptile.part{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.sugg{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
+.sugg:last-child{border-bottom:0}
+.sugg .quote{font-size:.82rem;color:var(--ink-2);border-left:3px solid var(--line-2);padding:2px 0 2px 9px;margin-top:6px;overflow-wrap:anywhere}
+.sugg.done{opacity:.55}
+.sugg.done .txt{text-decoration:line-through}
+.disclaimer{font-size:.78rem;color:var(--ink-3);display:flex;gap:6px;align-items:flex-start}
+
+/* ---------- prep ---------- */
+.qlist{display:flex;flex-direction:column;gap:6px;max-height:560px;overflow:auto;padding-right:4px}
+.q{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface);text-align:left;width:100%}
+.q:hover{border-color:var(--line-2)}
+.q[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.q .tick{flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line-2);margin-top:2px;display:grid;place-items:center}
+.q .tick.on{background:var(--good);border-color:var(--good)}
+.q .tick.on::after{content:"";width:6px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.q small{display:block;color:var(--ink-3);font:600 .66rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.star{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start}
+.star .L{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font:800 1.05rem var(--f-display);color:#fff}
+.mock-stage{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:center}
+.mock-q{font:700 1.45rem/1.25 var(--f-display);text-wrap:balance}
+.rate{display:flex;gap:6px}
+.rate button{width:38px;height:38px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:700}
+.rate button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.check:last-child{border-bottom:0}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);flex:none}
+.readiness{display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px;align-items:center}
+.legend{display:flex;flex-direction:column;gap:8px;font-size:.85rem}
+.legend div{display:flex;gap:8px;align-items:center}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend .val{margin-left:auto;font-family:var(--f-mono);font-size:.78rem;color:var(--ink-2)}
+
+/* ---------- outreach ---------- */
+.out{display:grid;grid-template-columns:250px minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start}
+.tpl-group{display:flex;flex-direction:column;gap:3px;margin-bottom:12px}
+.tpl{border:1px solid transparent;background:transparent;text-align:left;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:.88rem;font-weight:500}
+.tpl:hover{background:var(--well)}
+.tpl[aria-pressed="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,transparent);color:var(--ink);font-weight:600}
+.meter{display:flex;gap:3px}
+.meter i{flex:1;height:8px;border-radius:2px;background:var(--well);border:1px solid var(--line)}
+.meter i.on{border-color:transparent}
+.checks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;font-size:.84rem}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks .mk{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:.65rem;font-weight:800;margin-top:2px}
+.checks .y{background:var(--good-soft);color:var(--good)}
+.checks .n{background:var(--bad-soft);color:var(--bad)}
+.preview{white-space:pre-wrap;font-size:.9rem;line-height:1.6;background:var(--well);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-wrap:anywhere}
+.preview mark{background:var(--bad-soft);color:var(--bad);border-radius:4px;padding:0 3px;font-weight:600}
+.proof{display:flex;flex-direction:column;gap:6px}
+.proof button{text-align:left;border:1px solid var(--line);background:var(--well);border-radius:8px;padding:7px 10px;font-size:.8rem;cursor:pointer;color:var(--ink-2)}
+.proof button:hover{border-color:var(--accent);color:var(--ink)}
+
+/* ---------- applications ---------- */
+table.t{width:100%;border-collapse:collapse;font-size:.88rem;min-width:780px}
+.t th{text-align:left;font:600 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+.t th button{border:0;background:transparent;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;padding:0}
+.t td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.t tr.click{cursor:pointer}
+.t tr.click:hover td{background:var(--well)}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:180px}
+.col.over{outline:2px dashed var(--accent);outline-offset:-4px}
+.col h4{font:600 .72rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;display:flex;justify-content:space-between;color:var(--ink-2);padding:2px 4px 4px}
+.pass{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:grab;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.pass::before,.pass::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--well);border:1px solid var(--line);top:calc(62% - 6px)}
+.pass::before{left:-7px;clip-path:inset(0 0 0 50%)}
+.pass::after{right:-7px;clip-path:inset(0 50% 0 0)}
+.pass .co{font-weight:700;font-size:.92rem}
+.pass .ro{font-size:.8rem;color:var(--ink-2)}
+.pass .perf{border-top:1px dashed var(--line-2);margin-top:9px;padding-top:7px;display:flex;justify-content:space-between;font:600 .7rem var(--f-mono);color:var(--ink-3)}
+.pass.dragging{opacity:.4}
+.flag{font:600 .64rem var(--f-mono);color:var(--warn);letter-spacing:.06em;text-transform:uppercase}
+.timeline{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.timeline li{position:relative}
+.timeline li::before{content:"";position:absolute;left:-24px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.timeline .when{font:600 .7rem var(--f-mono);color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase}
+.timeline .body{font-size:.86rem;white-space:pre-wrap;color:var(--ink-2);max-height:120px;overflow:auto;overflow-wrap:anywhere}
+
+/* ---------- modal / toast ---------- */
+.overlay{position:fixed;inset:0;background:rgba(8,14,22,.55);z-index:50;display:flex;justify-content:flex-end}
+.drawer{background:var(--bg);width:min(760px,100%);height:100%;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:-20px 0 40px rgba(0,0,0,.25);animation:slide .22s ease-out}
+@keyframes slide{from{transform:translateX(30px);opacity:.4}to{transform:none;opacity:1}}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;font-size:.88rem;font-weight:600;box-shadow:var(--shadow);animation:pop .2s ease-out}
+@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+kbd{font:600 .72rem var(--f-mono);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:var(--well)}
+
+@media (max-width:1180px){
+  .out{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .out .tplcol{grid-column:1 / -1}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{position:fixed;bottom:0;top:auto;left:0;right:0;height:auto;flex-direction:row;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:40;gap:0}
+  .brand,.rail-foot{display:none}
+  .navlist{flex-direction:row;flex:1;justify-content:space-around}
+  .navbtn{flex-direction:column;gap:3px;font-size:.62rem;padding:6px 4px}
+  .navbtn .count{display:none}
+  .navbtn[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--board-ink)}
+  #view{padding:16px 16px 100px}
+  .topbar{padding:12px 16px}
+  .board,.banner{margin-left:16px;margin-right:16px}
+  .g2,.g3,.out,.gaugewrap,.mock-stage,.readiness{grid-template-columns:minmax(0,1fr)}
+  .gauge{margin:0 auto}
+  .mock-stage>div:first-child{max-width:200px;margin:0 auto}
+}
+@media (max-width:560px){
+  .g4{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  h1{font-size:1.5rem}
+  .board .status{display:none}
+  .sugg{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="app">
+  <aside class="rail" aria-label="Main">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <rect x="1" y="6" width="32" height="22" rx="4" fill="#f3c14f"/>
+        <circle cx="23" cy="6" r="3" fill="#121a24"/><circle cx="23" cy="28" r="3" fill="#121a24"/>
+        <path d="M23 10v2M23 15v2M23 20v2" stroke="#121a24" stroke-width="1.5"/>
+        <path d="M6 20l4-7 3 4 3-2" stroke="#121a24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div><b>CareerPrep<br>Studio</b><small>Resume → Offer</small></div>
+    </div>
+    <nav class="navlist" id="nav"></nav>
+    <div class="rail-foot"><span class="dot"></span>Offline. Your data stays in this browser. Press <kbd>N</kbd> for a new application.</div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="pack">
+        <label for="pk-ind">Industry pack</label>
+        <select class="input" id="pk-ind" style="width:auto"></select>
+        <select class="input" id="pk-role" style="width:auto" aria-label="Target role"></select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn ghost sm" id="theme-btn" type="button" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span>Theme</span>
+      </button>
+      <button class="btn primary sm" type="button" data-action="new-app">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New application
+      </button>
+    </header>
+    <div class="board" id="board" aria-live="polite"></div>
+    <div id="banners"></div>
+    <main id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div id="modal"></div>
+<div id="toast" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* =====================================================================
+   CONFIG — industry packs, rules, skills, synonyms, templates.
+   Edit these blocks to tune the app without touching the logic below.
+   ===================================================================== */
+
+const PACKS = {
+  hospitality: {
+    label:'Hospitality', noun:'hospitality',
+    roles:['Front Office Associate','Guest Relations Executive','F&B Service Captain','Housekeeping Supervisor','Revenue Analyst','Commis Chef'],
+    keywords:['opera pms','micros pos','check-in','check-out','night audit','upselling','banquets','haccp','guest recovery','guest satisfaction','front office','housekeeping','food and beverage','fine dining','room service','reservations','complaint handling','grooming standards','revenue management','loyalty programme','mise en place','guest relations','vip handling','concierge'],
+    certs:[['hotel management','Hotel management degree/diploma'],['fostac','FSSAI FoSTaC'],['haccp','HACCP'],['ahlei','AHLEI certification']],
+    metrics:['review score','tripadvisor','occupancy','adr','revpar','upsell revenue','covers','guest satisfaction','nps','gss'],
+    metricHint:'guest review scores, occupancy %, ADR, RevPAR, upsell revenue or covers per shift',
+    outcome:['guest','guests','customer','customers','diner','diners','covers','review','reviews','satisfaction'],
+    languages:true, safety:false, mobility:false, photo:true
+  },
+  tourism: {
+    label:'Tourism', noun:'travel and tourism',
+    roles:['Travel Consultant','Tour Manager','Ticketing Executive','Visa Executive','DMC Operations Executive'],
+    keywords:['amadeus','sabre','galileo','itinerary planning','fit','git','mice','visa processing','b2b','fares','ticketing','reissue','refunds','holiday packages','destination knowledge','tour operations','supplier contracting','travel insurance','forex','customer handling'],
+    certs:[['iata','IATA Foundation in Travel & Tourism'],['gds','GDS certificate'],['tour guide','Tour guide licence']],
+    metrics:['bookings','sales value','conversion','repeat clients','group size','pax','revenue','margin'],
+    metricHint:'bookings per month, sales value, conversion %, repeat clients or group sizes',
+    outcome:['client','clients','customer','customers','traveller','travellers','pax','guests','repeat'],
+    languages:true, safety:false, mobility:true, photo:false
+  },
+  fm: {
+    label:'Facilities Management', noun:'facilities management',
+    roles:['Facility Executive','Facility Manager','Soft Services Supervisor','MEP Supervisor','Helpdesk Coordinator','Property Manager'],
+    keywords:['hard services','soft services','mep','hvac','bms','ppm','sla','kpi','cafm','amc','vendor management','fire safety','energy management','helpdesk','housekeeping','security','pest control','budgeting','audit','work permits','asset management','client relationship'],
+    certs:[['ifma','IFMA FMP/CFM'],['iwfm','IWFM qualification'],['nebosh','NEBOSH'],['iosh','IOSH Managing Safely']],
+    metrics:['sla compliance','ppm completion','energy saving','cost saving','sq ft','square feet','downtime','uptime','tickets closed'],
+    metricHint:'SLA compliance %, PPM completion %, energy or cost savings, sq ft managed or downtime reduced',
+    outcome:['client','clients','occupants','tenants','stakeholders','users','sla'],
+    languages:false, safety:true, mobility:false, photo:false,
+    safetyTerms:['safety','fire','nebosh','iosh','compliance','audit','permit','ppe','risk assessment','hse','ehs','statutory']
+  },
+  events: {
+    label:'Events', noun:'events',
+    roles:['Event Coordinator','Event Manager','MICE Executive','Wedding Planner','Banquet Sales Executive'],
+    keywords:['run of show','beo','venue sourcing','vendor management','budgeting','registration','logistics','sponsorship','cvent','event planning','on-site management','client servicing','production','av','hospitality desk','mice','weddings','proposals','negotiation'],
+    certs:[['cmp','CMP (Certified Meeting Professional)'],['csep','CSEP (Certified Special Events Professional)']],
+    metrics:['events delivered','attendees','delegates','guests','budget','sponsorship revenue','client satisfaction','pax'],
+    metricHint:'events delivered, attendee counts, budget handled, sponsorship revenue or client satisfaction',
+    outcome:['client','clients','attendees','delegates','guests','sponsors','satisfaction'],
+    languages:false, safety:false, mobility:false, photo:false
+  },
+  aviation: {
+    label:'Aviation', noun:'aviation',
+    roles:['Cabin Crew','Airport Customer Service Agent','Ramp / Airside Agent','Airport Operations Executive','Airline Ticketing Agent'],
+    keywords:['passenger handling','check-in','boarding','dcs','amadeus altea','dgr','avsec','safety and emergency procedures','first aid','turnaround','otp','customer service','in-flight service','grooming standards','teamwork','conflict resolution','special assistance','baggage','gate operations','announcements'],
+    certs:[['dgr','IATA DGR'],['iata','IATA course'],['avsec','BCAS AVSEC awareness'],['first aid','First aid / CPR'],['cabin crew training','Cabin crew training certificate']],
+    metrics:['passengers','pax','otp','turnaround','complaints resolved','on-time','languages','per shift'],
+    metricHint:'passengers handled per shift, OTP %, turnaround time, complaints resolved or languages spoken',
+    outcome:['passenger','passengers','pax','guest','guests','customer','customers','travellers'],
+    languages:true, safety:true, mobility:true, photo:true,
+    safetyTerms:['safety','emergency','avsec','dgr','security','evacuation','first aid','cpr','compliance','sop']
+  }
+};
+
+const GENERAL_SKILLS = ['customer service','communication','team leadership','training','scheduling','inventory','budgeting','vendor management','negotiation','crm','salesforce','excel','microsoft office','reporting','sop','compliance','health and safety','stakeholder management','problem solving','time management','cash handling','pos','upselling','english','hindi','arabic','french','german','mandarin','first aid','cpr','sales','marketing','social media','data entry','multitasking','attention to detail','shift management','cross-selling','quality control','procurement','contract management','event management','project management'];
+
+const SYNONYMS = [
+  ['ms excel','excel'],['microsoft excel','excel'],['advanced excel','excel'],['ms office','microsoft office'],
+  ['f & b','food and beverage'],['f&b','food and beverage'],['food & beverage','food and beverage'],['food and beverages','food and beverage'],
+  ['check in','check-in'],['checkin','check-in'],['check out','check-out'],['checkout','check-out'],
+  ['opera property management system','opera pms'],['oracle opera','opera pms'],['micros','micros pos'],
+  ['banquet','banquets'],['up-selling','upselling'],['up selling','upselling'],['cross selling','cross-selling'],
+  ['loyalty program','loyalty programme'],['run-of-show','run of show'],['banquet event order','beo'],
+  ['planned preventive maintenance','ppm'],['planned preventative maintenance','ppm'],['building management system','bms'],
+  ['annual maintenance contract','amc'],['on time performance','otp'],['on-time performance','otp'],
+  ['dangerous goods regulations','dgr'],['dangerous goods','dgr'],['aviation security','avsec'],
+  ['customer care','customer service'],['customer support','customer service'],['guest service','customer service'],
+  ['standard operating procedures','sop'],['sops','sop'],['crm software','crm'],
+  ['team leader','team leadership'],['led a team','team leadership'],['people management','team leadership'],
+  ['cardiopulmonary resuscitation','cpr'],['h&s','health and safety'],['hse','health and safety'],
+  ['altea','amadeus altea'],['departure control system','dcs'],['meetings incentives conferences and exhibitions','mice']
+];
+
+const RULES = {
+  strongVerbs:['led','managed','built','reduced','increased','improved','delivered','launched','handled','resolved','trained','coordinated','organised','organized','planned','negotiated','supervised','achieved','created','designed','streamlined','cut','grew','drove','boosted','maintained','served','welcomed','processed','executed','implemented','introduced','mentored','oversaw','ran','scheduled','sold','upsold','won','secured','restored','prepared','audited','inspected','monitored','ensured','assisted','operated','handled','spearheaded','established','converted','exceeded','saved'],
+  weakOpeners:['responsible for','worked on','helped','helping','involved in','duties included','tasked with','assisted with','in charge of','participated in'],
+  buzzwords:['hardworking','hard-working','team player','go-getter','self-motivated','dynamic','result-oriented','results-driven','detail-oriented','passionate','synergy','think outside the box','go getter','highly motivated','proactive','dedicated','fast learner','quick learner'],
+  bulletMaxWords:30, repeatedVerbMin:3, minWords:250, maxPages:2, wordsPerPage:450,
+  numberRe:/\d|%|₹|\$|£|€|\baed\b|\binr\b|\brs\.?\b/i
+};
+
+const STOP = new Set(('a about above across after again against all also am an and any are as at be because been before being below between both but by can could did do does doing down during each either etc few for from further had has have having he her here hers him his how i if in into is it its itself just least less like may me might more most must my no nor not of off on once only or other our ours out over own per please plus rather same shall she should since so some such than that the their theirs them then there these they this those through to too under until up upon us very via was we were what when where which while who whom why will with within without would you your yours yourself role job candidate candidates position company team work working ability able strong excellent good great new using including include includes required requirements requirement preferred plus years year experience experienced minimum least well across must knowledge understanding skills skill responsibilities responsibility key day days time apply applicants opportunity looking join based environment duties high level etc ensure ensuring provide providing within various related relevant similar other others').split(/\s+/));
+
+const STATUSES = ['Saved','Applied','Replied','Interview','Offer','Rejected','Ghosted','Withdrawn'];
+const PIPE = ['Saved','Applied','Replied','Interview','Offer'];
+const END = ['Rejected','Ghosted','Withdrawn'];
+
+const REPLY_GROUPS = {
+  Offer:['offer','compensation','joining date','offer letter','ctc','package','date of joining','welcome aboard'],
+  Interview:['schedule','interview','availability','call with','shortlisted','assessment day','open day','meet you','next round','trade test'],
+  Rejected:['unfortunately','not moving forward','other candidates','regret to inform','not been successful','will not be progressing','not shortlisted','decided to proceed with']
+};
+
+const QUESTIONS = {
+  general:[
+    'Tell me about yourself.','Why do you want this role?','Why do you want to work for us?','What are your greatest strengths?',
+    'What is one area you are working to improve?','Where do you see yourself in three years?','Why are you leaving your current job?',
+    'What are your salary expectations?','What questions do you have for us?'
+  ],
+  behavioural:[
+    'Tell me about a time you went beyond what was expected.','Describe a conflict with a colleague and how you resolved it.',
+    'Tell me about a mistake you made and what you did next.','Describe a time you led a team or a shift.',
+    'Tell me about the most difficult complaint you handled.','Describe a time you worked to a very tight deadline.',
+    'Tell me about a time you adapted to a sudden change.','Describe a time you took initiative without being asked.'
+  ],
+  hospitality:[
+    'Tell me about a time you turned an unhappy guest into a satisfied one.','A guest arrives and the room is not ready. What do you do?',
+    'How do you upsell without being pushy?','Walk me through your night audit or end-of-shift routine.',
+    'How do you keep grooming and hygiene standards over a long shift?','A guest reports an allergic reaction at dinner. What do you do first?',
+    'How have you contributed to guest review scores?','Describe working a banquet or a very busy service.',
+    'Which PMS or POS systems have you used, and how well?','Why hospitality, and why our property?'
+  ],
+  tourism:[
+    'How would you build an itinerary for a family on a fixed budget?','Walk me through issuing and reissuing a ticket on a GDS.',
+    'A client’s visa is delayed a week before travel. What do you do?','A hotel has overbooked your group on arrival. How do you handle it?',
+    'Tell me about a sale you closed that others thought was lost.','How do you keep up with fare and visa rule changes?',
+    'Describe a MICE group you handled end to end.','How do you convert an enquiry into a booking?',
+    'Which destinations do you know best, and how did you learn them?','How do you manage B2B partner relationships?'
+  ],
+  fm:[
+    'How do you plan and track a PPM schedule?','A chiller fails at 9am on a weekday. Walk me through your response.',
+    'How do you manage vendor performance against SLAs?','Describe a cost or energy saving you delivered.',
+    'How do you balance hard and soft services with a lean team?','Tell me about a fire safety audit or mock drill you ran.',
+    'Which CAFM or BMS tools have you used?','How do you handle a client escalation about cleanliness?',
+    'How do you manage AMCs and their renewals?','Which KPIs would you report to the client each month?'
+  ],
+  events:[
+    'Walk me through a run of show you built.','The keynote speaker cancels two hours before. What do you do?',
+    'How do you source and negotiate with venues?','Describe an event where you managed the budget and came in under.',
+    'How do you write and use a BEO?','How do you run registration on event day?',
+    'Tell me about a difficult client and how you kept them happy.','How have you sold or delivered sponsorship?',
+    'Which tools do you use for event management?','How do you manage vendors on load-in day?'
+  ],
+  aviation:[
+    'Why do you want to work in aviation?','How would you handle a disruptive passenger?',
+    'Tell me about a time you stayed calm under pressure.','A flight is delayed three hours and passengers at the gate are angry. What do you do?',
+    'What does safety mean to you in this role?','A passenger has a medical emergency mid-flight. What are your first steps?',
+    'Describe working with a diverse team on irregular shifts.','How do you contribute to on-time performance?',
+    'What do you know about our airline?','Which languages do you speak, and how have you used them with passengers?'
+  ]
+};
+
+const CHECKLISTS = {
+  hospitality:['Grooming to property standard (hair, nails, uniform-ready attire)','Trade test practised: tray service, table set-up, check-in role-play','Know the property: outlets, star rating, recent guest reviews','Copies of certificates (FoSTaC, HACCP, diploma)','Reference letters from previous managers','Know the brand’s loyalty programme'],
+  tourism:['GDS command recap: availability, PNR, pricing, reissue','Fare calculation practice','Destination notes on your top five markets','A sample itinerary ready to show','Visa rules for the company’s top destinations','Sales numbers from your last role written down'],
+  fm:['Questions ready for the site walk-through','Know the client’s building type and size','SLA and KPI examples with real numbers','Safety certificates (NEBOSH / IOSH) with copies','PPE ready if there is a site visit','Anonymised CAFM or BMS report samples'],
+  events:['Portfolio of three events: photos, budgets, attendee counts','A run-of-show sample','Your vendor list and how you rate vendors','A budget sheet example','A crisis story with the outcome','Know the company’s recent events'],
+  aviation:['Passport valid 6+ months, plus copies','CV and photos (passport size and full length if requested)','Certificates: education, first aid, any IATA courses','Grooming to airline standard; check visible tattoo policy','Formal business attire and polished shoes','Practise the reach test','Swim test preparation if required','Practise group exercises: speak, listen, include others','Research the fleet, routes and values']
+};
+const CHECK_GENERAL = ['Route and timing planned; arrive 15 minutes early','Three printed CV copies','Three questions for the interviewer','Salary range researched','Thank-you email drafted'];
+
+const DEFAULT_TEMPLATES = [
+  {id:'c1',group:'Cold outreach',cold:true,name:'Hiring manager, cold',
+   subject:'{{role}} at {{company}}: {{proof_short}}',
+   body:'Hi {{recruiter}},\n\n{{hook}}\n\nI’m {{name}}, with {{years_experience}} years in {{industry}}. {{proof_point}}\n\nI’d like to bring that to {{company}} as {{role}}. My strongest areas are {{top_skills}}.\n\nWould you be open to a 10-minute call next week, or could you point me to the right person?\n\nThank you,\n{{name}}\n{{phone}} · {{portfolio_link}}'},
+  {id:'c2',group:'Cold outreach',cold:true,name:'Recruiter or HR, cold',
+   subject:'{{role}} candidate: {{years_experience}} yrs in {{industry}}',
+   body:'Hi {{recruiter}},\n\n{{hook}}\n\nI’m applying for {{role}} at {{company}}. In brief: {{proof_point}} I also bring {{top_skills}}.\n\nI’ve attached my CV. Is there anything else you need from me to move to the next step?\n\nBest regards,\n{{name}}\n{{phone}}'},
+  {id:'c3',group:'Cold outreach',cold:true,name:'Mutual connection intro',
+   subject:'{{mutual}} suggested I reach out',
+   body:'Hi {{recruiter}},\n\n{{mutual}} suggested I get in touch. {{hook}}\n\nI’m {{name}}, currently in {{industry}} with {{years_experience}} years of experience. {{proof_point}}\n\nCould I ask you two or three questions about the {{role}} team at {{company}}? Fifteen minutes on a call would be plenty.\n\nThanks,\n{{name}}\n{{phone}}'},
+  {id:'c4',group:'Cold outreach',cold:true,short:true,name:'LinkedIn connection note',
+   subject:'(LinkedIn note – no subject)',
+   body:'Hi {{recruiter}}, {{hook}} I’m a {{industry}} professional ({{years_experience}} yrs) interested in {{role}} roles at {{company}}. Would love to connect.'},
+  {id:'c5',group:'Cold outreach',cold:true,name:'Cold follow-up (day 5)',
+   subject:'Re: {{role}} at {{company}}',
+   body:'Hi {{recruiter}},\n\nFollowing up on my note last week about {{role}}. One more thing that may be relevant: {{proof_point}}\n\nIf now isn’t the right time, a pointer to the right person would help a lot.\n\nThanks,\n{{name}}'},
+  {id:'t1',group:'Application flow',name:'Application / cover email',
+   subject:'Application: {{role}} – {{name}}',
+   body:'Dear {{recruiter}},\n\nPlease find my CV attached for the {{role}} position at {{company}}.\n\nI have {{years_experience}} years of experience in {{industry}}, with strengths in {{top_skills}}. {{proof_point}}\n\nI would welcome the chance to discuss how I can contribute to your team.\n\nKind regards,\n{{name}}\n{{phone}} · {{portfolio_link}}'},
+  {id:'t2',group:'Application flow',name:'Follow-up after no reply',
+   subject:'Following up: {{role}} application',
+   body:'Dear {{recruiter}},\n\nI applied for the {{role}} position at {{company}} last week and wanted to confirm you received my application. I remain very interested and am available for a conversation at your convenience.\n\nKind regards,\n{{name}}\n{{phone}}'},
+  {id:'t3',group:'Application flow',name:'Thank-you after interview',
+   subject:'Thank you – {{role}} interview',
+   body:'Dear {{recruiter}},\n\nThank you for your time today. I enjoyed learning more about the {{role}} role and the team at {{company}}. Our conversation confirmed my interest, and I’m confident my experience in {{top_skills}} would help me contribute quickly.\n\nPlease let me know if you need anything further.\n\nKind regards,\n{{name}}'},
+  {id:'t4',group:'Application flow',name:'Accept offer',
+   subject:'Offer acceptance – {{role}}',
+   body:'Dear {{recruiter}},\n\nThank you for the offer for the {{role}} position. I’m delighted to accept and look forward to joining {{company}}. Please let me know the next steps and any documents you need from me.\n\nKind regards,\n{{name}}\n{{phone}}'},
+  {id:'t5',group:'Application flow',name:'Decline offer',
+   subject:'{{role}} offer',
+   body:'Dear {{recruiter}},\n\nThank you for offering me the {{role}} position. After careful thought I have decided to decline. I appreciated the process and hope our paths cross again.\n\nKind regards,\n{{name}}'},
+  {id:'t6',group:'Application flow',name:'Withdraw application',
+   subject:'Withdrawing my application – {{role}}',
+   body:'Dear {{recruiter}},\n\nI’d like to withdraw my application for the {{role}} position at {{company}}. Thank you for your time and consideration.\n\nKind regards,\n{{name}}'},
+  {id:'t7',group:'Application flow',name:'Referral request',
+   subject:'Quick favour: {{role}} at {{company}}',
+   body:'Hi {{recruiter}},\n\nI hope you’re well. I’m applying for the {{role}} role at {{company}} and would be grateful for a referral if you feel comfortable. In short: {{proof_point}}\n\nI’ve attached my CV and am happy to send a short blurb you can forward.\n\nThank you,\n{{name}}'},
+  {id:'i1',group:'Industry',pack:'hospitality',name:'Hotel walk-in follow-up',
+   subject:'Following my visit – {{role}} at {{company}}',
+   body:'Dear {{recruiter}},\n\nThank you for meeting me when I visited {{company}} to drop off my CV. {{hook}}\n\nI have {{years_experience}} years in hospitality. {{proof_point}} I speak {{languages}} and can join {{availability}}.\n\nI would be glad to attend a trade test at your convenience.\n\nKind regards,\n{{name}}\n{{phone}}'},
+  {id:'i2',group:'Industry',pack:'tourism',name:'After a branch visit',
+   subject:'{{role}} – following my visit to {{company}}',
+   body:'Dear {{recruiter}},\n\nThank you for your time at the branch. {{hook}}\n\n{{proof_point}} I work confidently on {{top_skills}} and my passport is valid until {{passport}}.\n\nI’m happy to complete a GDS or fare test whenever suits you.\n\nKind regards,\n{{name}}\n{{phone}}'},
+  {id:'i3',group:'Industry',pack:'fm',name:'Site-visit thank-you',
+   subject:'Thank you for the site visit – {{role}}',
+   body:'Dear {{recruiter}},\n\nThank you for showing me around the site today. {{hook}}\n\nFrom what I saw, my experience with {{top_skills}} fits well. {{proof_point}}\n\nI’d welcome the next conversation.\n\nKind regards,\n{{name}}\n{{phone}}'},
+  {id:'i4',group:'Industry',pack:'events',name:'Portfolio share after meeting',
+   subject:'My event portfolio – {{role}} at {{company}}',
+   body:'Dear {{recruiter}},\n\nThank you for the conversation. As promised, my portfolio is here: {{portfolio_link}}\n\n{{proof_point}} {{hook}}\n\nI’d love to talk about your upcoming season.\n\nKind regards,\n{{name}}\n{{phone}}'},
+  {id:'i5',group:'Industry',pack:'aviation',name:'Cabin crew open-day follow-up',
+   subject:'Open day follow-up – {{name}}, {{role}}',
+   body:'Dear {{recruiter}},\n\nThank you for the open day at {{company}}. {{hook}}\n\n{{proof_point}} I speak {{languages}}, my passport is valid until {{passport}}, and I am {{relocation}}.\n\nI look forward to hearing about the next stage.\n\nKind regards,\n{{name}}\n{{phone}}'}
+];
+
+/* ---------- sample content (clearly marked as examples) ---------- */
+const SAMPLE_RESUME = `PRIYA NAIR
+Guest Relations Executive
+priya.nair@example.com | +91 98450 12345 | Bengaluru
+
+PROFESSIONAL SUMMARY
+Hardworking team player with 4 years in luxury hotels, now moving into cabin crew. Calm under pressure and passionate about service.
+
+EXPERIENCE
+Guest Relations Executive, Harbourline Grand, Bengaluru (2022 – present)
+• Welcomed and checked in up to 180 guests a day on Opera PMS during peak season
+• Responsible for handling VIP arrivals and special requests
+• Resolved guest complaints and raised the hotel's TripAdvisor score from 4.3 to 4.7 in 12 months
+• Helped the front office team with night audit
+• Trained 6 new associates on grooming standards and check-in
+
+Front Office Associate, Coral Bay Resort, Goa (2020 – 2022)
+• Handled check-in and check-out for international guests
+• Upsold room upgrades worth ₹9 lakh in one season
+• Worked on the loyalty programme enrolment desk
+
+EDUCATION
+Diploma in Hotel Management, IHM Bengaluru, 2020
+
+SKILLS
+Opera PMS, Micros POS, customer service, complaint handling, upselling, Microsoft Office
+
+LANGUAGES
+English, Hindi, Malayalam, basic French`;
+
+const SAMPLE_JD = `Cabin Crew – SkyBridge Airways (example job ad)
+
+About the role
+Deliver safe, warm in-flight service to passengers on our domestic and international network.
+
+Responsibilities
+- Carry out safety and emergency procedures and pre-flight checks
+- Provide in-flight service and passenger handling with a focus on customer service
+- Handle special assistance passengers and resolve complaints with empathy
+- Support on-time performance (OTP) through efficient boarding and turnaround
+
+Requirements
+- Excellent customer service experience in hospitality or aviation
+- First aid / CPR certificate (or willingness to obtain)
+- Knowledge of safety and emergency procedures; DGR awareness preferred
+- Fluent English; additional languages a plus
+- Strong grooming standards and teamwork
+- Passport valid for at least 12 months; willing to relocate to base`;
+
+/* =====================================================================
+   STATE & STORAGE
+   ===================================================================== */
+const KEY = 'jobtracker:v1';
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = p => p + Math.random().toString(36).slice(2,9);
+const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
+const today = () => iso(new Date());
+const addDays = (s, n) => { const d = new Date(s+'T12:00:00'); d.setDate(d.getDate()+n); return iso(d); };
+const daysBetween = (a, b) => Math.round((new Date(b+'T12:00:00') - new Date(a+'T12:00:00')) / 864e5);
+const fmtDate = s => { if(!s) return '—'; const d = new Date(s+'T12:00:00'); return d.toLocaleDateString(undefined,{day:'numeric',month:'short'}); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function freshState(){
+  return {
+    profile:{name:'',email:'',phone:'',portfolio_link:'',years_experience:0,industry:'aviation',role:'Cabin Crew',languages:'',passport:'',relocation:'open to relocation',availability:'within 30 days'},
+    resumes:[], applications:[], templates:JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)),
+    outreach:[], suggestionStatus:{}, prep:{general:{star:{},checklist:{},mocks:[],research:''}},
+    check:{resumeId:null,jd:'',appId:''},
+    settings:{followUpDays:7,ghostedDays:21,lastBackup:null,theme:null,examples:false}
+  };
+}
+let S = load();
+function load(){
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch(e) {}
+  if(raw){
+    try {
+      const d = JSON.parse(raw);
+      if(d && Array.isArray(d.applications)) return migrate(d);
+    } catch(e) { setTimeout(()=>toast('Saved data was unreadable. Started fresh — import a backup from Settings.'), 400); }
+  }
+  return seed(freshState());
+}
+function migrate(d){
+  const f = freshState();
+  const out = Object.assign(f, d);
+  out.profile = Object.assign(f.profile, d.profile||{});
+  out.settings = Object.assign(freshState().settings, d.settings||{});
+  out.prep = d.prep || {general:{star:{},checklist:{},mocks:[],research:''}};
+  out.check = Object.assign({resumeId:null,jd:'',appId:''}, d.check||{});
+  out.suggestionStatus = d.suggestionStatus || {};
+  out.outreach = d.outreach || [];
+  if(!Array.isArray(out.templates) || !out.templates.length) out.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+  out.applications.forEach(a => { a.timeline = a.timeline||[]; a.contact = a.contact||{name:'',email:''}; a.nextAction = a.nextAction||{text:'',date:''}; a.prep = a.prep||{star:{},checklist:{},mocks:[],research:''}; if(a.maxStage==null) a.maxStage = Math.max(0, PIPE.indexOf(a.status)); });
+  return out;
+}
+let saveTimer = null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) { toast('Could not save to this browser. Export a backup from Settings.'); } }, 150);
+}
+
+function seed(s){
+  const t = today();
+  s.settings.examples = true;
+  Object.assign(s.profile, {name:'Priya Nair',email:'priya.nair@example.com',phone:'+91 98450 12345',portfolio_link:'linkedin.com/in/priya-example',years_experience:4,languages:'English, Hindi, Malayalam and basic French',passport:'March 2031'});
+  s.resumes.push({id:'r1',label:'Cabin crew v1 (example)',text:SAMPLE_RESUME,added:t,meta:{source:'paste'}});
+  s.check = {resumeId:'r1', jd:SAMPLE_JD, appId:'a1'};
+  const mk = (id, company, role, status, applied, ats, extra) => Object.assign({
+    id, company, role, jobLink:'', jdText:'', resumeId:'r1', atsScore:ats, status, dateApplied:applied,
+    contact:{name:'',email:''}, salaryRange:'', notes:'', nextAction:{text:'',date:''}, example:true,
+    maxStage:Math.max(0, PIPE.indexOf(status)), timeline:[{type:'status_change',date:applied,content:'Status set to '+status}],
+    prep:{star:{},checklist:{},mocks:[],research:''}
+  }, extra||{});
+  s.applications.push(
+    mk('a1','SkyBridge Airways','Cabin Crew','Interview',addDays(t,-12),0,{jdText:SAMPLE_JD,contact:{name:'Anita Rao',email:'careers@skybridge.example'},nextAction:{text:'Assessment day',date:addDays(t,3)},salaryRange:'₹45–55k / month',
+      timeline:[{type:'status_change',date:addDays(t,-12),content:'Applied via careers page'},{type:'email_sent',date:addDays(t,-12),content:'Application / cover email'},{type:'reply_received',date:addDays(t,-4),content:'Thank you for applying. We would like to invite you to our assessment day on '+fmtDate(addDays(t,3))+' at 9:30 am.'},{type:'status_change',date:addDays(t,-4),content:'Status changed to Interview'}],
+      prep:{star:{},checklist:{},mocks:[{date:addDays(t,-2),count:5,avg:3.4}],research:'Fleet of A320neo, hub in Bengaluru, values: warmth, punctuality. Recently launched Gulf routes.'}}),
+    mk('a2','Harbourline Hotels','Guest Relations Manager','Applied',addDays(t,-9),68,{nextAction:{text:'Follow up',date:addDays(t,-2)},contact:{name:'Rahul Menon',email:'hr@harbourline.example'}}),
+    mk('a3','Coral Bay Resorts','Front Office Supervisor','Replied',addDays(t,-15),74,{nextAction:{text:'Send availability',date:t},maxStage:2}),
+    mk('a4','Meridian Facility Services','Helpdesk Coordinator','Rejected',addDays(t,-30),49,{maxStage:2}),
+    mk('a5','Lumen Events Co.','Event Coordinator','Saved',addDays(t,-1),0,{}),
+    mk('a6','Aerolink Ground Services','Airport Customer Service Agent','Offer',addDays(t,-34),81,{maxStage:4,nextAction:{text:'Reply to offer',date:addDays(t,1)}}),
+    mk('a7','Nimbus Air','Cabin Crew','Ghosted',addDays(t,-40),58,{maxStage:1})
+  );
+  s.applications[4].dateApplied = '';
+  s.outreach.push({date:addDays(t,-6),to:'Rahul Menon',company:'Harbourline Hotels',subject:'Guest Relations Manager at Harbourline Hotels: raised TripAdvisor 4.3 → 4.7',template:'Hiring manager, cold'});
+  return s;
+}
+
+/* =====================================================================
+   TEXT ENGINE — normalise, extract keywords, detect sections, score
+   ===================================================================== */
+const SYN_RES = SYNONYMS.map(([a,b]) => [new RegExp('(^|[^a-z0-9])' + a.replace(/[.*+?^${}()|[\]\\&]/g,'\\$&') + '(?=$|[^a-z0-9])','g'), '$1'+b]);
+function normalize(t){
+  let s = ' ' + String(t||'').toLowerCase().replace(/[‘’]/g,"'").replace(/[–—]/g,' ') + ' ';
+  s = s.replace(/[•·▪●◦►✓|\t]/g,' ');
+  for(const [re, rep] of SYN_RES) s = s.replace(re, rep);
+  s = s.replace(/[^a-z0-9+#&%\/\-.\s]/g,' ').replace(/\.(?=\s|$)/g,' ').replace(/(^|\s)[\-\/]+(?=\s)/g,' ').replace(/\s+/g,' ');
+  return ' ' + s.trim() + ' ';
+}
+function countOcc(padded, term){
+  const needle = ' ' + term + ' ';
+  let n = 0, i = padded.indexOf(needle);
+  while(i !== -1){ n++; i = padded.indexOf(needle, i + needle.length - 1); }
+  return n;
+}
+function dictionaryFor(packKey){
+  const set = new Set(GENERAL_SKILLS);
+  Object.values(PACKS).forEach(p => p.keywords.forEach(k => set.add(k)));
+  return Array.from(set).map(k => normalize(k).trim()).filter(Boolean);
+}
+function requiredBlock(jd){
+  const lines = String(jd||'').split(/\r?\n/);
+  let on = false; const out = [];
+  for(const raw of lines){
+    const l = raw.trim();
+    const isHead = l.length < 60 && !/^[-•*]/.test(l) && /[a-z]/i.test(l) && (l.split(/\s+/).length <= 6);
+    if(isHead && /(requirement|qualification|must have|essential|what you.ll need|you have|skills required|who you are|eligibility)/i.test(l)){ on = true; continue; }
+    if(isHead && on && /(about|responsibilit|benefit|what we offer|perks|how to apply|role)/i.test(l)){ on = false; continue; }
+    if(on) out.push(l);
+  }
+  return normalize(out.join(' '));
+}
+function extractKeywords(jd, packKey){
+  const n = normalize(jd);
+  const req = requiredBlock(jd);
+  const kws = new Map();
+  const pack = PACKS[packKey];
+  for(const k of dictionaryFor(packKey)){
+    const c = countOcc(n, k);
+    if(c > 0) kws.set(k, {term:k, count:c, src: pack && pack.keywords.map(x=>normalize(x).trim()).includes(k) ? 'pack' : 'dict'});
+  }
+  const toks = n.trim().split(' ').filter(Boolean);
+  const good = w => w.length > 2 && !STOP.has(w) && !/^\d+$/.test(w) && /[a-z]/.test(w);
+  const grams = new Map();
+  for(const size of [2,3]){
+    for(let i=0; i + size <= toks.length; i++){
+      const g = toks.slice(i, i+size);
+      if(!g.every(good)) continue;
+      const key = g.join(' ');
+      grams.set(key, (grams.get(key)||0) + 1);
+    }
+  }
+  const covered = term => Array.from(kws.keys()).some(k => k.includes(term) || term.includes(k));
+  for(const [g, c] of grams){ if(c >= 2 && !covered(g)) kws.set(g, {term:g, count:c, src:'phrase'}); }
+  const singles = new Map();
+  toks.forEach(w => { if(good(w) && w.length >= 4) singles.set(w, (singles.get(w)||0) + 1); });
+  for(const [w, c] of singles){ if(c >= 3 && !covered(w)) kws.set(w, {term:w, count:c, src:'repeat'}); }
+  const list = Array.from(kws.values()).map(k => {
+    const inReq = countOcc(req, k.term) > 0;
+    k.req = inReq;
+    k.weight = (k.count >= 2 ? 2 : 1) * (inReq ? 2 : 1) * (k.src === 'pack' ? 1.25 : 1);
+    return k;
+  });
+  list.sort((a,b) => b.weight - a.weight || b.count - a.count || a.term.localeCompare(b.term));
+  return list.slice(0, 30);
+}
+
+const SECTION_RES = {
+  contact:/^(contact|contact details|personal details|personal information)$/,
+  summary:/^(summary|profile|professional summary|career summary|career objective|objective|about me|professional profile)$/,
+  experience:/^(experience|work experience|professional experience|employment|employment history|work history|career history|relevant experience)$/,
+  education:/^(education|academic|academics|qualifications|academic qualifications|education and training)$/,
+  skills:/^(skills|key skills|core skills|technical skills|competencies|core competencies|areas of expertise|skills and competencies)$/,
+  projects:/^(projects|key projects|events delivered|achievements|key achievements|portfolio)$/,
+  certifications:/^(certifications|certificates|certification|licen[cs]es|training|courses|certifications and training|licenses and certifications)$/,
+  languages:/^(languages|language skills|languages known)$/
+};
+const SECTION_LABEL = {contact:'Contact',summary:'Summary',experience:'Experience',education:'Education',skills:'Skills',projects:'Projects',certifications:'Certifications',languages:'Languages'};
+
+function parseResume(text){
+  const lines = String(text||'').split(/\r?\n/).map(l => l.replace(/\s+$/,'')).filter(l => l.trim());
+  const sections = {}; let cur = null;
+  const bullets = [];
+  lines.forEach((raw, idx) => {
+    const l = raw.trim();
+    const key = l.toLowerCase().replace(/[^a-z& ]/g,' ').replace(/&/g,'and').replace(/\s+/g,' ').trim();
+    if(l.length <= 45 && l.split(/\s+/).length <= 5){
+      for(const s in SECTION_RES){ if(SECTION_RES[s].test(key)){ sections[s] = idx; cur = s; return; } }
+    }
+    const isBullet = /^[•·▪●◦►✓\-*–]\s*/.test(l);
+    const body = l.replace(/^[•·▪●◦►✓\-*–]\s*/,'').trim();
+    if((isBullet || (cur === 'experience' && body.split(/\s+/).length >= 7)) && (cur === 'experience' || cur === 'projects' || cur === null || isBullet) && cur !== 'skills' && cur !== 'languages' && cur !== 'education'){
+      if(body.split(/\s+/).length >= 4 && !/\(\s*\d{4}/.test(body)) bullets.push({text:body, line:idx, section:cur});
+    }
+  });
+  const email = (text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)||[])[0] || '';
+  const phone = (text.match(/(\+?\d[\d\s\-()]{8,}\d)/)||[])[0] || '';
+  const emailLine = lines.findIndex(l => email && l.includes(email));
+  const words = (text.match(/\S+/g)||[]).length;
+  return {lines, sections, bullets, email, phone, emailLine, words};
+}
+
+function analyze(resume, jd, packKey){
+  const meta = resume.meta || {};
+  const text = resume.text || '';
+  const P = parseResume(text);
+  const nres = normalize(text);
+  const pack = PACKS[packKey] || PACKS.hospitality;
+  const kws = extractKeywords(jd, packKey);
+  let tot = 0, got = 0; const matched = [], missing = [];
+  kws.forEach(k => { tot += k.weight; if(countOcc(nres, k.term) > 0){ got += k.weight; matched.push(k); } else missing.push(k); });
+  const kwScore = tot ? got / tot : 0;
+
+  const core = ['summary','experience','education','skills'];
+  const hasContact = !!(P.email || P.phone) || ('contact' in P.sections);
+  const coreFound = core.filter(s => s in P.sections).length + (hasContact ? 1 : 0);
+  const secScore = coreFound / 5;
+
+  const fmtIssues = [];
+  let fmt = 1;
+  if(meta.tables){ fmt -= .4; fmtIssues.push('Tables found — many ATS tools read table cells out of order.'); }
+  const pipeLines = P.lines.filter(l => (l.match(/\|/g)||[]).length >= 2 && !l.includes('@')).length;
+  if(!meta.tables && pipeLines >= 3){ fmt -= .25; fmtIssues.push('Several lines use | separators, which often come from tables.'); }
+  if(meta.columns){ fmt -= .35; fmtIssues.push('Two-column layout detected — ATS tools may mix the columns together.'); }
+  if(meta.images){ fmt -= .2; fmtIssues.push('Images or icons found — ATS tools ignore them, and photos can block parsing.'); }
+  if(P.email && P.emailLine > 8){ fmt -= .2; fmtIssues.push('Contact details are not near the top; they may be in a footer that ATS tools skip.'); }
+  const fancy = (text.match(/[★☆✦❖➤➢◆■□]/g)||[]).length;
+  if(fancy > 4){ fmt -= .1; fmtIssues.push('Decorative symbols may turn into junk characters.'); }
+  fmt = clamp(fmt, 0, 1);
+
+  const bl = P.bullets;
+  const firstWord = b => b.text.toLowerCase().split(/\s+/)[0].replace(/[^a-z]/g,'');
+  const strong = bl.filter(b => { const w = firstWord(b); return RULES.strongVerbs.includes(w) || (/ed$/.test(w) && w.length > 4); });
+  const withNum = bl.filter(b => RULES.numberRe.test(b.text));
+  const expScore = bl.length ? (strong.length/bl.length)*.5 + (withNum.length/bl.length)*.5 : 0;
+
+  const pages = meta.pages || Math.max(1, Math.ceil(P.words / RULES.wordsPerPage));
+  let lenScore = 0;
+  if(P.words >= RULES.minWords && pages <= RULES.maxPages) lenScore += .5; else if(P.words >= 150 && pages <= 3) lenScore += .25;
+  if(P.email) lenScore += .25;
+  if(P.phone) lenScore += .25;
+
+  const comps = [
+    {key:'kw',label:'Keyword match',w:50,v:kwScore,detail:`${matched.length} of ${kws.length} JD keywords`},
+    {key:'sec',label:'Section completeness',w:15,v:secScore,detail:`${coreFound} of 5 core sections`},
+    {key:'fmt',label:'Formatting / parseability',w:15,v:fmt,detail:fmtIssues.length ? `${fmtIssues.length} risk${fmtIssues.length>1?'s':''}` : 'No parse risks found'},
+    {key:'exp',label:'Experience evidence',w:10,v:expScore,detail:`${withNum.length}/${bl.length} bullets with numbers`},
+    {key:'len',label:'Length and contact',w:10,v:lenScore,detail:`${P.words} words · ~${pages} page${pages>1?'s':''}`}
+  ];
+  const score = Math.round(comps.reduce((s,c) => s + c.v*c.w, 0));
+
+  // industry gap map
+  const certs = pack.certs.map(([k, label]) => ({label, found: countOcc(nres, normalize(k).trim()) > 0}));
+  const metrics = pack.metrics.map(m => ({label:m, found: countOcc(nres, normalize(m).trim()) > 0}));
+  const outcomeRe = new RegExp('\\b(' + pack.outcome.join('|') + ')\\b','i');
+  const outcomeBul = bl.filter(b => outcomeRe.test(b.text) && RULES.numberRe.test(b.text));
+  const safetyFound = pack.safety ? (pack.safetyTerms||[]).filter(t => countOcc(nres, normalize(t).trim()) > 0) : [];
+
+  const res = {score, comps, matched, missing, kws, P, fmtIssues, pages, certs, metrics, outcomeBul, safetyFound, packKey, strong, withNum};
+  res.suggestions = suggest(res, pack, jd);
+  return res;
+}
+
+function sid(rule, txt){ let h = 0; const s = rule + '|' + txt; for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) | 0; return rule + ':' + (h>>>0).toString(36); }
+
+function suggest(r, pack, jd){
+  const out = [];
+  const add = (rule, prio, text, line) => out.push({id:sid(rule, text + (line||'')), rule, prio, text, line});
+  r.missing.slice(0, 14).forEach((k, i) => {
+    const hi = k.weight >= 2 || i < 4;
+    add('Missing keyword', hi ? 'High' : 'Medium', `Add “${k.term}” if you have used it — it appears ${k.count} time${k.count>1?'s':''} in the JD${k.req?' and in the requirements':''}.`);
+  });
+  const bl = r.P.bullets;
+  bl.forEach(b => {
+    const low = b.text.toLowerCase();
+    const weak = RULES.weakOpeners.find(w => low.startsWith(w));
+    if(weak) add('Weak opening verb','Medium',`Starts with “${weak[0].toUpperCase()+weak.slice(1)}”. Open with a verb like Led, Resolved, Reduced or Trained.`, b.text);
+    if(!RULES.numberRe.test(b.text)) add('No measurable result','Medium',`Add a result: how much, how many or how fast. For ${pack.label.toLowerCase()} that could be ${pack.metricHint}.`, b.text);
+    const wc = b.text.split(/\s+/).length;
+    if(wc > RULES.bulletMaxWords) add('Bullet too long','Low',`${wc} words. Split into two bullets or trim to under ${RULES.bulletMaxWords}.`, b.text);
+  });
+  const verbs = {};
+  bl.forEach(b => { const w = b.text.split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g,''); if(w) (verbs[w] = verbs[w]||[]).push(b); });
+  Object.entries(verbs).forEach(([v, list]) => { if(list.length >= RULES.repeatedVerbMin) add('Repeated verb','Low',`“${v}” starts ${list.length} bullets. Vary the verbs.`, list[0].text); });
+  ['summary','experience','education','skills'].forEach(s => { if(!(s in r.P.sections)) add('Missing section', s==='experience'||s==='skills' ? 'High' : 'Medium', `Add a clear “${SECTION_LABEL[s]}” heading so ATS tools can find this section.`); });
+  r.fmtIssues.forEach(f => add('Parse risk','High', f + ' Use a single-column layout with plain headings.'));
+  if(r.pages > RULES.maxPages) add('Length','Medium',`About ${r.pages} pages. Trim older roles to keep it to two pages.`);
+  if(r.P.words < RULES.minWords) add('Length','Medium',`Only ${r.P.words} words. Add detail and results to your recent roles.`);
+  if(!r.P.email) add('Contact gaps','High','No email address found. Add contact details at the top.');
+  if(!r.P.phone) add('Contact gaps','High','No phone number found. Add it at the top.');
+  const n = normalize(r.P.lines.join('\n'));
+  RULES.buzzwords.forEach(bw => { if(countOcc(n, normalize(bw).trim()) > 0){ const line = r.P.lines.find(l => l.toLowerCase().includes(bw)); add('Buzzwords','Low',`“${bw}” is a claim without proof. Replace it with a result that shows it.`, line); } });
+  // industry rules
+  if(pack.languages && !('languages' in r.P.sections)) add('Languages','High',`${pack.label} employers screen for languages. Add a “Languages” section with your level in each.`);
+  if(pack.photo) add('Photo','Low',`Some ${pack.label.toLowerCase()} roles ask for a photo, but photos hurt ATS parsing. Keep two versions: an ATS version without a photo and a direct-apply version with one.`);
+  if(!r.certs.some(c => c.found)) add('Certifications','High',`No ${pack.label.toLowerCase()} certification detected. If you hold one (${r.certs.map(c=>c.label).slice(0,3).join(', ')}), add a “Certifications” section.`);
+  const outcomeRe = new RegExp('\\b(' + pack.outcome.join('|') + ')\\b','i');
+  bl.filter(b => !outcomeRe.test(b.text)).slice(0, 3).forEach(b => add('Customer outcome','Medium','No guest, passenger or client result in this bullet. Say who benefited and how.', b.text));
+  if(pack.safety && !r.safetyFound.length) add('Safety and compliance','High',`No safety or compliance terms found. ${pack.label} roles screen for them — mention drills, audits or certificates you hold.`);
+  if(pack.mobility && (!S.profile.passport || !S.profile.relocation)) add('Mobility','Low','Add passport validity and relocation willingness in Settings → Profile. Emails for this pack use them.');
+  const order = {High:0, Medium:1, Low:2};
+  return out.sort((a,b) => order[a.prio] - order[b.prio]);
+}
+
+/* ---------- file extraction (pdf.js / mammoth, loaded on demand from lib/) ---------- */
+const loaded = {};
+function loadScript(src){
+  if(loaded[src]) return loaded[src];
+  loaded[src] = new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => { loaded[src] = null; rej(new Error('Could not load ' + src + '. Keep the lib folder next to index.html.')); }; document.head.appendChild(s); });
+  return loaded[src];
+}
+async function readPdf(file){
+  await loadScript('lib/pdf.min.js');
+  await loadScript('lib/pdf.worker.min.js'); // defines globalThis.pdfjsWorker so pdf.js runs on the main thread under file://
+  const lib = window.pdfjsLib;
+  const doc = await lib.getDocument({data: new Uint8Array(await file.arrayBuffer()), isEvalSupported:false}).promise;
+  let text = '', colLines = 0, totLines = 0, images = false;
+  for(let p=1; p<=doc.numPages; p++){
+    const page = await doc.getPage(p);
+    const vw = page.getViewport({scale:1}).width;
+    const tc = await page.getTextContent();
+    const rows = new Map();
+    tc.items.forEach(it => { if(!it.str || !it.str.trim()) return; const y = Math.round(it.transform[5]/3); if(!rows.has(y)) rows.set(y, []); rows.get(y).push({x:it.transform[4], w:it.width, s:it.str}); });
+    Array.from(rows.keys()).sort((a,b) => b-a).forEach(y => {
+      const r = rows.get(y).sort((a,b) => a.x-b.x);
+      let line = '', last = null, gapped = false;
+      r.forEach(it => { if(last){ const gap = it.x - (last.x + last.w); if(gap > vw*.12) gapped = true; line += gap > 1.5 ? ' ' : ''; } line += it.s; last = it; });
+      totLines++; if(gapped) colLines++;
+      text += line.trim() + '\n';
+    });
+    if(p <= 2){
+      try { const ops = await page.getOperatorList(); if(ops.fnArray.some(f => f === lib.OPS.paintImageXObject || f === lib.OPS.paintInlineImageXObject || f === lib.OPS.paintJpegXObject)) images = true; } catch(e) {}
+    }
+  }
+  if(text.replace(/\s/g,'').length < 40) throw new Error('This PDF has no selectable text (it may be a scan). Paste the text instead.');
+  return {text, meta:{source:'pdf', pages:doc.numPages, columns: totLines > 8 && colLines/totLines > .25, images}};
+}
+async function readDocx(file){
+  await loadScript('lib/mammoth.browser.min.js');
+  const buf = await file.arrayBuffer();
+  const out = await window.mammoth.convertToHtml({arrayBuffer: buf});
+  const html = out.value;
+  const div = document.createElement('div');
+  div.innerHTML = html.replace(/<img[^>]*>/g,'');
+  div.querySelectorAll('li').forEach(li => li.insertAdjacentText('afterbegin','• '));
+  div.querySelectorAll('p,li,h1,h2,h3,h4,h5,h6,tr').forEach(el => el.insertAdjacentText('afterend','\n'));
+  div.querySelectorAll('td,th').forEach(el => el.insertAdjacentText('afterend',' | '));
+  const text = div.textContent.replace(/\n{3,}/g,'\n\n');
+  return {text, meta:{source:'docx', tables:/<table/i.test(html), images:/<img/i.test(html)}};
+}
+async function readFile(file){
+  const n = file.name.toLowerCase();
+  if(n.endsWith('.pdf')) return readPdf(file);
+  if(n.endsWith('.docx')) return readDocx(file);
+  if(n.endsWith('.txt') || n.endsWith('.md')) return {text: await file.text(), meta:{source:'txt'}};
+  throw new Error('Use a PDF, DOCX or TXT file. Old .doc files need saving as .docx first.');
+}
+
+/* ---------- reply parsing ---------- */
+const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+function parseReply(text){
+  const low = ' ' + text.toLowerCase().replace(/\s+/g,' ') + ' ';
+  const hits = {};
+  for(const g in REPLY_GROUPS) hits[g] = REPLY_GROUPS[g].filter(k => low.includes(k));
+  let status = 'Replied';
+  const order = ['Rejected','Offer','Interview'];
+  let best = 0;
+  order.forEach(g => { if(hits[g].length > best){ best = hits[g].length; status = g; } });
+  return {status, hits, dates: findDates(text)};
+}
+function findDates(text){
+  const out = []; const now = new Date(); const y0 = now.getFullYear();
+  const push = (d, label) => { if(isNaN(d)) return; if(d < new Date(now.getTime() - 30*864e5) && !/\d{4}/.test(label)) d.setFullYear(d.getFullYear()+1); const v = iso(d); if(!out.some(o => o.iso === v)) out.push({iso:v, label}); };
+  const mon = '(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?';
+  let m;
+  const r1 = new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?' + mon + '(?:,?\\s+(\\d{4}))?','gi');
+  while((m = r1.exec(text))) push(new Date(+(m[3]||y0), MONTHS.indexOf(m[2].slice(0,3).toLowerCase()), +m[1], 12), m[0]);
+  const r2 = new RegExp('\\b' + mon + '\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?','gi');
+  while((m = r2.exec(text))) push(new Date(+(m[3]||y0), MONTHS.indexOf(m[1].slice(0,3).toLowerCase()), +m[2], 12), m[0]);
+  const r3 = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
+  while((m = r3.exec(text))) push(new Date(+m[1], +m[2]-1, +m[3], 12), m[0]);
+  const r4 = /\b(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})\b/g;
+  while((m = r4.exec(text))){ const yy = +m[3] < 100 ? 2000 + +m[3] : +m[3]; push(new Date(yy, +m[2]-1, +m[1], 12), m[0]); }
+  if(/\btomorrow\b/i.test(text)) push(new Date(now.getTime() + 864e5), 'tomorrow');
+  const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const r5 = /\b(next\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi;
+  while((m = r5.exec(text))){ const target = days.indexOf(m[2].toLowerCase()); let diff = (target - now.getDay() + 7) % 7 || 7; if(m[1]) diff += diff < 7 ? 0 : 0; push(new Date(now.getTime() + diff*864e5), m[0]); }
+  const tm = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i) || text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+  const time = tm ? tm[0] : '';
+  return out.map(o => Object.assign(o, {time}));
+}
+
+/* =====================================================================
+   UI HELPERS
+   ===================================================================== */
+function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#toast').appendChild(t); setTimeout(() => t.remove(), 2600); }
+async function copy(text, btn){
+  try { await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch(e){
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch(_) {}
+    ta.remove(); toast(ok ? 'Copied' : 'Select the text and press Ctrl+C');
+  }
+}
+function download(name, text){
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type:'application/json'})); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); return true; }
+  catch(e){ return false; }
+}
+const ICON = {
+  dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+  resume:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+  prep:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  apps:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M14 4v16"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+  play:'<path d="M7 4v16l13-8z"/>',
+  send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>'
+};
+const ico = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+const band = s => s >= 75 ? 'var(--good)' : s >= 50 ? 'var(--warn)' : 'var(--bad)';
+const bandWord = s => s >= 75 ? 'Strong match' : s >= 50 ? 'Needs work' : 'Weak match';
+
+function gaugeSVG(score, opts={}){
+  const size = 220, cx = 110, cy = 112, r = 86, a0 = 135, sweep = 270;
+  const pt = (ang, rad) => { const t = (ang-90) * Math.PI/180; return [cx + rad*Math.cos(t), cy + rad*Math.sin(t)]; };
+  const arc = (from, to, rad) => { const [x1,y1] = pt(from, rad), [x2,y2] = pt(to, rad); const large = (to-from) > 180 ? 1 : 0; return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${rad} ${rad} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`; };
+  const len = 2*Math.PI*r*(sweep/360);
+  let ticks = '';
+  for(let i=0;i<=10;i++){ const ang = a0 + sweep*i/10; const [x1,y1] = pt(ang, r+14), [x2,y2] = pt(ang, r+(i%5===0?22:18)); ticks += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--line-2)" stroke-width="${i%5===0?2:1.2}"/>`; if(i%5===0){ const [tx,ty] = pt(ang, r+34); ticks += `<text x="${tx.toFixed(1)}" y="${(ty+4).toFixed(1)}" text-anchor="middle" font-family="var(--f-mono)" font-size="10" fill="var(--ink-3)">${i*10}</text>`; } }
+  const bands = [[0,50,'var(--bad)'],[50,75,'var(--warn)'],[75,100,'var(--good)']].map(([f,t,c]) => `<path d="${arc(a0+sweep*f/100+0.8, a0+sweep*t/100-0.8, r+9)}" stroke="${c}" stroke-width="3" fill="none" opacity=".55"/>`).join('');
+  const off = len * (1 - score/100);
+  return `<svg viewBox="-14 -14 248 238" role="img" aria-label="ATS score ${score} out of 100">
+    ${ticks}${bands}
+    <path d="${arc(a0, a0+sweep, r)}" stroke="var(--well)" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path class="g-fill" d="${arc(a0, a0+sweep, r)}" stroke="${band(score)}" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="${opts.animate ? len.toFixed(1) : off.toFixed(1)}" data-off="${off.toFixed(1)}" style="transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)"/>
+    <text x="${cx}" y="${cy+8}" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="58" fill="var(--ink)" class="num">${score}</text>
+    <text x="${cx}" y="${cy+34}" text-anchor="middle" font-family="var(--f-mono)" font-size="11" letter-spacing="1.5" fill="var(--ink-2)">ATS MATCH / 100</text>
+    <text x="${cx}" y="${cy+82}" text-anchor="middle" font-family="var(--f-body)" font-weight="700" font-size="14" fill="${band(score)}">${bandWord(score)}</text>
+  </svg>`;
+}
+function animateGauges(root){ requestAnimationFrame(() => requestAnimationFrame(() => $$('.g-fill', root).forEach(p => p.setAttribute('stroke-dashoffset', p.dataset.off)))); }
+
+function ringSVG(parts, total, label){
+  // parts: [{v (0..1), w (points), color}], drawn as segments of a 300° ring scaled by points
+  const cx = 85, cy = 85, r = 66, C = 2*Math.PI*r;
+  let acc = 0; const gap = 4;
+  const sum = parts.reduce((s,p) => s + p.w, 0);
+  const segs = parts.map(p => {
+    const segLen = C * p.w/sum - gap;
+    const base = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--well)" stroke-width="14" stroke-dasharray="${segLen.toFixed(1)} ${(C-segLen).toFixed(1)}" stroke-dashoffset="${(-acc).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    const fillLen = Math.max(0, segLen * p.v);
+    const fill = fillLen > 0 ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p.color}" stroke-width="14" stroke-dasharray="${fillLen.toFixed(1)} ${(C-fillLen).toFixed(1)}" stroke-dashoffset="${(-acc).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>` : '';
+    acc += C * p.w/sum;
+    return base + fill;
+  }).join('');
+  return `<svg viewBox="0 0 170 170" role="img" aria-label="${esc(label)} ${total} out of 100" style="width:100%;max-width:170px;height:auto;display:block">${segs}
+    <text x="85" y="88" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="40" fill="var(--ink)">${total}</text>
+    <text x="85" y="108" text-anchor="middle" font-family="var(--f-mono)" font-size="9.5" letter-spacing="1.4" fill="var(--ink-2)">${esc(label.toUpperCase())}</text></svg>`;
+}
+
+function timerSVG(left, total){
+  const r = 80, C = 2*Math.PI*r, frac = total ? left/total : 0;
+  const col = frac > .5 ? 'var(--accent)' : frac > .2 ? 'var(--warn)' : 'var(--bad)';
+  const mm = Math.floor(left/60), ss = String(left%60).padStart(2,'0');
+  return `<svg viewBox="0 0 200 200" style="width:100%;max-width:200px;height:auto;display:block" role="img" aria-label="${left} seconds left">
+    <circle cx="100" cy="100" r="${r}" fill="none" stroke="var(--well)" stroke-width="12"/>
+    <circle cx="100" cy="100" r="${r}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 100 100)"/>
+    <text x="100" y="110" text-anchor="middle" font-family="var(--f-mono)" font-weight="700" font-size="38" fill="var(--ink)">${mm}:${ss}</text>
+    <text x="100" y="134" text-anchor="middle" font-family="var(--f-mono)" font-size="10" letter-spacing="1.5" fill="var(--ink-3)">REMAINING</text></svg>`;
+}
+
+/* =====================================================================
+   DERIVED DATA
+   ===================================================================== */
+const pk = () => S.profile.industry || 'hospitality';
+const P_ = () => PACKS[pk()];
+function lastActivity(a){ const ds = a.timeline.map(t => t.date).filter(Boolean); if(a.dateApplied) ds.push(a.dateApplied); return ds.sort().pop() || ''; }
+function isGhostRisk(a){ const la = lastActivity(a); return ['Applied','Replied'].includes(a.status) && la && daysBetween(la, today()) >= S.settings.ghostedDays; }
+function dueItems(){
+  const t = today(), out = [];
+  S.applications.forEach(a => {
+    if(END.includes(a.status)) return;
+    if(a.nextAction && a.nextAction.date && a.nextAction.date <= addDays(t, 3)) out.push({a, date:a.nextAction.date, text:a.nextAction.text || 'Next step'});
+    else if(a.status === 'Applied' && a.dateApplied){
+      const la = lastActivity(a);
+      if(daysBetween(la, t) >= S.settings.followUpDays) out.push({a, date:addDays(la, S.settings.followUpDays), text:'Follow-up due (no reply)'});
+    }
+  });
+  return out.sort((x,y) => x.date.localeCompare(y.date));
+}
+function resumeById(id){ return S.resumes.find(r => r.id === id); }
+let analysisCache = {key:'', res:null};
+function currentAnalysis(){
+  const r = resumeById(S.check.resumeId);
+  if(!r || !S.check.jd.trim()) return null;
+  const key = r.id + '|' + r.text.length + '|' + S.check.jd.length + '|' + pk() + '|' + S.check.jd.slice(0,80) + '|' + r.text.slice(0,40);
+  if(analysisCache.key !== key) analysisCache = {key, res: analyze(r, S.check.jd, pk())};
+  return analysisCache.res;
+}
+function topSkills(n=3){ const a = currentAnalysis(); if(!a || !a.matched.length) return ''; const s = a.matched.slice(0,n).map(k => k.term); return s.length > 1 ? s.slice(0,-1).join(', ') + ' and ' + s[s.length-1] : s[0]; }
+function proofCandidates(){
+  const r = resumeById(S.check.resumeId) || S.resumes[0];
+  if(!r) return [];
+  return parseResume(r.text).bullets.filter(b => RULES.numberRe.test(b.text)).map(b => b.text.replace(/\.$/,'')).slice(0, 5);
+}
+function prepFor(appId){
+  if(appId && appId !== 'general'){ const a = S.applications.find(x => x.id === appId); if(a){ a.prep = a.prep || {star:{},checklist:{},mocks:[],research:''}; return a.prep; } }
+  return S.prep.general;
+}
+function questionSet(appId){
+  const a = S.applications.find(x => x.id === appId);
+  const qs = [];
+  const add = (cat, list) => list.forEach((q, i) => qs.push({id: cat + i, cat, q}));
+  add('General', QUESTIONS.general);
+  add('Behavioural', QUESTIONS.behavioural);
+  add(P_().label, QUESTIONS[pk()]);
+  const jd = a && a.jdText ? a.jdText : (S.check.jd || '');
+  if(jd.trim()){
+    const r = resumeById(a && a.resumeId || S.check.resumeId);
+    const kws = extractKeywords(jd, pk()).slice(0, 8);
+    const nres = r ? normalize(r.text) : '';
+    kws.slice(0, 6).forEach((k, i) => {
+      const have = nres && countOcc(nres, k.term) > 0;
+      qs.push({id:'jd-' + k.term.replace(/\W+/g,'_'), cat:'From the job ad', q: have ? `Walk me through a time you used ${k.term}.` : `The role asks for ${k.term}. How would you get up to speed quickly?`});
+    });
+  }
+  return qs;
+}
+function readiness(appId){
+  const a = S.applications.find(x => x.id === appId);
+  const p = prepFor(appId);
+  const stars = Object.values(p.star||{}).filter(s => starComplete(s)).length;
+  const items = (CHECKLISTS[pk()]||[]).concat(CHECK_GENERAL);
+  const done = items.filter((_, i) => p.checklist && p.checklist[i]).length;
+  const ats = a && a.atsScore ? a.atsScore : (currentAnalysis() ? currentAnalysis().score : 0);
+  const parts = [
+    {k:'Resume match', v: clamp(ats/100,0,1), w:25, color:'var(--s1)', d:`ATS ${ats||'—'}`},
+    {k:'STAR stories', v: clamp(stars/6,0,1), w:25, color:'var(--s2)', d:`${stars} of 6 written`},
+    {k:'Mock interviews', v: clamp((p.mocks||[]).length/3,0,1), w:20, color:'var(--s3)', d:`${(p.mocks||[]).length} of 3 done`},
+    {k:'Assessment checklist', v: items.length ? done/items.length : 0, w:20, color:'var(--s4)', d:`${done} of ${items.length} ticked`},
+    {k:'Company research', v: clamp((p.research||'').trim().length/200,0,1), w:10, color:'var(--s5)', d:(p.research||'').trim().length >= 200 ? 'Done' : 'Add notes'}
+  ];
+  const total = Math.round(parts.reduce((s,x) => s + x.v*x.w, 0));
+  return {parts, total};
+}
+function starComplete(s){ return s && ['s','t','a','r'].every(k => (s[k]||'').trim().length >= 12); }
+
+/* =====================================================================
+   SHELL: nav, top bar, departures board, banners
+   ===================================================================== */
+const VIEWS = [
+  {id:'dashboard', label:'Dashboard', icon:'dash'},
+  {id:'resume', label:'Resume Check', icon:'resume'},
+  {id:'prep', label:'Interview Prep', icon:'prep'},
+  {id:'outreach', label:'Outreach', icon:'mail'},
+  {id:'applications', label:'Applications', icon:'apps'},
+  {id:'settings', label:'Settings', icon:'gear'}
+];
+let view = (location.hash||'').slice(1);
+if(!VIEWS.some(v => v.id === view)) view = 'dashboard';
+const ui = {appsMode:'board', sort:{k:'dateApplied',dir:-1}, filter:'', statusFilter:'', prepApp:'a1', prepTab:'questions', qSel:null, outTpl:'c1', outApp:'', outFields:{}, outDirty:false, editTpl:false, promptType:'bullets', mock:null, suggFilter:'open', confirm:null};
+
+function renderNav(){
+  const due = dueItems().filter(d => d.date <= today()).length;
+  $('#nav').innerHTML = VIEWS.map(v => `<button class="navbtn" type="button" data-nav="${v.id}" ${v.id===view?'aria-current="page"':''}>${ico(v.icon)}<span>${v.label}</span>${v.id==='dashboard' && due ? `<span class="count">${due}</span>` : ''}${v.id==='applications' ? `<span class="count">${S.applications.length}</span>` : ''}</button>`).join('');
+}
+function renderPack(){
+  const ind = $('#pk-ind'), role = $('#pk-role');
+  ind.innerHTML = Object.entries(PACKS).map(([k,p]) => `<option value="${k}" ${k===pk()?'selected':''}>${p.label}</option>`).join('');
+  const roles = P_().roles.includes(S.profile.role) ? P_().roles : P_().roles.concat(S.profile.role ? [S.profile.role] : []);
+  role.innerHTML = roles.map(r => `<option ${r===S.profile.role?'selected':''}>${esc(r)}</option>`).join('');
+}
+function boardText(){
+  const d = dueItems()[0];
+  if(!d) return {txt:'NO DEPARTURES DUE · ADD AN APPLICATION', late:false, status:'CLEAR'};
+  const late = d.date < today();
+  return {txt:`${fmtDate(d.date)}  ${d.text}  ${d.a.company}  ${d.a.role}`, late, status: late ? 'OVERDUE' : d.date === today() ? 'TODAY' : 'ON TIME'};
+}
+let flapTimer = null;
+function renderBoard(anim){
+  const b = boardText();
+  const target = b.txt.toUpperCase().slice(0, 64);
+  const box = $('#board');
+  box.innerHTML = `<span class="tag">NEXT</span><div class="flap" aria-label="${esc(b.txt)}">${target.split('').map(c => c===' ' ? '<span class="sp"> </span>' : `<span>${esc(c)}</span>`).join('')}</div><span class="status ${b.late?'late':''}">${b.status}</span>`;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!anim || reduce) return;
+  const cells = $$('.flap span:not(.sp)', box); const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const finals = cells.map(c => c.textContent);
+  let tick = 0; clearInterval(flapTimer);
+  flapTimer = setInterval(() => {
+    tick++;
+    cells.forEach((c, i) => { c.textContent = tick > 4 + i*0.35 ? finals[i] : chars[(Math.random()*chars.length)|0]; });
+    if(tick > 6 + cells.length*0.35){ clearInterval(flapTimer); cells.forEach((c,i) => c.textContent = finals[i]); }
+  }, 45);
+}
+function renderBanners(){
+  const out = [];
+  if(S.settings.examples) out.push(`<div class="banner info"><span class="grow"><b>You’re looking at example data.</b> Priya and her applications show how the studio works. Clear them when you’re ready to add your own.</span><button class="btn sm" data-action="clear-examples">Clear examples</button></div>`);
+  const lb = S.settings.lastBackup;
+  if(!S.settings.examples && S.applications.length && (!lb || daysBetween(lb, today()) > 7)) out.push(`<div class="banner warn"><span class="grow"><b>${lb ? 'Last backup was ' + daysBetween(lb, today()) + ' days ago.' : 'No backup yet.'}</b> Browser storage is wiped if site data is cleared.</span><button class="btn sm" data-action="export">Export backup</button></div>`);
+  $('#banners').innerHTML = out.join('');
+}
+function applyTheme(){ if(S.settings.theme) document.documentElement.setAttribute('data-theme', S.settings.theme); else document.documentElement.removeAttribute('data-theme'); }
+
+function go(v){ view = v; try { history.replaceState(null,'','#'+v); } catch(e){} render(); $('#view').focus({preventScroll:true}); window.scrollTo(0,0); }
+function render(){
+  renderNav(); renderPack(); renderBanners(); renderBoard(false);
+  const fn = {dashboard:vDashboard, resume:vResume, prep:vPrep, outreach:vOutreach, applications:vApps, settings:vSettings}[view];
+  $('#view').innerHTML = fn();
+  after[view] && after[view]();
+}
+const after = {};
+
+/* =====================================================================
+   VIEW: DASHBOARD
+   ===================================================================== */
+function vDashboard(){
+  const A = S.applications;
+  const reached = PIPE.map((_, i) => A.filter(a => (a.maxStage ?? PIPE.indexOf(a.status)) >= i).length);
+  const applied = reached[1], replied = reached[2], interview = reached[3], offers = reached[4];
+  const active = A.filter(a => !END.includes(a.status)).length;
+  const rate = (a, b) => b ? Math.round(a/b*100) : 0;
+  const avg = list => list.length ? Math.round(list.reduce((s,a) => s + a.atsScore, 0)/list.length) : 0;
+  const scored = A.filter(a => a.atsScore > 0);
+  const atsInt = avg(scored.filter(a => (a.maxStage ?? 0) >= 3));
+  const atsRej = avg(scored.filter(a => a.status === 'Rejected' || a.status === 'Ghosted'));
+  const due = dueItems();
+  const name = (S.profile.name||'').split(' ')[0];
+
+  // route graphic
+  const W = 760, H = 170, x0 = 60, x1 = W - 60, step = (x1 - x0)/(PIPE.length-1), maxN = Math.max(1, ...reached);
+  let route = `<line x1="${x0}" y1="70" x2="${x1}" y2="70" stroke="var(--line-2)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>`;
+  const lastReached = reached.reduce((m, n, i) => n > 0 ? i : m, 0);
+  route += `<line x1="${x0}" y1="70" x2="${x0 + step*lastReached}" y2="70" stroke="var(--accent)" stroke-width="3"/>`;
+  PIPE.forEach((st, i) => {
+    const x = x0 + step*i, n = reached[i], rr = 10 + 16*Math.sqrt(n/maxN);
+    if(i > 0){ const conv = rate(reached[i], reached[i-1]); route += `<text x="${x - step/2}" y="58" text-anchor="middle" font-family="var(--f-mono)" font-size="11" fill="var(--ink-3)">${reached[i-1] ? conv + '%' : ''}</text>`; }
+    route += `<circle cx="${x}" cy="70" r="${rr.toFixed(1)}" fill="${n ? 'var(--accent)' : 'var(--surface)'}" stroke="${n ? 'var(--accent)' : 'var(--line-2)'}" stroke-width="2"/>`;
+    route += `<text x="${x}" y="${70 + 5}" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="15" fill="${n ? 'var(--accent-ink)' : 'var(--ink-3)'}">${n}</text>`;
+    route += `<text x="${x}" y="${120}" text-anchor="middle" font-family="var(--f-mono)" font-size="11" letter-spacing="1.2" fill="var(--ink-2)">${st.toUpperCase()}</text>`;
+    route += `<text x="${x}" y="${138}" text-anchor="middle" font-family="var(--f-body)" font-size="11" fill="var(--ink-3)">${A.filter(a => a.status === st).length} here now</text>`;
+  });
+  // plane at the furthest stage
+  const px = x0 + step*lastReached;
+  route += `<g transform="translate(${px} 30) rotate(90)"><path d="M0 -11 L3 -3 L11 2 L11 4 L3 2 L2 8 L5 10 L5 11 L0 10 L-5 11 L-5 10 L-2 8 L-3 2 L-11 4 L-11 2 L-3 -3 Z" fill="var(--brass)"/></g>`;
+
+  // weekly activity
+  const weeks = 8, wk = []; const t = today();
+  for(let i=weeks-1;i>=0;i--){ const end = addDays(t, -7*i), start = addDays(end, -6); wk.push({start, n: A.filter(a => a.dateApplied && a.dateApplied >= start && a.dateApplied <= end).length}); }
+  const wmax = Math.max(2, ...wk.map(w => w.n));
+  const bw = 34, bg = 14, WH = 120;
+  const wsvg = `<svg viewBox="0 0 ${weeks*(bw+bg)+20} ${WH+34}" style="width:100%;height:auto;display:block" role="img" aria-label="Applications per week">
+    ${[0, .5, 1].map(f => `<line x1="20" x2="${weeks*(bw+bg)+20}" y1="${(WH - f*(WH-14)).toFixed(1)}" y2="${(WH - f*(WH-14)).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="14" y="${(WH - f*(WH-14) + 4).toFixed(1)}" text-anchor="end" font-family="var(--f-mono)" font-size="9" fill="var(--ink-3)">${Math.round(f*wmax)}</text>`).join('')}
+    ${wk.map((w,i) => { const h = (w.n/wmax)*(WH-14); const x = 26 + i*(bw+bg); return `<rect x="${x}" y="${(WH-h).toFixed(1)}" width="${bw}" height="${Math.max(h,0).toFixed(1)}" rx="4" fill="${i===weeks-1 ? 'var(--brass)' : 'var(--accent)'}" opacity="${i===weeks-1?1:.8}"/>${w.n ? `<text x="${x+bw/2}" y="${(WH-h-5).toFixed(1)}" text-anchor="middle" font-family="var(--f-mono)" font-size="10" font-weight="600" fill="var(--ink)">${w.n}</text>` : ''}<text x="${x+bw/2}" y="${WH+16}" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--ink-3)">${fmtDate(w.start)}</text>`; }).join('')}
+  </svg>`;
+
+  const atsBar = (label, v, col) => `<div class="bar"><div class="lbl"><b>${label}</b><span class="mono num">${v || '—'}</span></div><div class="track"><div class="fill" style="width:${v}%;background:${col}"></div></div></div>`;
+
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">${esc(P_().label)} · ${esc(S.profile.role||'')}</div><h1>${name ? 'Good to see you, ' + esc(name) + '.' : 'Your job hunt at a glance'}</h1>
+  <p>${due.filter(d => d.date <= today()).length ? `${due.filter(d => d.date <= today()).length} thing${due.filter(d => d.date <= today()).length>1?'s':''} need you today.` : 'Nothing overdue.'} ${active} active application${active===1?'':'s'}, ${offers} offer${offers===1?'':'s'} so far.</p></div>
+  <div class="row"><button class="btn" data-nav="resume">${ico('resume')}Check a resume</button><button class="btn" data-nav="outreach">${ico('mail')}Write outreach</button></div></div>
+
+  <div class="grid g4">
+    <div class="panel kpi"><span class="eyebrow">Active</span><span class="v num">${active}</span><span class="s">of ${A.length} tracked</span></div>
+    <div class="panel kpi"><span class="eyebrow">Reply rate</span><span class="v num">${rate(replied, applied)}%</span><span class="s">${replied} replies from ${applied} applied</span></div>
+    <div class="panel kpi"><span class="eyebrow">Interview rate</span><span class="v num">${rate(interview, applied)}%</span><span class="s">${interview} reached interview</span></div>
+    <div class="panel kpi"><span class="eyebrow">Offers</span><span class="v num" style="color:var(--good)">${offers}</span><span class="s">${rate(offers, interview)}% of interviews</span></div>
+  </div>
+
+  <div class="panel route">
+    <div class="panel-h"><h2>Flight path</h2><span class="muted grow">How far your applications got. Percentages show the hop from one stage to the next.</span>
+      <span class="chips">${END.map(e => `<span class="pill st-${e}">${e} ${A.filter(a => a.status===e).length}</span>`).join('')}</span></div>
+    <div class="scroll-x"><svg viewBox="0 0 ${W} ${H}" style="min-width:520px" role="img" aria-label="Pipeline: ${PIPE.map((p,i)=>p+' '+reached[i]).join(', ')}">${route}</svg></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel today">
+      <div class="panel-h"><h2>Today and next 3 days</h2><span class="grow"></span><button class="btn sm ghost" data-nav="applications">All applications</button></div>
+      ${due.length ? `<ul>${due.slice(0,7).map(d => { const late = d.date < today(); const dd = new Date(d.date+'T12:00:00'); return `<li><div class="datebox ${late?'late':''}"><b class="num">${dd.getDate()}</b><i>${late ? 'LATE' : dd.toLocaleDateString(undefined,{month:'short'}).toUpperCase()}</i></div><div style="flex:1;min-width:0"><b>${esc(d.text)}</b><div class="muted" style="font-size:.85rem">${esc(d.a.company)} · ${esc(d.a.role)}</div></div><button class="btn sm" data-open="${d.a.id}">Open</button></li>`; }).join('')}</ul>` : `<div class="empty">Nothing due. Add a next action to any application and it shows up here.</div>`}
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <div class="panel-h"><h2>Does the ATS score matter?</h2></div>
+        <div class="bars">${atsBar('Got an interview', atsInt, 'var(--good)')}${atsBar('Rejected or ghosted', atsRej, 'var(--bad)')}</div>
+        <p class="note" style="margin-top:10px">Average ATS score of scored applications in each group. ${atsInt && atsRej ? (atsInt > atsRej ? `Interviews scored ${atsInt-atsRej} points higher on average.` : 'No clear gap yet.') : 'Score more applications to compare.'}</p>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Applications per week</h2><span class="muted">last 8 weeks</span></div>
+        ${wsvg}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =====================================================================
+   VIEW: RESUME CHECK
+   ===================================================================== */
+function vResume(){
+  const r = resumeById(S.check.resumeId);
+  const a = currentAnalysis();
+  const appOpts = S.applications.map(x => `<option value="${x.id}" ${S.check.appId===x.id?'selected':''}>${esc(x.company)} — ${esc(x.role)}</option>`).join('');
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">Feature 1 + 2 · ${esc(P_().label)} pack</div><h1>Resume Check</h1>
+  <p>Upload a resume, paste the job ad, and see the gaps an ATS keyword filter would see — plus the ${esc(P_().label.toLowerCase())}-specific things recruiters look for.</p></div></div>
+
+  <div class="grid g2">
+    <div class="panel stack">
+      <div class="panel-h" style="margin:0"><h2>1 · Resume</h2><span class="grow"></span>
+        ${S.resumes.length ? `<select class="input" id="rc-resume" style="width:auto;max-width:220px" aria-label="Resume version">${S.resumes.map(x => `<option value="${x.id}" ${x.id===S.check.resumeId?'selected':''}>${esc(x.label)}</option>`).join('')}</select>` : ''}
+      </div>
+      <label class="drop" id="drop" for="rc-file">${ico('upload')}<div><b>Drop a PDF, DOCX or TXT here, or click to choose</b><span class="note">Text is extracted in your browser. The file itself is never stored or sent.</span></div></label>
+      <input type="file" id="rc-file" accept=".pdf,.docx,.txt,.md" hidden>
+      <label class="field"><span>Or paste / edit the resume text ${r ? `<span class="faint">· ${r.meta && r.meta.source ? r.meta.source.toUpperCase() : 'TEXT'} · ${(r.text.match(/\S+/g)||[]).length} words</span>` : ''}</span>
+        <textarea class="input mono" id="rc-text" rows="11" style="font-size:.8rem" placeholder="Paste your resume text">${esc(r ? r.text : '')}</textarea></label>
+      <div class="row"><input class="input" id="rc-label" placeholder="Version label, e.g. Cabin crew v2" style="flex:1;min-width:160px" value=""><button class="btn" data-action="save-resume-new">Save as new version</button>${r ? `<button class="btn ghost sm danger" data-action="del-resume">Delete version</button>` : ''}</div>
+    </div>
+    <div class="panel stack">
+      <div class="panel-h" style="margin:0"><h2>2 · Job description</h2><span class="grow"></span>
+        <select class="input" id="rc-app" style="width:auto;max-width:240px" aria-label="Link to application"><option value="">Not linked to an application</option>${appOpts}</select></div>
+      <textarea class="input" id="rc-jd" rows="15" placeholder="Paste the full job ad, including the requirements">${esc(S.check.jd)}</textarea>
+      <div class="row"><button class="btn primary" data-action="analyze">${ico('play')}Check match</button><span class="note">Score updates as you type. Linking saves the score to that application.</span></div>
+    </div>
+  </div>
+
+  ${a ? resultsHTML(a) : `<div class="empty">Add a resume and a job description to see your match score, gaps and fixes.</div>`}`;
+}
+
+function resultsHTML(a){
+  const pack = PACKS[a.packKey];
+  const st = S.suggestionStatus;
+  const sugg = a.suggestions.filter(s => ui.suggFilter === 'all' ? true : ui.suggFilter === 'open' ? !st[s.id] : !!st[s.id]);
+  const openCount = a.suggestions.filter(s => !st[s.id]).length;
+  const sec = ['contact','summary','experience','education','skills','projects','certifications','languages'];
+  const hasContact = a.P.email || a.P.phone;
+  const tile = (cls, k, v) => `<div class="gaptile ${cls}"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const metFound = a.metrics.filter(m => m.found);
+  const outcomePct = a.P.bullets.length ? Math.round(a.outcomeBul.length / a.P.bullets.length * 100) : 0;
+  return `
+  <div class="panel">
+    <div class="gaugewrap">
+      <div class="gauge">${gaugeSVG(a.score, {animate:true})}</div>
+      <div class="stack">
+        <div class="panel-h" style="margin:0"><h2>Score breakdown</h2><span class="grow"></span><span class="chip neutral">${esc(pack.label)} pack</span></div>
+        <div class="bars">${a.comps.map(c => `<div class="bar"><div class="lbl"><span><b>${c.label}</b> <span class="faint">· ${c.w}%</span></span><span class="muted" style="font-size:.8rem">${esc(c.detail)} · <span class="mono num">${Math.round(c.v*c.w)}/${c.w}</span></span></div><div class="track"><div class="fill" style="width:${Math.round(c.v*100)}%;background:${band(c.v*100)}"></div></div></div>`).join('')}</div>
+        <p class="disclaimer">ⓘ This approximates how ATS keyword filters behave. Real ATS tools differ and don’t publish their scores.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-h"><h2>Keywords</h2><span class="muted">${a.matched.length} matched · ${a.missing.length} missing</span></div>
+      <div class="eyebrow" style="margin-bottom:8px">Found in your resume</div>
+      <div class="chips">${a.matched.map(k => `<span class="chip ok" title="appears ${k.count}× in JD">✓ ${esc(k.term)}${k.req?' <span class="w">REQ</span>':''}</span>`).join('') || '<span class="note">None yet.</span>'}</div>
+      <div class="eyebrow" style="margin:16px 0 8px">Missing — add only if you have it</div>
+      <div class="chips">${a.missing.map(k => `<span class="chip miss" title="appears ${k.count}× in JD">${esc(k.term)} <span class="w">×${k.count}${k.req?' REQ':''}</span></span>`).join('') || '<span class="note">Nothing missing.</span>'}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Gap map</h2><span class="muted">${esc(pack.label)} recruiters check these</span></div>
+      <div class="eyebrow" style="margin-bottom:8px">Sections</div>
+      <div class="gapmap" style="margin-bottom:14px">${sec.map(s => { const on = s==='contact' ? hasContact : (s in a.P.sections); const opt = ['projects','certifications','languages'].includes(s) && !(s==='languages' && pack.languages) && !(s==='certifications'); return tile(on ? 'ok' : opt ? '' : 'miss', SECTION_LABEL[s], on ? 'Found' : opt ? 'Optional' : 'Missing'); }).join('')}</div>
+      <div class="eyebrow" style="margin-bottom:8px">Industry evidence</div>
+      <div class="gapmap">
+        ${tile(a.certs.some(c=>c.found) ? 'ok' : 'miss', 'Certifications', a.certs.filter(c=>c.found).map(c=>esc(c.label)).join(', ') || 'None detected')}
+        ${tile(metFound.length >= 2 ? 'ok' : metFound.length ? 'part' : 'miss', 'Industry metrics', metFound.length ? metFound.map(m=>esc(m.label)).join(', ') : 'None — try ' + esc(pack.metrics.slice(0,3).join(', ')))}
+        ${tile(outcomePct >= 40 ? 'ok' : outcomePct ? 'part' : 'miss', 'Customer outcomes', `${a.outcomeBul.length}/${a.P.bullets.length} bullets (${outcomePct}%)`)}
+        ${tile(a.withNum.length/Math.max(1,a.P.bullets.length) >= .5 ? 'ok' : 'part', 'Quantified bullets', `${a.withNum.length}/${a.P.bullets.length}`)}
+        ${pack.safety ? tile(a.safetyFound.length ? 'ok' : 'miss', 'Safety & compliance', a.safetyFound.slice(0,4).map(esc).join(', ') || 'None found') : ''}
+        ${pack.languages ? tile('languages' in a.P.sections ? 'ok' : 'miss', 'Languages', 'languages' in a.P.sections ? 'Section found' : 'No section') : ''}
+        ${pack.mobility ? tile(S.profile.passport ? 'ok' : 'part', 'Passport & relocation', S.profile.passport ? 'Valid to ' + esc(S.profile.passport) : 'Add in Settings') : ''}
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><h2>Fixes</h2><span class="muted grow">${openCount} open · every fix points to a line. The app never adds skills you don’t have.</span>
+      <div class="tabs" role="tablist">${['open','handled','all'].map(f => `<button role="tab" aria-selected="${ui.suggFilter===f}" data-sf="${f}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}</div></div>
+    ${sugg.length ? sugg.map(s => `<div class="sugg ${st[s.id]?'done':''}"><span class="pill prio-${s.prio}">${s.prio}</span><div><div class="eyebrow" style="margin-bottom:3px">${esc(s.rule)}${st[s.id] ? ' · ' + st[s.id] : ''}</div><div class="txt">${esc(s.text)}</div>${s.line ? `<div class="quote">“${esc(s.line.length > 160 ? s.line.slice(0,160)+'…' : s.line)}”</div>` : ''}</div>
+      <div class="row" style="flex-wrap:nowrap">${st[s.id] ? `<button class="btn sm ghost" data-sugg="${s.id}" data-v="">Reopen</button>` : `<button class="btn sm" data-sugg="${s.id}" data-v="Done">Done</button><button class="btn sm ghost" data-sugg="${s.id}" data-v="Ignored">Ignore</button>`}</div></div>`).join('') : `<div class="empty">${ui.suggFilter==='open' ? 'All fixes handled. Nice work.' : 'Nothing here.'}</div>`}
+  </div>
+
+  ${promptHelperHTML(a)}`;
+}
+
+function promptHelperHTML(a){
+  const types = {bullets:'Rewrite my weak bullets', summary:'Tailor my summary', email:'Polish an email draft', reply:'Draft a reply to a recruiter'};
+  return `<div class="panel stack">
+    <div class="panel-h" style="margin:0"><h2>AI prompt helper</h2><span class="muted grow">Builds a prompt you paste into any chat AI you already use. This app makes no connection.</span></div>
+    <div class="tabs" role="tablist">${Object.entries(types).map(([k,v]) => `<button role="tab" aria-selected="${ui.promptType===k}" data-pt="${k}">${v}</button>`).join('')}</div>
+    ${ui.promptType === 'email' || ui.promptType === 'reply' ? `<label class="field"><span>${ui.promptType==='email' ? 'Email draft to polish' : 'Recruiter email to reply to'}</span><textarea class="input" id="pt-extra" rows="4">${esc(ui.ptExtra||'')}</textarea></label>` : ''}
+    <textarea class="input mono" id="pt-out" rows="9" readonly style="font-size:.78rem">${esc(buildPrompt(a))}</textarea>
+    <div class="row"><button class="btn primary" data-action="copy-prompt">${ico('copy')}Copy prompt</button><span class="note">Includes “Do not invent experience or skills.”</span></div>
+    <div class="hr"></div>
+    <label class="field"><span>Paste the AI’s answer to keep it</span><textarea class="input" id="pt-back" rows="4" placeholder="Paste the answer here"></textarea></label>
+    <div class="row"><select class="input" id="pt-app" style="width:auto;max-width:260px" aria-label="Save to application">${S.applications.map(x => `<option value="${x.id}" ${S.check.appId===x.id?'selected':''}>${esc(x.company)} — ${esc(x.role)}</option>`).join('')}</select><button class="btn" data-action="save-ai">Save to application notes</button></div>
+  </div>`;
+}
+function buildPrompt(a){
+  const r = resumeById(S.check.resumeId);
+  const pack = PACKS[a.packKey];
+  const miss = a.missing.slice(0, 12).map(k => k.term).join(', ') || 'none';
+  const rule = 'Do not invent experience or skills. Only use what is in my resume. If a missing keyword does not apply to me, leave it out.';
+  const jd = S.check.jd.trim();
+  if(ui.promptType === 'bullets'){
+    const flagged = Array.from(new Set(a.suggestions.filter(s => s.line && ['Weak opening verb','No measurable result','Bullet too long','Customer outcome'].includes(s.rule)).map(s => s.line))).slice(0, 10);
+    return `You are an expert ${pack.noun} resume writer.\n\nRewrite these resume bullets for the job description below. Start each with a strong action verb, add a measurable result where my original gives one (use [X] as a placeholder where I need to fill a number), and show the guest, passenger or client outcome. Keep each under 25 words.\n\n${rule}\n\nBULLETS TO REWRITE:\n${flagged.map(b => '- ' + b).join('\n') || '- (no flagged bullets)'}\n\nKEYWORDS MISSING FROM MY RESUME (use only if they truly apply): ${miss}\n\nJOB DESCRIPTION:\n${jd}`;
+  }
+  if(ui.promptType === 'summary'){
+    return `You are an expert ${pack.noun} resume writer.\n\nWrite a 3-sentence professional summary for my resume, tailored to the ${S.profile.role || 'target'} role below. Lead with years of experience and my strongest measurable result.\n\n${rule}\n\nMY RESUME:\n${r ? r.text : ''}\n\nKEYWORDS MISSING FROM MY RESUME: ${miss}\n\nJOB DESCRIPTION:\n${jd}`;
+  }
+  if(ui.promptType === 'email'){
+    return `Polish this job-search email. Keep it under 150 words, warm and direct, with one clear ask. Keep every fact as written.\n\n${rule}\n\nEMAIL DRAFT:\n${ui.ptExtra || '(paste your draft above)'}\n\nCONTEXT – JOB DESCRIPTION:\n${jd}\n\nCONTEXT – MY RESUME:\n${r ? r.text : ''}`;
+  }
+  return `Draft a short, professional reply to this recruiter email. Confirm any dates or times they mention, answer their questions, and keep it under 120 words.\n\n${rule}\n\nRECRUITER EMAIL:\n${ui.ptExtra || '(paste the email above)'}\n\nMY RESUME:\n${r ? r.text : ''}\n\nJOB DESCRIPTION:\n${jd}`;
+}
+after.resume = function(){
+  animateGauges($('#view'));
+  const drop = $('#drop');
+  if(drop){
+    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+    drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
+  }
+};
+async function handleFile(f){
+  toast('Reading ' + f.name + '…');
+  try {
+    const {text, meta} = await readFile(f);
+    const r = {id:uid('r'), label:f.name.replace(/\.[^.]+$/,''), text:text.trim(), added:today(), meta};
+    S.resumes.push(r); S.check.resumeId = r.id; save(); render(); toast('Resume added: ' + r.label);
+  } catch(err){ toast(err.message || 'Could not read that file.'); }
+}
+function linkScore(){
+  const a = currentAnalysis();
+  if(!a || !S.check.appId) return;
+  const app = S.applications.find(x => x.id === S.check.appId);
+  if(app){ app.atsScore = a.score; app.resumeId = S.check.resumeId; if(!app.jdText) app.jdText = S.check.jd; save(); }
+}
+
+/* =====================================================================
+   VIEW: INTERVIEW PREP
+   ===================================================================== */
+function vPrep(){
+  if(ui.prepApp !== 'general' && !S.applications.some(a => a.id === ui.prepApp)) ui.prepApp = (S.applications.find(a => a.status === 'Interview') || S.applications[0] || {id:'general'}).id;
+  const app = S.applications.find(a => a.id === ui.prepApp);
+  const p = prepFor(ui.prepApp);
+  const rd = readiness(ui.prepApp);
+  const tabs = {questions:'Questions & STAR', mock:'Mock interview', checklist:'Assessment day', research:'Research notes'};
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">${esc(P_().label)} · role-specific</div><h1>Interview Prep</h1>
+  <p>Build STAR stories for the questions you’ll actually get, run a timed mock, and tick off the assessment-day list. Readiness is scored per application.</p></div>
+  <label class="field" style="min-width:260px"><span>Preparing for</span><select class="input" id="prep-app"><option value="general" ${ui.prepApp==='general'?'selected':''}>General practice</option>${S.applications.filter(a => !['Rejected','Withdrawn'].includes(a.status)).map(a => `<option value="${a.id}" ${a.id===ui.prepApp?'selected':''}>${esc(a.company)} — ${esc(a.role)}${a.status==='Interview'?' ★':''}</option>`).join('')}</select></label></div>
+
+  <div class="panel readiness">
+    <div>${ringSVG(rd.parts, rd.total, 'Readiness')}</div>
+    <div class="stack">
+      <div class="panel-h" style="margin:0"><h2>${app ? esc(app.company) : 'General practice'}</h2>${app ? `<span class="pill st-${app.status}">${app.status}</span>` : ''}<span class="grow"></span>${app && app.nextAction && app.nextAction.date ? `<span class="chip brass">${esc(app.nextAction.text||'Next step')} · ${fmtDate(app.nextAction.date)}</span>` : ''}</div>
+      <div class="legend">${rd.parts.map(x => `<div><i style="background:${x.color}"></i>${x.k}<span class="val">${x.d} · ${Math.round(x.v*x.w)}/${x.w}</span></div>`).join('')}</div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" style="align-self:flex-start">${Object.entries(tabs).map(([k,v]) => `<button role="tab" aria-selected="${ui.prepTab===k}" data-prept="${k}">${v}</button>`).join('')}</div>
+  ${ui.prepTab === 'questions' ? prepQuestions(p) : ui.prepTab === 'mock' ? prepMock(p) : ui.prepTab === 'checklist' ? prepChecklist(p) : prepResearch(p, app)}`;
+}
+function prepQuestions(p){
+  const qs = questionSet(ui.prepApp);
+  if(!ui.qSel || !qs.some(q => q.id === ui.qSel)) ui.qSel = (qs.find(q => q.cat === P_().label) || qs[0]).id;
+  const q = qs.find(x => x.id === ui.qSel);
+  const s = (p.star||{})[q.id] || {s:'',t:'',a:'',r:''};
+  const words = ['s','t','a','r'].reduce((n,k) => n + ((s[k]||'').match(/\S+/g)||[]).length, 0);
+  const checks = [
+    {ok: /\d|%/.test(s.r||''), t:'Result includes a number'},
+    {ok: /\bI\b/.test(s.a||''), t:'Action says what you did (uses “I”)'},
+    {ok: words >= 90 && words <= 300, t:`Speaks in about 1–2 minutes (${words} words; aim 90–300)`},
+    {ok: (s.r||'').trim().length > 0 && P_().outcome.some(o => (s.r||'').toLowerCase().includes(o)), t:'Result names the guest, passenger or client impact'}
+  ];
+  const cats = Array.from(new Set(qs.map(x => x.cat)));
+  const L = [['s','Situation','Where and when? Set the scene in one or two sentences.','var(--s3)'],['t','Task','What were you responsible for?','var(--s4)'],['a','Action','What did you do? Use “I”, not “we”.','var(--s1)'],['r','Result','What changed? Add a number and who benefited.','var(--s2)']];
+  return `<div class="grid" style="grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr)">
+    <div class="panel"><div class="panel-h"><h2>Question bank</h2><span class="muted">${qs.length} questions</span></div>
+      <div class="qlist">${cats.map(c => `<div class="eyebrow" style="margin:8px 0 2px">${esc(c)}</div>` + qs.filter(x => x.cat === c).map(x => `<button class="q" data-q="${x.id}" aria-pressed="${x.id===ui.qSel}"><span class="tick ${starComplete((p.star||{})[x.id]) ? 'on' : ''}"></span><span>${esc(x.q)}</span></button>`).join('')).join('')}</div></div>
+    <div class="panel stack">
+      <div><div class="eyebrow">${esc(q.cat)}</div><h2 style="font-size:1.35rem;margin-top:4px">${esc(q.q)}</h2></div>
+      ${L.map(([k, name, hint, col]) => `<div class="star"><span class="L" style="background:${col}">${k.toUpperCase()}</span><label class="field"><span>${name} <span class="faint">— ${hint}</span></span><textarea class="input" rows="${k==='a'?4:2}" data-star="${k}">${esc(s[k]||'')}</textarea></label></div>`).join('')}
+      <ul class="checks">${checks.map(c => `<li><span class="mk ${c.ok?'y':'n'}">${c.ok?'✓':'!'}</span>${c.t}</li>`).join('')}</ul>
+      <div class="row"><button class="btn" data-action="copy-star">${ico('copy')}Copy answer</button><span class="note">Saved automatically. Stories with all four parts count toward readiness.</span></div>
+    </div></div>`;
+}
+function prepMock(p){
+  const m = ui.mock;
+  const hist = (p.mocks||[]).slice().reverse();
+  if(!m || m.done){
+    const last = m && m.done ? m : null;
+    return `<div class="grid g2">
+      <div class="panel stack"><h2>Timed mock interview</h2><p class="muted">Questions are drawn at random from this application’s bank. Answer out loud, then rate yourself honestly. Rehearsing aloud is what moves the needle.</p>
+        <div class="row"><label class="field"><span>Questions</span><select class="input" id="mk-n">${[3,5,8].map(n => `<option ${n===5?'selected':''}>${n}</option>`).join('')}</select></label>
+        <label class="field"><span>Time per answer</span><select class="input" id="mk-t"><option value="60">1 min</option><option value="90" selected>1.5 min</option><option value="120">2 min</option></select></label></div>
+        <div><button class="btn primary" data-action="mock-start">${ico('play')}Start mock interview</button></div>
+        ${last ? `<div class="banner info" style="margin:0"><span class="grow"><b>Session saved.</b> ${last.qs.length} questions, average self-rating ${(last.ratings.reduce((s,x)=>s+x,0)/Math.max(1,last.ratings.filter(Boolean).length)).toFixed(1)} / 5.</span></div>` : ''}
+      </div>
+      <div class="panel"><div class="panel-h"><h2>History</h2></div>${hist.length ? `<table class="t" style="min-width:0"><thead><tr><th>Date</th><th>Questions</th><th>Avg rating</th></tr></thead><tbody>${hist.map(h => `<tr><td>${fmtDate(h.date)}</td><td class="num">${h.count}</td><td><span class="meter" style="width:120px;display:inline-flex">${[1,2,3,4,5].map(i => `<i class="${i <= Math.round(h.avg) ? 'on' : ''}" style="${i <= Math.round(h.avg) ? 'background:var(--accent)' : ''}"></i>`).join('')}</span> <span class="mono num">${h.avg.toFixed(1)}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty">No sessions yet. Three sessions max out this part of readiness.</div>'}</div>
+    </div>`;
+  }
+  const q = m.qs[m.i];
+  return `<div class="panel stack">
+    <div class="row"><span class="eyebrow">Question ${m.i+1} of ${m.qs.length} · ${esc(q.cat)}</span><span class="grow" style="flex:1"></span><button class="btn sm ghost" data-action="mock-stop">End session</button></div>
+    <div class="mock-stage"><div id="mk-timer">${timerSVG(m.left, m.total)}</div>
+      <div class="stack"><div class="mock-q">${esc(q.q)}</div>
+        <textarea class="input" id="mk-note" rows="3" placeholder="Optional: jot key points as you speak">${esc(m.notes[m.i]||'')}</textarea>
+        <div class="row"><span class="muted" style="font-size:.85rem">How did that go?</span><div class="rate">${[1,2,3,4,5].map(n => `<button data-rate="${n}" aria-pressed="${m.ratings[m.i]===n}">${n}</button>`).join('')}</div></div>
+        <div class="row"><button class="btn" data-action="mock-pause">${m.paused ? 'Resume timer' : 'Pause timer'}</button><button class="btn primary" data-action="mock-next">${m.i === m.qs.length-1 ? 'Finish and save' : 'Next question →'}</button></div>
+      </div></div></div>`;
+}
+function prepChecklist(p){
+  const items = (CHECKLISTS[pk()]||[]).concat(CHECK_GENERAL);
+  p.checklist = p.checklist || {};
+  const done = items.filter((_, i) => p.checklist[i]).length;
+  return `<div class="panel"><div class="panel-h"><h2>${esc(P_().label)} assessment-day checklist</h2><span class="muted grow">${done} of ${items.length} ready</span><div class="meter" style="width:180px">${items.map((_, i) => `<i class="${p.checklist[i]?'on':''}" style="${p.checklist[i]?'background:var(--s4)':''}"></i>`).join('')}</div></div>
+    ${items.map((t, i) => `<label class="check"><input type="checkbox" data-chk="${i}" ${p.checklist[i]?'checked':''}><span>${esc(t)}${i >= (CHECKLISTS[pk()]||[]).length ? ' <span class="faint">· general</span>' : ''}</span></label>`).join('')}</div>`;
+}
+function prepResearch(p, app){
+  return `<div class="panel stack"><h2>Company research${app ? ' — ' + esc(app.company) : ''}</h2>
+    <p class="muted">Note what you’d want to mention: what they do, recent news, values, the team, and why you fit. 200+ characters completes this part of readiness. These notes also make a great cold-email hook.</p>
+    <textarea class="input" id="prep-research" rows="9" placeholder="Fleet / properties / clients, recent news, values, people you’ll meet…">${esc(p.research||'')}</textarea>
+    <div class="row"><span class="note">${(p.research||'').trim().length} characters</span>${app ? `<button class="btn sm" data-action="research-hook">Use as outreach hook</button>` : ''}</div></div>`;
+}
+let mockTimer = null;
+function mockTick(){
+  const m = ui.mock; if(!m || m.done || m.paused) return;
+  if(document.hidden) return;
+  m.left = Math.max(0, m.left - 1);
+  const el = $('#mk-timer'); if(el) el.innerHTML = timerSVG(m.left, m.total);
+  if(m.left === 0){ clearInterval(mockTimer); toast('Time’s up — rate the answer and move on'); }
+}
+function mockStart(){
+  const n = +($('#mk-n')||{value:5}).value, t = +($('#mk-t')||{value:90}).value;
+  const all = questionSet(ui.prepApp);
+  const pool = all.filter(q => q.cat !== 'General' || Math.random() < .5);
+  const qs = pool.sort(() => Math.random() - .5).slice(0, n);
+  ui.mock = {qs, i:0, total:t, left:t, ratings:[], notes:[], paused:false, done:false};
+  clearInterval(mockTimer); mockTimer = setInterval(mockTick, 1000);
+  render();
+}
+function mockNext(){
+  const m = ui.mock; const note = $('#mk-note'); if(note) m.notes[m.i] = note.value;
+  if(m.i < m.qs.length - 1){ m.i++; m.left = m.total; m.paused = false; clearInterval(mockTimer); mockTimer = setInterval(mockTick, 1000); render(); return; }
+  clearInterval(mockTimer); m.done = true;
+  const rated = m.ratings.filter(Boolean);
+  const p = prepFor(ui.prepApp); p.mocks = p.mocks || [];
+  p.mocks.push({date:today(), count:m.qs.length, avg: rated.length ? rated.reduce((s,x)=>s+x,0)/rated.length : 0});
+  const app = S.applications.find(a => a.id === ui.prepApp);
+  if(app) app.timeline.push({type:'note', date:today(), content:`Mock interview: ${m.qs.length} questions, avg self-rating ${(rated.length ? rated.reduce((s,x)=>s+x,0)/rated.length : 0).toFixed(1)}/5`});
+  save(); render(); toast('Mock interview saved');
+}
+
+/* =====================================================================
+   VIEW: OUTREACH (cold + application emails)
+   ===================================================================== */
+function outCtx(){
+  const app = S.applications.find(a => a.id === ui.outApp);
+  const f = ui.outFields;
+  const pr = S.profile;
+  const proof = f.proof_point || '';
+  const proofShort = proof ? proof.replace(/^(I\s+)?/,'').split(/[,.;]/)[0].split(/\s+/).slice(0,6).join(' ') : '';
+  return {
+    name: pr.name, phone: pr.phone, portfolio_link: pr.portfolio_link, years_experience: pr.years_experience ? String(pr.years_experience) : '',
+    industry: P_().noun, languages: pr.languages, passport: pr.passport, relocation: pr.relocation, availability: pr.availability,
+    company: f.company ?? (app ? app.company : ''), role: f.role ?? (app ? app.role : S.profile.role),
+    recruiter: f.recruiter ?? (app && app.contact.name ? app.contact.name.split(' ')[0] : ''),
+    hook: f.hook || '', proof_point: proof ? (/[.!?]$/.test(proof) ? proof : proof + '.') : '', proof_short: proofShort,
+    mutual: f.mutual || '', top_skills: topSkills() || ''
+  };
+}
+function fill(tpl, ctx){ return tpl.replace(/\{\{(\w+)\}\}/g, (m, k) => (ctx[k] != null && String(ctx[k]).trim() !== '') ? String(ctx[k]) : m); }
+function unfilled(s){ return Array.from(new Set((s.match(/\{\{\w+\}\}/g)||[]))); }
+function outDraft(){
+  const t = S.templates.find(x => x.id === ui.outTpl) || S.templates[0];
+  if(!ui.outDirty){ const ctx = outCtx(); ui.outSubject = fill(t.subject, ctx); ui.outBody = fill(t.body, ctx); }
+  return t;
+}
+function personalChecks(t){
+  const body = ui.outBody || '', subj = ui.outSubject || '', ctx = outCtx();
+  const wc = (body.match(/\S+/g)||[]).length;
+  const asks = (body.match(/\?/g)||[]).length;
+  const bw = RULES.buzzwords.filter(b => body.toLowerCase().includes(b));
+  const hook = ctx.hook || '';
+  const list = [
+    {ok: !!ctx.recruiter && !/hiring manager|sir|madam/i.test(ctx.recruiter), t:'Addressed to a named person', tip:'Find the hiring manager on LinkedIn or the company site.'},
+    {ok: hook.split(/\s+/).length >= 10 && (ctx.company && hook.toLowerCase().includes(ctx.company.toLowerCase().split(' ')[0]) || /\d|recent|new|launch|award|opened|read|saw|post/i.test(hook)), t:'Hook is specific to them', tip:'Mention something only they did: a new property, route, award, event or post.'},
+    {ok: RULES.numberRe.test(ctx.proof_point || ''), t:'Proof point has a number', tip:'Pick a resume bullet with a result.'},
+    {ok: t.short ? body.length <= 300 : (wc >= 60 && wc <= 170), t: t.short ? `Under 300 characters (${body.length})` : `60–170 words (${wc})`, tip:'Short emails get read on a phone.'},
+    {ok: t.id === 'c4' || (subj.length > 0 && subj.length <= 60), t:`Subject under 60 characters (${subj.length})`, tip:'Lead with the role and a result.'},
+    {ok: asks >= 1 && asks <= 2, t:'One clear ask', tip:'End with a single yes/no question.'},
+    {ok: !bw.length, t: bw.length ? `Buzzwords: ${bw.join(', ')}` : 'No buzzwords', tip:'Swap claims for evidence.'},
+    {ok: !unfilled(subj + body).length, t: unfilled(subj+body).length ? `${unfilled(subj+body).length} placeholder(s) unfilled` : 'All placeholders filled', tip:'Fill the red fields.'}
+  ];
+  return list;
+}
+function vOutreach(){
+  if(ui.editTpl) return vTemplates();
+  const t = outDraft();
+  const ctx = outCtx();
+  const checks = personalChecks(t);
+  const passed = checks.filter(c => c.ok).length;
+  const pct = Math.round(passed / checks.length * 100);
+  const un = unfilled(ui.outSubject + ui.outBody);
+  const groups = ['Cold outreach','Application flow','Industry'];
+  const tpls = S.templates.filter(x => !x.pack || x.pack === pk());
+  const proofs = proofCandidates();
+  const app = S.applications.find(a => a.id === ui.outApp);
+  const mark = s => esc(s).replace(/\{\{(\w+)\}\}/g, '<mark>{{$1}}</mark>');
+  const mailto = `mailto:${encodeURIComponent((ui.outFields.email ?? (app ? app.contact.email : '')) || '')}?subject=${encodeURIComponent(ui.outSubject)}&body=${encodeURIComponent(ui.outBody)}`;
+  const fv = (k, fallback) => esc(ui.outFields[k] ?? fallback ?? '');
+  return `
+  <div class="pagehead"><div class="grow"><div class="eyebrow">Feature 3 · personalised, sent from your own mail app</div><h1>Outreach</h1>
+  <p>Write cold emails that sound like you did your homework. Pick a template, add one specific hook and one proof point, and the meter tells you what’s missing before you send.</p></div>
+  <button class="btn" data-action="edit-templates">Edit templates</button></div>
+
+  <div class="out">
+    <div class="panel tplcol">${groups.map(g => { const list = tpls.filter(x => (x.group||'Application flow') === g); return list.length ? `<div class="tpl-group"><div class="eyebrow" style="margin:2px 0 6px">${g}${g==='Industry' ? ' · ' + esc(P_().label) : ''}</div>${list.map(x => `<button class="tpl" data-tpl="${x.id}" aria-pressed="${x.id===ui.outTpl}">${esc(x.name)}</button>`).join('')}</div>` : ''; }).join('')}
+      ${S.outreach.length ? `<div class="hr"></div><div class="eyebrow" style="margin:10px 0 6px">Sent log</div><div class="stack" style="gap:8px">${S.outreach.slice(-5).reverse().map(o => `<div style="font-size:.8rem"><b>${esc(o.to||'—')}</b> · ${esc(o.company)}<div class="faint">${fmtDate(o.date)} · ${esc(o.template)}</div></div>`).join('')}</div>` : ''}
+    </div>
+
+    <div class="panel stack">
+      <h2>Personalise</h2>
+      <label class="field"><span>Link to application (fills company, role, contact)</span><select class="input" id="o-app"><option value="">Cold — not tracked yet</option>${S.applications.map(a => `<option value="${a.id}" ${a.id===ui.outApp?'selected':''}>${esc(a.company)} — ${esc(a.role)}</option>`).join('')}</select></label>
+      <div class="grid g2" style="gap:10px">
+        <label class="field"><span>Recipient first name</span><input class="input ${un.includes('{{recruiter}}')?'bad':''}" data-of="recruiter" value="${fv('recruiter', ctx.recruiter)}" placeholder="Anita"></label>
+        <label class="field"><span>Their email</span><input class="input" data-of="email" value="${fv('email', app ? app.contact.email : '')}" placeholder="name@company.com"></label>
+        <label class="field"><span>Company</span><input class="input ${un.includes('{{company}}')?'bad':''}" data-of="company" value="${fv('company', ctx.company)}"></label>
+        <label class="field"><span>Role</span><input class="input ${un.includes('{{role}}')?'bad':''}" data-of="role" value="${fv('role', ctx.role)}"></label>
+      </div>
+      <label class="field"><span>Hook — one thing specific to them</span><textarea class="input ${un.includes('{{hook}}')?'bad':''}" data-of="hook" rows="3" placeholder="e.g. I saw SkyBridge launched three new Gulf routes this month — congratulations.">${fv('hook','')}</textarea></label>
+      <label class="field"><span>Proof point — your best result for them</span><textarea class="input ${un.includes('{{proof_point}}')?'bad':''}" data-of="proof_point" rows="2" placeholder="e.g. I raised our hotel’s TripAdvisor score from 4.3 to 4.7 in 12 months.">${fv('proof_point','')}</textarea></label>
+      ${proofs.length ? `<div class="proof"><span class="eyebrow">From your resume — click to use</span>${proofs.map(p => `<button type="button" data-proof="${esc(p)}">${esc(p)}</button>`).join('')}</div>` : ''}
+      ${tpls.find(x => x.id === ui.outTpl && /\{\{mutual\}\}/.test(x.body + x.subject)) ? `<label class="field"><span>Mutual connection</span><input class="input ${un.includes('{{mutual}}')?'bad':''}" data-of="mutual" value="${fv('mutual','')}" placeholder="Rohan Das (IHM batch of 2020)"></label>` : ''}
+      <p class="note">Your name, phone, years and languages come from Settings → Profile. Top skills come from your latest Resume Check${ctx.top_skills ? `: <b>${esc(ctx.top_skills)}</b>` : ''}.</p>
+    </div>
+
+    <div class="stack">
+      <div class="panel stack">
+        <div class="panel-h" style="margin:0"><h2>Personalisation</h2><span class="grow"></span><span class="mono num" style="font-weight:700;color:${band(pct)}">${pct}%</span></div>
+        <div class="meter">${checks.map(c => `<i class="${c.ok?'on':''}" style="${c.ok ? 'background:' + band(pct) : ''}"></i>`).join('')}</div>
+        <ul class="checks">${checks.map(c => `<li><span class="mk ${c.ok?'y':'n'}">${c.ok?'✓':'!'}</span><span>${esc(c.t)}${c.ok ? '' : `<span class="faint"> — ${esc(c.tip)}</span>`}</span></li>`).join('')}</ul>
+      </div>
+      <div class="panel stack">
+        <label class="field"><span>Subject</span><div class="row" style="flex-wrap:nowrap"><input class="input" id="o-subj" value="${esc(ui.outSubject)}"><button class="btn sm" data-action="copy-subj" aria-label="Copy subject">${ico('copy')}</button></div></label>
+        <label class="field"><span>Body ${ui.outDirty ? '<span class="faint">· edited by you</span>' : ''}</span><textarea class="input ${un.length?'bad':''}" id="o-body" rows="12">${esc(ui.outBody)}</textarea></label>
+        ${un.length ? `<div class="preview" aria-label="Unfilled placeholders highlighted">${mark(ui.outBody)}</div>` : ''}
+        <div class="row">
+          <button class="btn primary" data-action="copy-body">${ico('copy')}${un.length && ui.confirm === 'copy' ? 'Copy anyway' : 'Copy body'}</button>
+          <a class="btn" href="${mailto}" target="_blank" rel="noopener" data-action="mailto">${ico('send')}Open in mail app</a>
+          <button class="btn" data-action="log-sent">Mark as sent</button>
+          ${ui.outDirty ? `<button class="btn ghost sm" data-action="reset-draft">Reset to template</button>` : ''}
+        </div>
+        ${un.length && ui.confirm === 'copy' ? `<p class="note" style="color:var(--bad)">${un.length} placeholder${un.length>1?'s are':' is'} still unfilled: ${un.join(', ')}. Fill them, or click again to copy anyway.</p>` : ''}
+        <p class="note">“Open in mail app” uses a mailto: link to your own mail app; nothing is sent from here. “Mark as sent” logs it${app ? ' on ' + esc(app.company) + '’s timeline' : ''}.</p>
+      </div>
+    </div>
+  </div>`;
+}
+function vTemplates(){
+  return `<div class="pagehead"><div class="grow"><div class="eyebrow">Templates</div><h1>Email templates</h1><p>Use placeholders like <span class="mono">{{name}}</span>, <span class="mono">{{company}}</span>, <span class="mono">{{role}}</span>, <span class="mono">{{recruiter}}</span>, <span class="mono">{{top_skills}}</span>, <span class="mono">{{years_experience}}</span>, <span class="mono">{{phone}}</span>, <span class="mono">{{portfolio_link}}</span>, <span class="mono">{{hook}}</span>, <span class="mono">{{proof_point}}</span>, <span class="mono">{{mutual}}</span>, <span class="mono">{{languages}}</span>, <span class="mono">{{passport}}</span>.</p></div>
+    <div class="row"><button class="btn" data-action="add-template">Add template</button><button class="btn ghost" data-action="reset-templates">${ui.confirm==='reset-tpl' ? 'Click again to restore defaults' : 'Restore defaults'}</button><button class="btn primary" data-action="done-templates">Done</button></div></div>
+    ${S.templates.map(t => `<div class="panel stack" data-tid="${t.id}"><div class="grid g3" style="gap:10px"><label class="field"><span>Name</span><input class="input" data-tf="name" value="${esc(t.name)}"></label><label class="field"><span>Group</span><select class="input" data-tf="group">${['Cold outreach','Application flow','Industry'].map(g => `<option ${g===(t.group||'Application flow')?'selected':''}>${g}</option>`).join('')}</select></label><div class="row" style="align-items:flex-end;justify-content:flex-end"><button class="btn sm danger" data-deltpl="${t.id}">Delete</button></div></div>
+      <label class="field"><span>Subject</span><input class="input" data-tf="subject" value="${esc(t.subject)}"></label>
+      <label class="field"><span>Body</span><textarea class="input" rows="6" data-tf="body">${esc(t.body)}</textarea></label></div>`).join('')}`;
+}
+
+/* =====================================================================
+   VIEW: APPLICATIONS
+   ===================================================================== */
+function vApps(){
+  return `<div class="pagehead"><div class="grow"><div class="eyebrow">Feature 4 · tracker</div><h1>Applications</h1><p>Drag a boarding pass to change its status, or switch to the table to sort and filter. Applications quiet for ${S.settings.ghostedDays}+ days are flagged.</p></div>
+    <div class="row"><div class="tabs" role="tablist"><button role="tab" aria-selected="${ui.appsMode==='board'}" data-mode="board">Board</button><button role="tab" aria-selected="${ui.appsMode==='table'}" data-mode="table">Table</button></div><button class="btn primary" data-action="new-app">New application <kbd>N</kbd></button></div></div>
+  ${S.applications.length ? (ui.appsMode === 'board' ? appsBoard() : appsTable()) : `<div class="empty">No applications yet. Press <kbd>N</kbd> or use “New application” to add one.</div>`}`;
+}
+function appsBoard(){
+  return `<div class="kanban">${STATUSES.map(st => { const list = S.applications.filter(a => a.status === st); return `<div class="col" data-col="${st}"><h4><span class="pill st-${st}">${st}</span><span class="num">${list.length}</span></h4>
+    ${list.map(a => `<div class="pass" draggable="true" data-card="${a.id}" tabindex="0" role="button" aria-label="${esc(a.company)}, ${esc(a.role)}, ${st}"><div class="co">${esc(a.company)}</div><div class="ro">${esc(a.role)}</div>${isGhostRisk(a) ? '<div class="flag">⚠ possibly ghosted</div>' : ''}
+      <div class="perf"><span>${a.dateApplied ? fmtDate(a.dateApplied).toUpperCase() : 'NOT SENT'}</span><span>${a.atsScore ? 'ATS ' + a.atsScore : ''}</span>${a.nextAction && a.nextAction.date ? `<span style="color:${a.nextAction.date < today() ? 'var(--bad)' : 'var(--brass)'}">→ ${fmtDate(a.nextAction.date).toUpperCase()}</span>` : ''}</div></div>`).join('')}</div>`; }).join('')}</div>`;
+}
+function appsTable(){
+  const f = ui.filter.toLowerCase();
+  let list = S.applications.filter(a => (!f || (a.company + ' ' + a.role).toLowerCase().includes(f)) && (!ui.statusFilter || a.status === ui.statusFilter));
+  const k = ui.sort.k, dir = ui.sort.dir;
+  const val = a => k === 'lastActivity' ? lastActivity(a) : k === 'next' ? (a.nextAction && a.nextAction.date || '') : a[k] ?? '';
+  list = list.slice().sort((x,y) => { const a = val(x), b = val(y); return (typeof a === 'number' ? a - b : String(a).localeCompare(String(b))) * dir; });
+  const th = (key, label) => `<th><button data-sort="${key}">${label}${ui.sort.k===key ? (ui.sort.dir>0?' ↑':' ↓') : ''}</button></th>`;
+  return `<div class="panel"><div class="row" style="margin-bottom:12px"><input class="input" id="ap-filter" placeholder="Filter by company or role" value="${esc(ui.filter)}" style="max-width:280px"><select class="input" id="ap-status" style="width:auto"><option value="">All statuses</option>${STATUSES.map(s => `<option ${s===ui.statusFilter?'selected':''}>${s}</option>`).join('')}</select><span class="note">${list.length} shown</span></div>
+  <div class="scroll-x"><table class="t"><thead><tr>${th('company','Company')}${th('role','Role')}${th('dateApplied','Applied')}${th('status','Status')}${th('atsScore','ATS')}${th('lastActivity','Last activity')}${th('next','Next action')}</tr></thead>
+  <tbody>${list.map(a => `<tr class="click" data-open="${a.id}" tabindex="0"><td><b>${esc(a.company)}</b>${isGhostRisk(a) ? ' <span class="flag">⚠ ghost?</span>' : ''}</td><td>${esc(a.role)}</td><td class="num">${fmtDate(a.dateApplied)}</td><td><span class="pill st-${a.status}">${a.status}</span></td><td class="num">${a.atsScore ? `<b style="color:${band(a.atsScore)}">${a.atsScore}</b>` : '—'}</td><td class="num">${fmtDate(lastActivity(a))}</td><td>${a.nextAction && a.nextAction.date ? `<span style="color:${a.nextAction.date < today() ? 'var(--bad)' : 'inherit'}">${esc(a.nextAction.text||'')} · ${fmtDate(a.nextAction.date)}</span>` : '—'}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function setStatus(a, st, note){
+  if(a.status === st) return;
+  a.status = st;
+  const idx = PIPE.indexOf(st);
+  if(idx > (a.maxStage ?? 0)) a.maxStage = idx;
+  if(st === 'Applied' && !a.dateApplied) a.dateApplied = today();
+  a.timeline.push({type:'status_change', date:today(), content: note || ('Status changed to ' + st)});
+  if(st === 'Applied' && (!a.nextAction || !a.nextAction.date)) a.nextAction = {text:'Follow up', date:addDays(today(), S.settings.followUpDays)};
+}
+after.applications = function(){
+  $$('.pass').forEach(c => {
+    c.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', c.dataset.card); c.classList.add('dragging'); });
+    c.addEventListener('dragend', () => c.classList.remove('dragging'));
+    c.addEventListener('click', () => openApp(c.dataset.card));
+    c.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openApp(c.dataset.card); } });
+  });
+  $$('.col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('over'));
+    col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('over'); const a = S.applications.find(x => x.id === e.dataTransfer.getData('text/plain')); if(a && a.status !== col.dataset.col){ setStatus(a, col.dataset.col); save(); render(); toast(a.company + ' → ' + col.dataset.col); } });
+  });
+};
+
+/* ---------- application drawer ---------- */
+let drawerId = null, replyGuess = null;
+function openApp(id){ drawerId = id; replyGuess = null; renderDrawer(); }
+function newApp(){
+  const a = {id:uid('a'), company:'', role:S.profile.role||'', jobLink:'', jdText:'', resumeId:S.check.resumeId||'', atsScore:0, status:'Saved', dateApplied:'', contact:{name:'',email:''}, salaryRange:'', notes:'', nextAction:{text:'',date:''}, timeline:[{type:'status_change',date:today(),content:'Saved'}], prep:{star:{},checklist:{},mocks:[],research:''}, maxStage:0, isNew:true};
+  S.applications.unshift(a); openApp(a.id);
+}
+function closeDrawer(){
+  const a = S.applications.find(x => x.id === drawerId);
+  if(a && a.isNew){ if(!a.company.trim()) S.applications = S.applications.filter(x => x !== a); else delete a.isNew; }
+  drawerId = null; ui.confirm = null; $('#modal').innerHTML = ''; save(); render();
+}
+function renderDrawer(){
+  const a = S.applications.find(x => x.id === drawerId);
+  if(!a){ $('#modal').innerHTML = ''; return; }
+  const f = (k, label, type='text', v) => `<label class="field"><span>${label}</span><input class="input" type="${type}" data-af="${k}" value="${esc(v ?? a[k] ?? '')}"></label>`;
+  const rd = readiness(a.id);
+  const tl = a.timeline.slice().reverse();
+  const tlLabel = {email_sent:'Email sent', reply_received:'Reply received', status_change:'Status', note:'Note'};
+  $('#modal').innerHTML = `<div class="overlay" data-action="close-overlay"><div class="drawer" role="dialog" aria-modal="true" aria-label="Application">
+    <div class="row"><div style="flex:1;min-width:0"><div class="eyebrow">${a.isNew ? 'New application' : 'Application'}</div><h2 style="font-size:1.5rem">${esc(a.company || 'Untitled')}</h2></div>
+      <select class="input" id="d-status" style="width:auto" aria-label="Status">${STATUSES.map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><button class="btn" data-action="close-drawer">Close</button></div>
+    <div class="row"><button class="btn sm" data-action="d-prep">${ico('prep')}Prep · ${rd.total}%</button><button class="btn sm" data-action="d-email">${ico('mail')}Draft email</button><button class="btn sm" data-action="d-check">${ico('resume')}Check resume vs this JD</button>${a.atsScore ? `<span class="chip" style="background:var(--well);color:${band(a.atsScore)}">ATS ${a.atsScore}</span>` : ''}${isGhostRisk(a) ? '<span class="flag">⚠ no activity for ' + daysBetween(lastActivity(a), today()) + ' days</span>' : ''}</div>
+    <div class="panel stack"><div class="grid g2" style="gap:10px">
+      ${f('company','Company')}${f('role','Role')}${f('jobLink','Job link','url')}${f('dateApplied','Date applied','date')}
+      ${f('contact.name','Contact name','text',a.contact.name)}${f('contact.email','Contact email','email',a.contact.email)}
+      ${f('salaryRange','Salary range')}<label class="field"><span>Resume version used</span><select class="input" data-af="resumeId"><option value="">—</option>${S.resumes.map(r => `<option value="${r.id}" ${r.id===a.resumeId?'selected':''}>${esc(r.label)}</option>`).join('')}</select></label>
+      ${f('nextAction.text','Next action','text',a.nextAction.text)}${f('nextAction.date','Next action date','date',a.nextAction.date)}
+    </div>
+    <label class="field"><span>Job description</span><textarea class="input" rows="4" data-af="jdText">${esc(a.jdText)}</textarea></label>
+    <label class="field"><span>Notes</span><textarea class="input" rows="3" data-af="notes">${esc(a.notes)}</textarea></label></div>
+
+    <div class="panel stack"><h3>Paste a reply</h3><p class="muted" style="font-size:.88rem">Paste the recruiter’s email. The app suggests a status and picks out dates; you confirm.</p>
+      <textarea class="input" id="d-reply" rows="4" placeholder="Paste the email text here">${esc(replyGuess ? replyGuess.text : '')}</textarea>
+      ${replyGuess ? `<div class="banner info" style="margin:0;flex-direction:column;align-items:stretch">
+        <div class="row"><b>Suggested status:</b> <select class="input" id="d-rs" style="width:auto">${STATUSES.map(s => `<option ${s===replyGuess.status?'selected':''}>${s}</option>`).join('')}</select>
+        ${Object.entries(replyGuess.hits).filter(([,v]) => v.length).map(([g,v]) => `<span class="chip neutral">${g}: ${v.map(esc).join(', ')}</span>`).join('')}</div>
+        <div class="row"><b>Next action date:</b> <select class="input" id="d-rd" style="width:auto"><option value="">None</option>${replyGuess.dates.map((d,i) => `<option value="${d.iso}" ${i===0?'selected':''}>${fmtDate(d.iso)} (“${esc(d.label)}”${d.time ? ' · ' + esc(d.time) : ''})</option>`).join('')}</select>
+        <input class="input" id="d-rt" style="flex:1;min-width:140px" value="${esc(replyGuess.status === 'Interview' ? 'Interview' + (replyGuess.dates[0] && replyGuess.dates[0].time ? ' at ' + replyGuess.dates[0].time : '') : replyGuess.status === 'Offer' ? 'Reply to offer' : 'Reply')}" aria-label="Next action"></div>
+        <div class="row"><button class="btn primary sm" data-action="confirm-reply">Confirm and save</button><button class="btn ghost sm" data-action="cancel-reply">Cancel</button></div></div>`
+      : `<div><button class="btn" data-action="read-reply">Read reply</button></div>`}
+    </div>
+
+    <div class="panel"><div class="panel-h"><h3>Timeline</h3><span class="grow"></span><input class="input" id="d-note" placeholder="Add a note" style="max-width:240px"><button class="btn sm" data-action="add-note">Add</button></div>
+      ${tl.length ? `<ul class="timeline">${tl.map(t => `<li><div class="when">${fmtDate(t.date)} · ${tlLabel[t.type]||t.type}</div><div class="body">${esc(t.content)}</div></li>`).join('')}</ul>` : '<div class="empty">No activity yet.</div>'}</div>
+    <div class="row"><span class="grow" style="flex:1"></span><button class="btn danger" data-action="del-app">${ui.confirm === 'del-app' ? 'Click again to delete' : 'Delete application'}</button></div>
+  </div></div>`;
+  const first = $('#modal input[data-af="company"]'); if(a.isNew && first) first.focus();
+}
+
+/* =====================================================================
+   VIEW: SETTINGS
+   ===================================================================== */
+function vSettings(){
+  const p = S.profile;
+  const f = (k, label, type='text', ph='') => `<label class="field"><span>${label}</span><input class="input" type="${type}" data-pf="${k}" value="${esc(p[k] ?? '')}" placeholder="${esc(ph)}"></label>`;
+  return `<div class="pagehead"><div class="grow"><div class="eyebrow">Settings</div><h1>Profile, reminders and backup</h1><p>Your profile fills email placeholders. Everything here stays in this browser on this device.</p></div></div>
+  <div class="grid g2">
+    <div class="panel stack"><h2>Profile</h2><div class="grid g2" style="gap:10px">
+      ${f('name','Full name')}${f('email','Email','email')}${f('phone','Phone','tel')}${f('portfolio_link','Portfolio or LinkedIn')}${f('years_experience','Years of experience','number')}${f('languages','Languages','text','English, Hindi, Arabic')}
+      ${f('passport','Passport valid until','text','March 2031')}${f('relocation','Relocation','text','open to relocation')}${f('availability','Can join','text','within 30 days')}
+    </div><p class="note">Passport and relocation are used by aviation and tourism templates.</p></div>
+    <div class="stack">
+      <div class="panel stack"><h2>Reminders</h2><div class="grid g2" style="gap:10px">
+        <label class="field"><span>Follow up after (days)</span><input class="input" type="number" min="1" data-sf2="followUpDays" value="${S.settings.followUpDays}"></label>
+        <label class="field"><span>Flag as possibly ghosted after (days)</span><input class="input" type="number" min="1" data-sf2="ghostedDays" value="${S.settings.ghostedDays}"></label></div>
+        <label class="field"><span>Theme</span><select class="input" id="set-theme"><option value="">Follow system</option><option value="light" ${S.settings.theme==='light'?'selected':''}>Light</option><option value="dark" ${S.settings.theme==='dark'?'selected':''}>Dark</option></select></label></div>
+      <div class="panel stack"><h2>Backup</h2><p class="muted" style="font-size:.9rem">Last backup: <b>${S.settings.lastBackup ? fmtDate(S.settings.lastBackup) : 'never'}</b>. Export regularly — clearing browser data deletes everything.</p>
+        <div class="row"><button class="btn primary" data-action="export">Export backup (.json)</button><button class="btn" data-action="copy-json">Copy backup as text</button><label class="btn" for="imp-file">Import backup…</label><input type="file" id="imp-file" accept=".json,application/json" hidden></div>
+        ${ui.importData ? `<div class="banner info" style="margin:0"><span class="grow">Backup has <b>${ui.importData.applications.length}</b> applications and <b>${(ui.importData.resumes||[]).length}</b> resumes.</span><button class="btn sm" data-action="import-merge">Merge</button><button class="btn sm danger" data-action="import-replace">Replace all</button></div>` : ''}
+        <div class="hr"></div>
+        <div class="row"><button class="btn danger" data-action="reset-all">${ui.confirm === 'reset' ? 'Click again to erase everything' : 'Reset all data'}</button><button class="btn ghost" data-action="load-examples">Load example data</button></div>
+      </div>
+    </div>
+  </div>`;
+}
+function exportData(){
+  S.settings.lastBackup = today(); save();
+  const ok = download('jobtracker-backup-' + today() + '.json', JSON.stringify(S, null, 2));
+  toast(ok ? 'Backup downloaded' : 'Download blocked here — use “Copy backup as text”');
+  render();
+}
+
+/* =====================================================================
+   EVENTS (delegated)
+   ===================================================================== */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-nav],[data-action],[data-open],[data-sugg],[data-sf],[data-pt],[data-q],[data-prept],[data-rate],[data-tpl],[data-proof],[data-mode],[data-sort],[data-deltpl]');
+  if(!t) return;
+  if(t.dataset.nav){ go(t.dataset.nav); return; }
+  if(t.dataset.open && !t.closest('.drawer')){ openApp(t.dataset.open); return; }
+  if(t.dataset.sugg !== undefined && t.dataset.sugg){ const v = t.dataset.v; if(v) S.suggestionStatus[t.dataset.sugg] = v; else delete S.suggestionStatus[t.dataset.sugg]; save(); rerenderKeep(); return; }
+  if(t.dataset.sf){ ui.suggFilter = t.dataset.sf; rerenderKeep(); return; }
+  if(t.dataset.pt){ ui.promptType = t.dataset.pt; rerenderKeep(); return; }
+  if(t.dataset.q){ ui.qSel = t.dataset.q; render(); return; }
+  if(t.dataset.prept){ ui.prepTab = t.dataset.prept; render(); return; }
+  if(t.dataset.rate){ ui.mock.ratings[ui.mock.i] = +t.dataset.rate; const n = $('#mk-note'); if(n) ui.mock.notes[ui.mock.i] = n.value; render(); return; }
+  if(t.dataset.tpl){ ui.outTpl = t.dataset.tpl; ui.outDirty = false; ui.confirm = null; render(); return; }
+  if(t.dataset.proof){ ui.outFields.proof_point = t.dataset.proof; ui.outDirty = false; render(); return; }
+  if(t.dataset.mode){ ui.appsMode = t.dataset.mode; render(); return; }
+  if(t.dataset.sort){ const k = t.dataset.sort; ui.sort = {k, dir: ui.sort.k === k ? -ui.sort.dir : 1}; render(); return; }
+  if(t.dataset.deltpl){ S.templates = S.templates.filter(x => x.id !== t.dataset.deltpl); save(); render(); return; }
+  const act = t.dataset.action;
+  const A = actions[act]; if(A){ if(act !== 'mailto') e.preventDefault(); A(e, t); }
+});
+function rerenderKeep(){ const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+const actions = {
+  'new-app': () => newApp(),
+  'clear-examples': () => { S.applications = S.applications.filter(a => !a.example); S.resumes = S.resumes.filter(r => r.id !== 'r1'); S.outreach = []; S.settings.examples = false; if(!resumeById(S.check.resumeId)) S.check = {resumeId: S.resumes[0] ? S.resumes[0].id : null, jd:'', appId:''}; S.profile = Object.assign(freshState().profile, {industry:S.profile.industry, role:S.profile.role}); save(); render(); toast('Examples cleared. Add your profile in Settings.'); },
+  'export': () => exportData(),
+  'copy-json': () => { S.settings.lastBackup = today(); save(); copy(JSON.stringify(S)); render(); },
+  'analyze': () => { syncResumeText(); analysisCache.key = ''; linkScore(); render(); const g = $('.gauge'); if(g) g.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); },
+  'save-resume-new': () => { const txt = $('#rc-text').value.trim(); if(!txt){ toast('Paste or upload a resume first'); return; } const r = {id:uid('r'), label: $('#rc-label').value.trim() || 'Version ' + (S.resumes.length+1), text:txt, added:today(), meta:{source:'paste'}}; S.resumes.push(r); S.check.resumeId = r.id; save(); render(); toast('Saved ' + r.label); },
+  'del-resume': (e, t) => { if(ui.confirm !== 'del-resume'){ ui.confirm = 'del-resume'; t.textContent = 'Click again to delete'; return; } ui.confirm = null; S.resumes = S.resumes.filter(r => r.id !== S.check.resumeId); S.check.resumeId = S.resumes[0] ? S.resumes[0].id : null; save(); render(); },
+  'copy-prompt': () => copy($('#pt-out').value),
+  'save-ai': () => { const v = $('#pt-back').value.trim(); const a = S.applications.find(x => x.id === $('#pt-app').value); if(!v || !a){ toast('Paste an answer and pick an application'); return; } a.notes = (a.notes ? a.notes + '\n\n' : '') + 'AI (' + today() + '):\n' + v; a.timeline.push({type:'note', date:today(), content:'Saved AI answer to notes'}); save(); $('#pt-back').value = ''; toast('Saved to ' + a.company); },
+  'copy-star': () => { const p = prepFor(ui.prepApp); const s = (p.star||{})[ui.qSel] || {}; const q = questionSet(ui.prepApp).find(x => x.id === ui.qSel); copy(`${q ? q.q : ''}\n\nSituation: ${s.s||''}\nTask: ${s.t||''}\nAction: ${s.a||''}\nResult: ${s.r||''}`); },
+  'mock-start': () => mockStart(),
+  'mock-next': () => mockNext(),
+  'mock-stop': () => { clearInterval(mockTimer); ui.mock = null; render(); },
+  'mock-pause': () => { ui.mock.paused = !ui.mock.paused; const n = $('#mk-note'); if(n) ui.mock.notes[ui.mock.i] = n.value; render(); },
+  'research-hook': () => { const p = prepFor(ui.prepApp); ui.outApp = ui.prepApp; ui.outFields = {hook: (p.research||'').split(/(?<=[.!?])\s/)[0]}; ui.outDirty = false; go('outreach'); },
+  'edit-templates': () => { ui.editTpl = true; render(); },
+  'done-templates': () => { ui.editTpl = false; ui.confirm = null; render(); },
+  'add-template': () => { S.templates.push({id:uid('t'), group:'Cold outreach', cold:true, name:'New template', subject:'{{role}} at {{company}}', body:'Hi {{recruiter}},\n\n{{hook}}\n\n{{proof_point}}\n\nBest,\n{{name}}'}); save(); render(); },
+  'reset-templates': () => { if(ui.confirm !== 'reset-tpl'){ ui.confirm = 'reset-tpl'; render(); return; } ui.confirm = null; S.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); render(); toast('Default templates restored'); },
+  'copy-subj': () => copy(ui.outSubject),
+  'copy-body': () => { const un = unfilled(ui.outSubject + ui.outBody); if(un.length && ui.confirm !== 'copy'){ ui.confirm = 'copy'; rerenderKeep(); return; } ui.confirm = null; copy(ui.outBody); rerenderKeep(); },
+  'mailto': () => {},
+  'reset-draft': () => { ui.outDirty = false; render(); },
+  'log-sent': () => {
+    const t = S.templates.find(x => x.id === ui.outTpl); const ctx = outCtx();
+    S.outreach.push({date:today(), to:ctx.recruiter, company:ctx.company, subject:ui.outSubject, template:t ? t.name : ''});
+    let a = S.applications.find(x => x.id === ui.outApp);
+    if(!a && ctx.company){ a = {id:uid('a'), company:ctx.company, role:ctx.role||'', jobLink:'', jdText:'', resumeId:S.check.resumeId||'', atsScore:0, status:'Saved', dateApplied:'', contact:{name:ctx.recruiter||'', email:ui.outFields.email||''}, salaryRange:'', notes:'', nextAction:{text:'Follow up on cold email', date:addDays(today(), 5)}, timeline:[], prep:{star:{},checklist:{},mocks:[],research:''}, maxStage:0}; S.applications.unshift(a); ui.outApp = a.id; }
+    if(a){ a.timeline.push({type:'email_sent', date:today(), content:(t ? t.name + ': ' : '') + ui.outSubject + '\n\n' + ui.outBody}); if(t && /^t1$/.test(t.id)) setStatus(a, 'Applied'); if(t && t.cold && (!a.nextAction || !a.nextAction.date)) a.nextAction = {text:'Follow up on cold email', date:addDays(today(), 5)}; }
+    save(); render(); toast(a ? 'Logged on ' + a.company + '’s timeline' : 'Logged');
+  },
+  'close-drawer': () => closeDrawer(),
+  'close-overlay': (e) => { if(e.target.classList.contains('overlay')) closeDrawer(); },
+  'd-prep': () => { ui.prepApp = drawerId; closeDrawer(); go('prep'); },
+  'd-email': () => { ui.outApp = drawerId; ui.outFields = {}; ui.outDirty = false; const a = S.applications.find(x => x.id === drawerId); ui.outTpl = a && a.status === 'Interview' ? 't3' : a && a.status === 'Offer' ? 't4' : a && a.status === 'Applied' ? 't2' : 'c1'; closeDrawer(); go('outreach'); },
+  'd-check': () => { const a = S.applications.find(x => x.id === drawerId); if(a){ if(a.jdText) S.check.jd = a.jdText; S.check.appId = a.id; if(a.resumeId && resumeById(a.resumeId)) S.check.resumeId = a.resumeId; } closeDrawer(); go('resume'); },
+  'read-reply': () => { const txt = $('#d-reply').value.trim(); if(!txt){ toast('Paste the reply first'); return; } replyGuess = Object.assign(parseReply(txt), {text:txt}); renderDrawer(); },
+  'cancel-reply': () => { replyGuess = null; renderDrawer(); },
+  'confirm-reply': () => {
+    const a = S.applications.find(x => x.id === drawerId); if(!a || !replyGuess) return;
+    a.timeline.push({type:'reply_received', date:today(), content:replyGuess.text});
+    const st = $('#d-rs').value, d = $('#d-rd').value, txt = $('#d-rt').value;
+    if(st !== a.status) setStatus(a, st, 'Status changed to ' + st + ' after reply');
+    if(d) a.nextAction = {text: txt || 'Next step', date:d};
+    replyGuess = null; save(); renderDrawer(); render(); toast('Reply saved');
+  },
+  'add-note': () => { const a = S.applications.find(x => x.id === drawerId); const v = $('#d-note').value.trim(); if(!a || !v) return; a.timeline.push({type:'note', date:today(), content:v}); save(); renderDrawer(); },
+  'del-app': () => { if(ui.confirm !== 'del-app'){ ui.confirm = 'del-app'; renderDrawer(); return; } S.applications = S.applications.filter(x => x.id !== drawerId); drawerId = null; ui.confirm = null; $('#modal').innerHTML = ''; save(); render(); toast('Application deleted'); },
+  'import-merge': () => { const d = ui.importData; const ids = new Set(S.applications.map(a => a.id)); d.applications.forEach(a => { if(!ids.has(a.id)) S.applications.push(a); }); const rids = new Set(S.resumes.map(r => r.id)); (d.resumes||[]).forEach(r => { if(!rids.has(r.id)) S.resumes.push(r); }); S = migrate(S); ui.importData = null; save(); render(); toast('Backup merged'); },
+  'import-replace': () => { S = migrate(ui.importData); S.settings.examples = false; ui.importData = null; save(); applyTheme(); render(); toast('Backup restored'); },
+  'reset-all': () => { if(ui.confirm !== 'reset'){ ui.confirm = 'reset'; render(); return; } ui.confirm = null; S = freshState(); save(); render(); toast('All data erased'); },
+  'load-examples': () => { const keep = S.applications.filter(a => !a.example); S = seed(Object.assign(freshState(), {applications:keep})); save(); render(); toast('Example data loaded'); }
+};
+
+function syncResumeText(){
+  const ta = $('#rc-text'); if(!ta) return;
+  const txt = ta.value;
+  let r = resumeById(S.check.resumeId);
+  if(!r && txt.trim()){ r = {id:uid('r'), label:'Pasted resume', text:txt, added:today(), meta:{source:'paste'}}; S.resumes.push(r); S.check.resumeId = r.id; }
+  else if(r && r.text !== txt){ r.text = txt; if(r.meta && r.meta.source !== 'paste') r.meta = Object.assign({}, r.meta, {edited:true}); }
+}
+
+let inputTimer = null;
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(t.id === 'rc-text' || t.id === 'rc-jd'){
+    if(t.id === 'rc-jd') S.check.jd = t.value; else syncResumeText();
+    save(); clearTimeout(inputTimer);
+    inputTimer = setTimeout(() => { analysisCache.key = ''; linkScore(); const res = $('#view'); const y = window.scrollY; const act = document.activeElement && document.activeElement.id; const pos = document.activeElement && document.activeElement.selectionStart; render(); window.scrollTo(0, y); if(act){ const el = document.getElementById(act); if(el){ el.focus({preventScroll:true}); try { el.setSelectionRange(pos, pos); } catch(_){} } } }, 700);
+    return;
+  }
+  if(t.id === 'pt-extra'){ ui.ptExtra = t.value; const out = $('#pt-out'); const a = currentAnalysis(); if(out && a) out.value = buildPrompt(a); return; }
+  if(t.dataset.star){ const p = prepFor(ui.prepApp); p.star = p.star || {}; p.star[ui.qSel] = p.star[ui.qSel] || {s:'',t:'',a:'',r:''}; p.star[ui.qSel][t.dataset.star] = t.value; save(); clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 900); return; }
+  if(t.id === 'prep-research'){ prepFor(ui.prepApp).research = t.value; save(); clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 900); return; }
+  if(t.id === 'mk-note' && ui.mock){ ui.mock.notes[ui.mock.i] = t.value; return; }
+  if(t.dataset.of){ ui.outFields[t.dataset.of] = t.value; ui.outDirty = false; ui.confirm = null; clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 350); return; }
+  if(t.id === 'o-subj' || t.id === 'o-body'){ ui.outDirty = true; if(t.id === 'o-subj') ui.outSubject = t.value; else ui.outBody = t.value; clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 600); return; }
+  if(t.dataset.tf){ const card = t.closest('[data-tid]'); const tp = S.templates.find(x => x.id === card.dataset.tid); if(tp){ tp[t.dataset.tf] = t.value; if(t.dataset.tf === 'group') tp.cold = t.value === 'Cold outreach'; save(); } return; }
+  if(t.dataset.af){ const a = S.applications.find(x => x.id === drawerId); if(!a) return; const [k1,k2] = t.dataset.af.split('.'); if(k2) a[k1][k2] = t.value; else a[k1] = t.value; save(); if(k1 === 'company'){ const h = $('.drawer h2'); if(h) h.textContent = t.value || 'Untitled'; } return; }
+  if(t.dataset.pf){ S.profile[t.dataset.pf] = t.dataset.pf === 'years_experience' ? +t.value : t.value; save(); return; }
+  if(t.dataset.sf2){ S.settings[t.dataset.sf2] = Math.max(1, +t.value || 1); save(); return; }
+  if(t.id === 'ap-filter'){ ui.filter = t.value; clearTimeout(inputTimer); inputTimer = setTimeout(() => softRerender(), 250); return; }
+});
+function softRerender(){
+  const act = document.activeElement; const id = act && (act.id || ''); const key = act && act.dataset ? (act.dataset.star || act.dataset.of || '') : '';
+  const pos = act && 'selectionStart' in act ? act.selectionStart : null; const y = window.scrollY;
+  render(); window.scrollTo(0, y);
+  let el = id ? document.getElementById(id) : null;
+  if(!el && key) el = $(`[data-star="${key}"]`) || $(`[data-of="${key}"]`);
+  if(el){ el.focus({preventScroll:true}); if(pos != null){ try { el.setSelectionRange(pos, pos); } catch(_){} } }
+}
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.id === 'pk-ind'){ S.profile.industry = t.value; S.profile.role = PACKS[t.value].roles[0]; analysisCache.key = ''; ui.qSel = null; save(); render(); toast(PACKS[t.value].label + ' pack loaded'); return; }
+  if(t.id === 'pk-role'){ S.profile.role = t.value; save(); render(); return; }
+  if(t.id === 'rc-resume'){ S.check.resumeId = t.value; analysisCache.key = ''; save(); render(); return; }
+  if(t.id === 'rc-app'){ S.check.appId = t.value; const a = S.applications.find(x => x.id === t.value); if(a && a.jdText && !S.check.jd.trim()) S.check.jd = a.jdText; linkScore(); save(); render(); return; }
+  if(t.id === 'rc-file'){ const f = t.files[0]; if(f) handleFile(f); t.value = ''; return; }
+  if(t.id === 'prep-app'){ ui.prepApp = t.value; ui.mock = null; clearInterval(mockTimer); ui.qSel = null; render(); return; }
+  if(t.dataset.chk !== undefined){ const p = prepFor(ui.prepApp); p.checklist = p.checklist || {}; p.checklist[t.dataset.chk] = t.checked; save(); render(); return; }
+  if(t.id === 'o-app'){ ui.outApp = t.value; ui.outFields = {}; ui.outDirty = false; render(); return; }
+  if(t.id === 'ap-status'){ ui.statusFilter = t.value; render(); return; }
+  if(t.id === 'd-status'){ const a = S.applications.find(x => x.id === drawerId); if(a){ setStatus(a, t.value); save(); renderDrawer(); render(); } return; }
+  if(t.dataset.af === 'resumeId'){ const a = S.applications.find(x => x.id === drawerId); if(a){ a.resumeId = t.value; save(); } return; }
+  if(t.id === 'set-theme'){ S.settings.theme = t.value || null; applyTheme(); save(); return; }
+  if(t.id === 'imp-file'){ const f = t.files[0]; t.value = ''; if(!f) return; f.text().then(txt => { const d = JSON.parse(txt); if(!d || !Array.isArray(d.applications)) throw new Error('bad'); ui.importData = d; render(); }).catch(() => toast('That file is not a CareerPrep backup.')); return; }
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && drawerId){ closeDrawer(); return; }
+  const tag = (e.target.tagName||'').toLowerCase();
+  if((e.key === 'n' || e.key === 'N') && !e.metaKey && !e.ctrlKey && !e.altKey && !['input','textarea','select'].includes(tag) && !e.target.isContentEditable && !drawerId){ e.preventDefault(); newApp(); }
+  if(e.key === 'Enter' && e.target.matches && e.target.matches('tr[data-open]')) openApp(e.target.dataset.open);
+});
+$('#theme-btn').addEventListener('click', () => {
+  const dark = S.settings.theme ? S.settings.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  S.settings.theme = dark ? 'light' : 'dark'; applyTheme(); save(); if(view === 'settings') render();
+});
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if(VIEWS.some(x => x.id === v) && v !== view){ view = v; render(); } });
+document.addEventListener('visibilitychange', () => {});
+
+/* ---------- boot ---------- */
+applyTheme();
+if(S.check.appId) linkScore();
+render();
+renderBoard(true);
+save();
+})();
+</script>
+
+</body>
+</html>
