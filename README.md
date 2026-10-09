@@ -248,3 +248,52 @@ Display currency toggles between CAD and INR at the model's exchange rate. All i
 
 A planning model, not a forecast. Treat break-even months as ranges, and re-run against real cost per
 visitor and booking conversion once live cohorts land.
+
+---
+
+# Vacario Card Scanner
+
+A phone-first app for turning trade-fair visiting cards into a contact database and a mailer list.
+
+**Live page:** https://claude.ai/artifact/Bow2bE3ZoEUHqAZqd4UFzG (private; share it from the page's Share menu,
+giving teammates *Contributor* or *Editor* access so they can add cards).
+**Source:** `src/card-scanner.html`. It runs only inside claude.ai or the Claude app, because it uses the
+platform's camera upload, Claude vision, shared database and downloads.
+
+## How it works
+
+1. **Scan a card** opens the phone camera. **Upload photos** takes many gallery photos at once and reads
+   them one after another. Tick *Photos come in pairs* if you shot the front and back of each card.
+2. Claude reads each card and fills: first/last name, job title, department, company, partner type,
+   what they do, two emails, mobile, office and other phones, WhatsApp/WeChat, website, LinkedIn,
+   street, city, state, postal code and country. Phones are put into international format and the
+   country is inferred from the address, dialling code or domain when it isn't printed.
+   Non-Latin cards are transliterated, with the original kept under *Other text on the card*.
+3. Fields Claude could not read confidently are highlighted. Open a card, compare it with the photo,
+   set Hot / Warm / Cold, add a note on what was discussed, then **Save & mark checked**.
+   You can also add the back of a card later and have both sides read again.
+4. Everyone the page is shared with works on **one shared list**, so 3 or 4 people can scan at the same
+   stand and nothing gets typed twice. Each card records who scanned it.
+
+## Sorting common data
+
+- **Filters:** To check, Hot, No email, Duplicates (same email, or same name at the same company), Scanned by me.
+- **Groups:** partner type, country, company, city, email domain (personal Gmail/Yahoo addresses are
+  separated out), priority, or who scanned it.
+- **Partner types:** Travel agency / tour operator, DMC / ground handler, Hotel / accommodation,
+  Airline / transport, OTA / travel tech, Tourism board / government, MICE / events, Corporate buyer,
+  Investor / finance, Media / marketing, Technology / SaaS vendor, Other.
+
+## Export
+
+**Download Excel (.xlsx)** produces four sheets with bold, frozen, filterable headers:
+
+| Sheet | Contents |
+|---|---|
+| Contacts | every card and every field, sorted by partner type then company |
+| Mailer list | one row per unique email (Email, First name, Last name, Company, Country, Partner type…), ready to import into Mailchimp, Brevo, Zoho Campaigns or Outlook |
+| Summary | counts by partner type, country and company |
+| To fix | cards with no email, unchecked fields or likely duplicates |
+
+**Mailer list (.csv)** is the same mailer sheet as a UTF-8 CSV, and the page also shows every email as
+one comma-separated block you can copy into BCC.

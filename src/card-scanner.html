@@ -1,0 +1,1052 @@
+<title>Vacario Card Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+
+<style>
+/* Layout: one phone-width column. Capture actions on top, then the card list,
+   grouped views and export behind three tabs. The editor is a full-height sheet. */
+:root{
+  --ground:#f1f2ee; --surface:#fbfbf8; --well:#e8eae2; --raise:#ffffff;
+  --ink:#15191a; --ink-2:#565d59; --ink-3:#868d88;
+  --rule:#d8dcd2; --rule-2:#c4c9bc;
+  --accent:#0e5b5e; --accent-ink:#0a4446; --accent-soft:#d6e7e6; --on-accent:#ffffff;
+  --good:#0b7f0b; --good-soft:#dcefd9; --warn:#9a6a00; --warn-soft:#f8ecc8; --crit:#b42f2f; --crit-soft:#f6dcd9;
+  --hot:#c2410c; --warm:#a16207; --cold:#3f6f9f;
+  --shadow:0 1px 2px rgba(20,28,24,.06), 0 6px 16px -10px rgba(20,28,24,.20);
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101210; --surface:#1a1c19; --well:#23261f; --raise:#23261f;
+    --ink:#f0f2ec; --ink-2:#a7aea3; --ink-3:#7b827a;
+    --rule:#31352d; --rule-2:#404539;
+    --accent:#4fb3ac; --accent-ink:#8fd6d0; --accent-soft:#123634; --on-accent:#08201f;
+    --good:#5cc95c; --good-soft:#163016; --warn:#e2b340; --warn-soft:#33290e; --crit:#ef7a7a; --crit-soft:#3a1716;
+    --hot:#f08a4b; --warm:#e0b04a; --cold:#7fb0e0;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101210; --surface:#1a1c19; --well:#23261f; --raise:#23261f;
+  --ink:#f0f2ec; --ink-2:#a7aea3; --ink-3:#7b827a;
+  --rule:#31352d; --rule-2:#404539;
+  --accent:#4fb3ac; --accent-ink:#8fd6d0; --accent-soft:#123634; --on-accent:#08201f;
+  --good:#5cc95c; --good-soft:#163016; --warn:#e2b340; --warn-soft:#33290e; --crit:#ef7a7a; --crit-soft:#3a1716;
+  --hot:#f08a4b; --warm:#e0b04a; --cold:#7fb0e0;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink); font:15px/1.45 var(--f-body); -webkit-text-size-adjust:100%}
+.wrap{max-width:780px; margin:0 auto; padding-inline:16px; padding-block:14px 80px; display:flex; flex-direction:column; gap:16px}
+h1,h2,h3{font-family:var(--f-display); font-weight:700; margin:0; text-wrap:balance; letter-spacing:.01em}
+h1{font-size:26px; line-height:1.1}
+h2{font-size:19px}
+h3{font-size:15px}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.small{font-size:13px}
+.eyebrow{font:600 11px/1.2 var(--f-body); letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+button,input,select,textarea{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* header */
+.top{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.top .meta{display:flex; flex-direction:column; gap:4px; min-width:0}
+.event{display:flex; align-items:center; gap:6px; color:var(--ink-2); font-size:13px}
+.event input{border:0; border-bottom:1px dashed var(--rule-2); background:transparent; padding:2px 0; min-width:0; width:16em; max-width:60vw}
+.tally{display:flex; gap:14px}
+.tally div{display:flex; flex-direction:column; align-items:flex-end}
+.tally b{font:600 22px/1 var(--f-mono); font-variant-numeric:tabular-nums}
+.tally span{font-size:11px; color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase}
+
+/* capture */
+.capture{background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
+.cap-row{display:grid; grid-template-columns:1.4fr 1fr; gap:10px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--rule-2); background:var(--raise); border-radius:10px; padding:10px 14px; font-weight:500; min-height:44px; text-align:center}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent); color:var(--on-accent); border-color:var(--accent); font-weight:600}
+.btn.big{min-height:64px; font-size:16px; flex-direction:column; gap:2px}
+.btn.big small{font-size:12px; font-weight:400; opacity:.85}
+.btn.ghost{background:transparent; border-color:transparent; color:var(--accent-ink); padding-inline:8px}
+.btn.danger{color:var(--crit); border-color:var(--crit)}
+.btn[disabled]{opacity:.5; cursor:not-allowed}
+.btn svg{width:20px; height:20px; flex:none}
+.filelabel{position:relative; overflow:hidden}
+.filelabel input{position:absolute; inset:0; opacity:0; cursor:pointer; font-size:0}
+.cap-foot{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--ink-2)}
+.twoside{display:flex; align-items:center; gap:8px}
+.twoside input{width:18px; height:18px; accent-color:var(--accent)}
+.notice{border-radius:10px; padding:10px 12px; font-size:13.5px; background:var(--warn-soft); color:var(--ink)}
+.notice.crit{background:var(--crit-soft)}
+.notice.info{background:var(--accent-soft)}
+
+/* queue */
+.queue{display:flex; flex-direction:column; gap:6px}
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.qbar{height:6px; border-radius:3px; background:var(--well); overflow:hidden}
+.qbar i{display:block; height:100%; width:0; background:var(--accent); transition:width .3s}
+.qlist{display:flex; flex-direction:column; gap:4px; max-height:180px; overflow:auto}
+.qi{display:grid; grid-template-columns:36px 1fr auto; gap:10px; align-items:center; font-size:13px; padding:4px 0; border-bottom:1px solid var(--rule)}
+.qi img{width:36px; height:24px; object-fit:cover; border-radius:3px; background:var(--well)}
+.qi .st{font-size:12px; color:var(--ink-3); white-space:nowrap}
+.qi .st.ok{color:var(--good)} .qi .st.err{color:var(--crit)} .qi .st.run{color:var(--accent-ink)}
+
+/* tabs */
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--rule); position:sticky; top:env(safe-area-inset-top,0px); background:var(--ground); z-index:5; padding-top:4px}
+.tab{border:0; background:transparent; padding:10px 12px; font-weight:600; color:var(--ink-2); border-bottom:2px solid transparent; margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.tab .n{font:500 12px var(--f-mono); color:var(--ink-3); margin-left:4px}
+
+/* list */
+.tools{display:flex; flex-direction:column; gap:10px}
+.search{width:100%; border:1px solid var(--rule-2); border-radius:10px; padding:10px 12px; background:var(--raise); min-height:44px}
+.chips{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none}
+.chip{border:1px solid var(--rule-2); border-radius:999px; padding:5px 11px; background:var(--raise); font-size:13px; white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--ground); border-color:var(--ink)}
+.chip .n{font-family:var(--f-mono); opacity:.7; margin-left:3px}
+.cards{display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--rule); border-radius:14px; overflow:hidden}
+.row{display:grid; grid-template-columns:64px 1fr auto; gap:12px; align-items:center; padding:10px 12px; border:0; border-bottom:1px solid var(--rule); background:transparent; text-align:left; width:100%}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--well)}
+.row .th{width:64px; height:40px; border-radius:4px; object-fit:cover; background:var(--well); display:block}
+.row .th.none{display:flex; align-items:center; justify-content:center; font:600 13px var(--f-display); color:var(--ink-3)}
+.row .who{min-width:0; display:flex; flex-direction:column; gap:1px}
+.row .nm{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .sub{font-size:13px; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .em{font:12.5px var(--f-mono); color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .flags{display:flex; flex-direction:column; align-items:flex-end; gap:4px}
+.pill{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; letter-spacing:.03em; padding:2px 7px; border-radius:999px; white-space:nowrap; background:var(--well); color:var(--ink-2)}
+.pill.check{background:var(--warn-soft); color:var(--warn)}
+.pill.dup{background:var(--crit-soft); color:var(--crit)}
+.pill.noemail{background:var(--crit-soft); color:var(--crit)}
+.pill.hot{color:var(--hot)} .pill.warm{color:var(--warm)} .pill.cold{color:var(--cold)}
+.pill i{width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block}
+.empty{padding:28px 18px; display:flex; flex-direction:column; gap:10px; align-items:flex-start}
+.empty ol{margin:0; padding-left:20px; color:var(--ink-2); display:flex; flex-direction:column; gap:4px}
+
+/* groups */
+.gsel{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.gsel select{border:1px solid var(--rule-2); border-radius:10px; padding:8px 10px; background:var(--raise); min-height:40px}
+.groups{display:flex; flex-direction:column; gap:12px}
+.grp{background:var(--surface); border:1px solid var(--rule); border-radius:14px; overflow:hidden}
+.grp>summary{list-style:none; display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:12px 14px; cursor:pointer}
+.grp>summary::-webkit-details-marker{display:none}
+.grp>summary .gname{font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.grp>summary .gn{font:500 13px var(--f-mono); color:var(--ink-2)}
+.gbar{grid-column:1 / -1; height:4px; background:var(--well); border-radius:2px; overflow:hidden}
+.gbar i{display:block; height:100%; background:var(--accent)}
+.grp .cards{border:0; border-top:1px solid var(--rule); border-radius:0}
+
+/* export */
+.exp{display:flex; flex-direction:column; gap:14px}
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px}
+.panel ul{margin:0; padding-left:18px; color:var(--ink-2); display:flex; flex-direction:column; gap:3px; font-size:14px}
+.btnrow{display:flex; gap:8px; flex-wrap:wrap}
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+.stat{display:flex; flex-direction:column; gap:2px}
+.stat b{font:600 20px/1.1 var(--f-mono); font-variant-numeric:tabular-nums}
+.stat span{font-size:12px; color:var(--ink-2)}
+.emails{width:100%; min-height:90px; border:1px solid var(--rule-2); border-radius:10px; padding:10px; font:12.5px/1.5 var(--f-mono); background:var(--raise); resize:vertical}
+
+/* editor sheet */
+.sheet{position:fixed; inset:0; z-index:20; background:var(--ground); overflow:auto; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet .wrap{padding-block:0 120px}
+.sbar{position:sticky; top:0; z-index:2; background:var(--ground); display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 0; border-bottom:1px solid var(--rule)}
+.sbar h2{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.shots{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.shots figure{margin:0; display:flex; flex-direction:column; gap:4px}
+.shots img{width:100%; aspect-ratio:1.7; object-fit:contain; background:var(--well); border-radius:8px; border:1px solid var(--rule)}
+.shots figcaption{font-size:12px; color:var(--ink-3)}
+.shots .slot{aspect-ratio:1.7; border:1px dashed var(--rule-2); border-radius:8px; display:flex; align-items:center; justify-content:center; text-align:center; padding:8px; font-size:13px; color:var(--ink-2)}
+fieldset{border:0; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+legend{padding:0; margin-bottom:6px}
+.fgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px 12px}
+.fgrid .full{grid-column:1 / -1}
+.fld{display:flex; flex-direction:column; gap:3px; min-width:0}
+.fld label{font-size:12px; color:var(--ink-2); display:flex; gap:6px; align-items:center}
+.fld input,.fld select,.fld textarea{border:1px solid var(--rule-2); border-radius:8px; padding:9px 10px; background:var(--raise); min-height:42px; width:100%; min-width:0}
+.fld textarea{min-height:72px; resize:vertical}
+.fld.unsure input{border-color:var(--warn); background:var(--warn-soft)}
+.fld .q{font-size:10.5px; font-weight:600; color:var(--warn); letter-spacing:.04em; text-transform:uppercase}
+.prio{display:flex; gap:6px}
+.prio button{flex:1; border:1px solid var(--rule-2); border-radius:8px; padding:8px; background:var(--raise); font-weight:600; min-height:42px}
+.prio button[aria-pressed="true"]{border-width:2px}
+.prio button[data-v="Hot"][aria-pressed="true"]{border-color:var(--hot); color:var(--hot)}
+.prio button[data-v="Warm"][aria-pressed="true"]{border-color:var(--warm); color:var(--warm)}
+.prio button[data-v="Cold"][aria-pressed="true"]{border-color:var(--cold); color:var(--cold)}
+.sfoot{position:fixed; left:0; right:0; bottom:0; z-index:3; background:var(--surface); border-top:1px solid var(--rule); padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.sfoot .in{max-width:780px; margin:0 auto; display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap}
+.sfoot .in>div{display:flex; gap:8px; flex-wrap:wrap}
+.confirm{display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px}
+.extra{font:12.5px/1.5 var(--f-mono); color:var(--ink-2); white-space:pre-wrap; background:var(--well); border-radius:8px; padding:10px}
+
+.toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translate(-50%,20px); background:var(--ink); color:var(--ground); padding:10px 14px; border-radius:10px; font-size:14px; max-width:calc(100vw - 32px); opacity:0; pointer-events:none; transition:.25s; z-index:40}
+.toast[data-on="1"]{opacity:1; transform:translate(-50%,0)}
+@media (max-width:520px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .fgrid{grid-template-columns:1fr}
+  .tally b{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap" id="main">
+  <header class="top">
+    <div class="meta">
+      <span class="eyebrow">Vacario · trade fair contacts</span>
+      <h1>Card Scanner</h1>
+      <div class="event"><label for="eventName">Event</label><input id="eventName" placeholder="e.g. ITB Berlin 2026" autocomplete="off"></div>
+    </div>
+    <div class="tally" aria-live="polite">
+      <div><b id="tCards">0</b><span>cards</span></div>
+      <div><b id="tMail">0</b><span>mailable</span></div>
+      <div><b id="tCheck">0</b><span>to check</span></div>
+    </div>
+  </header>
+
+  <section class="capture" aria-label="Add cards">
+    <div class="cap-row">
+      <label class="btn primary big filelabel" id="scanLbl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>
+        Scan a card<small>opens your phone camera</small>
+        <input type="file" id="scanInput" accept="image/*" capture="environment" aria-label="Scan a card with the camera">
+      </label>
+      <label class="btn big filelabel" id="uploadLbl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>
+        Upload photos<small>many at once</small>
+        <input type="file" id="uploadInput" accept="image/*" multiple aria-label="Upload card photos">
+      </label>
+    </div>
+    <div class="cap-foot">
+      <label class="twoside"><input type="checkbox" id="twoSided"> Photos come in pairs (front, then back)</label>
+      <button class="btn ghost" id="manualBtn" type="button">Type a contact in by hand</button>
+    </div>
+    <div class="notice" id="aiNotice" hidden></div>
+    <div class="queue" id="queue" hidden>
+      <div class="qhead"><span class="small" id="qText">Reading cards…</span><button class="btn ghost" id="qStop" type="button">Stop</button></div>
+      <div class="qbar"><i id="qBar"></i></div>
+      <div class="qlist" id="qList"></div>
+    </div>
+  </section>
+
+  <div class="notice crit" id="dbNotice" hidden></div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-list" aria-selected="true" data-tab="list">Contacts<span class="n" id="nList">0</span></button>
+    <button class="tab" role="tab" id="tab-groups" aria-selected="false" data-tab="groups">Groups</button>
+    <button class="tab" role="tab" id="tab-export" aria-selected="false" data-tab="export">Excel &amp; mailer</button>
+  </nav>
+
+  <section id="pane-list" role="tabpanel" aria-labelledby="tab-list" class="tools">
+    <input class="search" id="q" type="search" placeholder="Search name, company, email, city…" autocomplete="off">
+    <div class="chips" id="filters" role="group" aria-label="Filters"></div>
+    <div class="cards" id="list"></div>
+  </section>
+
+  <section id="pane-groups" role="tabpanel" aria-labelledby="tab-groups" class="tools" hidden>
+    <div class="gsel"><label for="groupBy" class="small muted">Group contacts by</label>
+      <select id="groupBy">
+        <option value="segment">Partner type</option>
+        <option value="country">Country</option>
+        <option value="company">Company</option>
+        <option value="city">City</option>
+        <option value="domain">Email domain</option>
+        <option value="priority">Priority</option>
+        <option value="scannedBy">Scanned by</option>
+      </select>
+    </div>
+    <div class="groups" id="groups"></div>
+  </section>
+
+  <section id="pane-export" role="tabpanel" aria-labelledby="tab-export" class="exp" hidden>
+    <div class="panel">
+      <span class="eyebrow">Ready to send</span>
+      <div class="stats">
+        <div class="stat"><b id="sAll">0</b><span>contacts</span></div>
+        <div class="stat"><b id="sMail">0</b><span>unique emails</span></div>
+        <div class="stat"><b id="sCo">0</b><span>companies</span></div>
+        <div class="stat"><b id="sCty">0</b><span>countries</span></div>
+      </div>
+      <p class="small muted" id="sWarn"></p>
+    </div>
+    <div class="panel">
+      <h2>Excel workbook</h2>
+      <ul>
+        <li><b>Contacts</b>: every card, every field, sorted by partner type then company</li>
+        <li><b>Mailer list</b>: one row per unique email, ready to import into Mailchimp, Brevo, Zoho or Outlook</li>
+        <li><b>Summary</b>: counts by partner type, country and company</li>
+        <li><b>To fix</b>: cards with no email, unchecked fields or likely duplicates</li>
+      </ul>
+      <div class="btnrow">
+        <button class="btn primary" id="dlXlsx" type="button">Download Excel (.xlsx)</button>
+        <button class="btn" id="dlCsv" type="button">Mailer list (.csv)</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>All emails</h2>
+      <p class="small muted">Comma-separated, duplicates removed. Paste into the BCC field for a quick send.</p>
+      <textarea class="emails" id="emailList" readonly aria-label="All email addresses"></textarea>
+      <div class="btnrow"><button class="btn" id="copyEmails" type="button">Copy emails</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sTitle">
+  <div class="wrap">
+    <div class="sbar">
+      <h2 id="sTitle">Contact</h2>
+      <button class="btn ghost" id="sClose" type="button">Close</button>
+    </div>
+    <div class="shots" id="shots"></div>
+    <div class="notice" id="sNote" hidden></div>
+    <form id="form" autocomplete="off" class="tools">
+      <fieldset>
+        <legend><span class="eyebrow">Person</span></legend>
+        <div class="fgrid">
+          <div class="fld" data-k="first_name"><label for="f-first_name">First name</label><input id="f-first_name"></div>
+          <div class="fld" data-k="last_name"><label for="f-last_name">Last name</label><input id="f-last_name"></div>
+          <div class="fld" data-k="job_title"><label for="f-job_title">Job title</label><input id="f-job_title"></div>
+          <div class="fld" data-k="department"><label for="f-department">Department</label><input id="f-department"></div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="eyebrow">Company</span></legend>
+        <div class="fgrid">
+          <div class="fld full" data-k="company"><label for="f-company">Company</label><input id="f-company"></div>
+          <div class="fld" data-k="segment"><label for="f-segment">Partner type</label><input id="f-segment" list="segList"></div>
+          <div class="fld" data-k="industry"><label for="f-industry">What they do</label><input id="f-industry"></div>
+          <div class="fld" data-k="website"><label for="f-website">Website</label><input id="f-website" inputmode="url"></div>
+          <div class="fld" data-k="linkedin"><label for="f-linkedin">LinkedIn</label><input id="f-linkedin" inputmode="url"></div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="eyebrow">Contact</span></legend>
+        <div class="fgrid">
+          <div class="fld" data-k="email"><label for="f-email">Email</label><input id="f-email" type="email" inputmode="email"></div>
+          <div class="fld" data-k="email_2"><label for="f-email_2">Second email</label><input id="f-email_2" type="email" inputmode="email"></div>
+          <div class="fld" data-k="mobile"><label for="f-mobile">Mobile</label><input id="f-mobile" inputmode="tel"></div>
+          <div class="fld" data-k="phone"><label for="f-phone">Office phone</label><input id="f-phone" inputmode="tel"></div>
+          <div class="fld" data-k="phone_2"><label for="f-phone_2">Other phone</label><input id="f-phone_2" inputmode="tel"></div>
+          <div class="fld" data-k="other_social"><label for="f-other_social">WhatsApp / WeChat / other</label><input id="f-other_social"></div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="eyebrow">Address</span></legend>
+        <div class="fgrid">
+          <div class="fld full" data-k="street"><label for="f-street">Street</label><input id="f-street"></div>
+          <div class="fld" data-k="city"><label for="f-city">City</label><input id="f-city"></div>
+          <div class="fld" data-k="state"><label for="f-state">State / region</label><input id="f-state"></div>
+          <div class="fld" data-k="postal_code"><label for="f-postal_code">Postal code</label><input id="f-postal_code"></div>
+          <div class="fld" data-k="country"><label for="f-country">Country</label><input id="f-country"></div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="eyebrow">Follow-up</span></legend>
+        <div class="fld"><label>Priority</label>
+          <div class="prio" id="prio">
+            <button type="button" data-v="Hot" aria-pressed="false">Hot</button>
+            <button type="button" data-v="Warm" aria-pressed="false">Warm</button>
+            <button type="button" data-v="Cold" aria-pressed="false">Cold</button>
+          </div>
+        </div>
+        <div class="fld" data-k="notes"><label for="f-notes">What we discussed / next step</label><textarea id="f-notes" placeholder="e.g. wants API access for Q1, send rate card"></textarea></div>
+        <div class="fld" data-k="event"><label for="f-event">Met at</label><input id="f-event"></div>
+      </fieldset>
+      <div id="extraWrap" hidden class="fld"><span class="eyebrow">Other text on the card</span><div class="extra" id="extra"></div></div>
+      <p class="small muted" id="sMeta"></p>
+    </form>
+  </div>
+  <div class="sfoot"><div class="in">
+    <div id="delArea"><button class="btn danger" id="sDel" type="button">Delete</button></div>
+    <div><button class="btn" id="sReread" type="button">Read card again</button><button class="btn primary" id="sSave" type="button">Save &amp; mark checked</button></div>
+  </div></div>
+</div>
+
+<datalist id="segList"></datalist>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+var SEGMENTS = [
+  "Travel agency / tour operator","DMC / ground handler","Hotel / accommodation","Airline / transport",
+  "OTA / travel tech","Tourism board / government","MICE / events","Corporate buyer",
+  "Investor / finance","Media / marketing","Technology / SaaS vendor","Other"
+];
+var FIELDS = ["first_name","last_name","job_title","department","company","segment","industry","website","linkedin",
+  "email","email_2","mobile","phone","phone_2","other_social","street","city","state","postal_code","country","notes","event"];
+var AI_FIELDS = FIELDS.filter(function(k){ return k!=="notes" && k!=="event"; });
+var COLL = "cards";
+
+var $ = function(id){ return document.getElementById(id); };
+var S = { cards: [], filter: "all", q: "", tab: "list", editing: null, uid: null, names: {}, canAI: null, aiOff: "" };
+var db = null, sample = null, user = null, downloads = null;
+
+/* ---------- small helpers ---------- */
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function str(v){ return v==null ? "" : String(v).trim(); }
+var TT=null;
+function toast(t){ var k=$("toast"); k.textContent=t; k.setAttribute("data-on","1"); clearTimeout(TT); TT=setTimeout(function(){ k.setAttribute("data-on","0"); },4200); }
+var EMAIL_RE = /^[^\s@,;]+@[^\s@,;]+\.[a-z]{2,}$/i;
+function goodEmail(e){ return EMAIL_RE.test(str(e)); }
+function mailOf(c){ return goodEmail(c.email) ? str(c.email).toLowerCase() : (goodEmail(c.email_2) ? str(c.email_2).toLowerCase() : ""); }
+function fullName(c){ return [str(c.first_name), str(c.last_name)].filter(Boolean).join(" "); }
+function displayName(c){ return fullName(c) || str(c.company) || "Unnamed card"; }
+function domainOf(c){ var m=mailOf(c); return m ? m.split("@")[1] : ""; }
+var FREEMAIL = /^(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|icloud|me|aol|proton|protonmail|gmx|web|mail|yandex|qq|163|126|rediffmail|zoho)\./i;
+function initials(c){ var n=displayName(c).split(/\s+/); return ((n[0]||"")[0]||"?").toUpperCase()+((n[1]||"")[0]||"").toUpperCase(); }
+function normCo(s){ return str(s).toLowerCase().replace(/[.,]/g,"").replace(/\b(gmbh|ltd|limited|llc|inc|pvt|private|sa|srl|spa|bv|ag|co|corp|plc|pty|llp)\b/g,"").replace(/\s+/g," ").trim(); }
+function cleanUrl(u){ return str(u).replace(/^https?:\/\//i,"").replace(/\/$/,""); }
+function fmtDate(iso){ if(!iso) return ""; var d=new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}); }
+
+/* duplicates: same email, or same name at the same company */
+function dupMap(){
+  var by={}, out={};
+  S.cards.forEach(function(c){
+    var keys=[];
+    var m=mailOf(c); if(m) keys.push("e:"+m);
+    var n=fullName(c).toLowerCase(), co=normCo(c.company);
+    if(n && co) keys.push("n:"+n+"|"+co);
+    keys.forEach(function(k){ (by[k]=by[k]||[]).push(c.id); });
+  });
+  Object.keys(by).forEach(function(k){ if(by[k].length>1) by[k].forEach(function(id){ out[id]=true; }); });
+  return out;
+}
+
+/* ---------- images ---------- */
+function loadImg(blob){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(blob), im=new Image();
+    im.onload=function(){ res({im:im, url:url}); };
+    im.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("That file is not an image this browser can open.")); };
+    im.src=url;
+  });
+}
+function shrink(blob, maxEdge, q){
+  return loadImg(blob).then(function(o){
+    var w=o.im.naturalWidth, h=o.im.naturalHeight, s=Math.min(1, maxEdge/Math.max(w,h));
+    var cv=document.createElement("canvas"); cv.width=Math.round(w*s); cv.height=Math.round(h*s);
+    var cx=cv.getContext("2d"); cx.fillStyle="#fff"; cx.fillRect(0,0,cv.width,cv.height);
+    cx.drawImage(o.im,0,0,cv.width,cv.height);
+    URL.revokeObjectURL(o.url);
+    return new Promise(function(res){ cv.toBlob(function(b){ res({blob:b, dataUrl:cv.toDataURL("image/jpeg",q)}); },"image/jpeg",q); });
+  });
+}
+function dataUrlToBlob(d){
+  var p=d.split(","), bin=atob(p[1]), u=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+  return new Blob([u],{type:"image/jpeg"});
+}
+
+/* ---------- Claude reads the card ---------- */
+function prompt(two){
+  return [
+    "You are reading "+(two?"two photos of the SAME business card (front and back)":"a photo of a business card")+
+    " collected at a B2B travel-industry trade fair. Extract the contact details exactly as printed.",
+    "",
+    "Reply with ONLY one JSON object with exactly these keys. Use \"\" for anything not on the card. Never invent a value.",
+    "{",
+    ' "first_name": "", "last_name": "", "job_title": "", "department": "",',
+    ' "company": "", "segment": "", "industry": "",',
+    ' "email": "", "email_2": "", "mobile": "", "phone": "", "phone_2": "", "other_social": "",',
+    ' "website": "", "linkedin": "",',
+    ' "street": "", "city": "", "state": "", "postal_code": "", "country": "",',
+    ' "other_text": "", "unsure": [], "not_a_card": false',
+    "}",
+    "",
+    "Rules:",
+    "- Names in proper case. If the name order is unclear (for example Chinese, Japanese, Korean), put the family name in last_name.",
+    "- Non-Latin cards: give a Latin transliteration in the fields and put the original script in other_text.",
+    "- Emails lowercase. website and linkedin without https:// (e.g. \"vacario.com\", \"linkedin.com/in/name\").",
+    "- Phones in international format with + and country code when the country is known from the address, a printed code, or the website domain; keep extensions as \"ext. 12\". mobile = a number marked M/Mob/Cell or that is clearly mobile; phone = office/T/Tel; phone_2 = any other number including fax (prefix \"Fax \").",
+    "- other_social: WhatsApp, WeChat, Line, Skype, Instagram handles etc., \"label: value\" separated by \"; \".",
+    "- country: full English name. Infer it from address, phone country code or domain if not printed.",
+    "- segment: pick exactly one of: "+SEGMENTS.join(" | ")+". Decide from the company name, tagline, title and services printed.",
+    "- industry: 2 to 6 words on what the company does, from the card (e.g. \"inbound DMC for Rajasthan\").",
+    "- other_text: any remaining printed text worth keeping (services, branch offices, certifications, tagline), short, \"; \" separated.",
+    "- unsure: list the keys you could not read confidently (blurred, cut off, guessed order).",
+    "- If the image is not a business card at all, set not_a_card to true."
+  ].join("\n");
+}
+function aiErrText(code){
+  switch(code){
+    case "not_granted": return "Reading cards needs your OK to use Claude. Reload the page and allow it, or type contacts in by hand.";
+    case "sampling_disabled": case "capability_disabled": case "capability_removed": case "not_declared":
+      return "Claude is not available on this account, so cards can't be read automatically. You can still type contacts in by hand.";
+    case "images_unavailable": return "This view can't send photos to Claude. Open the page in the Claude app or claude.ai to scan cards.";
+    case "rate_limited": return "Claude usage limit reached for now. The remaining photos are kept in the queue; press Retry in a few minutes.";
+    case "session_expired": return "You were signed out. Sign in to Claude again, then retry.";
+    case "image_rejected": return "That photo could not be read. Try a sharper photo, JPEG or PNG.";
+    case "refused": case "empty_completion": return "Claude could not read this one. Retake the photo with the card filling the frame.";
+    case "invalid_json": return "The answer came back garbled. Retry this card.";
+    default: return "Connection hiccup while reading. Retry this card.";
+  }
+}
+var FATAL = {not_granted:1, sampling_disabled:1, capability_disabled:1, capability_removed:1, not_declared:1, images_unavailable:1, session_expired:1, rate_limited:1};
+
+function readCard(blobs, signal){
+  return sample.json(prompt(blobs.length>1), {images: blobs, signal: signal, modelTier: "default"}).then(function(r){
+    if(!r || typeof r!=="object" || Array.isArray(r)) throw {code:"invalid_json"};
+    var out={};
+    AI_FIELDS.forEach(function(k){ out[k]=str(r[k]); });
+    out.website=cleanUrl(out.website); out.linkedin=cleanUrl(out.linkedin);
+    out.email=out.email.toLowerCase(); out.email_2=out.email_2.toLowerCase();
+    out.other_text=str(r.other_text);
+    out.unsure=Array.isArray(r.unsure) ? r.unsure.map(String).filter(function(k){ return AI_FIELDS.indexOf(k)>=0; }) : [];
+    out.not_a_card=!!r.not_a_card;
+    return out;
+  });
+}
+
+/* ---------- queue ---------- */
+var Q = { items: [], running: false, ctl: null, done: 0 };
+function addToQueue(files){
+  files = Array.prototype.slice.call(files||[]).filter(function(f){ return /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name); });
+  if(!files.length) return;
+  if(!sample || S.canAI===false){ toast(S.aiOff || "Automatic reading is not available here. Use “Type a contact in by hand”."); return; }
+  var pairs = $("twoSided").checked;
+  for(var i=0;i<files.length;i+= pairs?2:1){
+    var group = pairs ? files.slice(i,i+2) : [files[i]];
+    Q.items.push({ id: "q"+Date.now()+"_"+i, files: group, st: "waiting", msg: "Waiting", thumb: null, single: files.length===1 });
+  }
+  renderQueue(); runQueue();
+}
+function runQueue(){
+  if(Q.running) return;
+  var it = Q.items.find(function(x){ return x.st==="waiting"; });
+  if(!it){ renderQueue(); return; }
+  Q.running = true; it.st="run"; it.msg="Reading…"; renderQueue();
+  var ctl = Q.ctl = new AbortController();
+  var shots;
+  Promise.all(it.files.map(function(f){ return shrink(f, 1600, .85); }))
+    .then(function(s){ shots=s; it.thumb=s[0].dataUrl; renderQueue();
+      return Promise.all(it.files.map(function(f){ return shrink(f, 820, .66); })); })
+    .then(function(small){
+      return readCard(shots.map(function(s){ return s.blob; }), ctl.signal).then(function(fields){
+        if(fields.not_a_card){ throw {code:"not_card"}; }
+        return saveNew(fields, small.map(function(s){ return s.dataUrl; }));
+      });
+    })
+    .then(function(id){
+      it.st="ok"; it.msg="Saved"; Q.done++;
+      if(it.single && Q.items.filter(function(x){ return x.st!=="ok"; }).length===0) openEditor(id, true);
+    }, function(e){
+      var code = e && e.code;
+      if(code==="cancelled"){ it.st="waiting"; it.msg="Stopped"; Q.running=false; renderQueue(); return "halt"; }
+      it.st="err";
+      it.msg = code==="not_card" ? "Not a business card" : (code ? aiErrText(code) : (e && e.message) || "Could not save");
+      if(code && FATAL[code]){
+        Q.items.forEach(function(x){ if(x.st==="waiting") x.msg="Paused"; });
+        Q.halted = aiErrText(code);
+        if(code!=="rate_limited"){ S.canAI=false; S.aiOff=aiErrText(code); showAiNotice(); }
+        return "halt";
+      }
+    })
+    .then(function(flag){
+      Q.running=false; Q.ctl=null;
+      if(flag==="halt"){ renderQueue(); return; }
+      Q.halted=null; runQueue();
+    });
+}
+function renderQueue(){
+  var box=$("queue"), active=Q.items.filter(function(x){ return x.st!=="ok"; });
+  if(!Q.items.length){ box.hidden=true; return; }
+  box.hidden=false;
+  var total=Q.items.length, ok=Q.items.filter(function(x){ return x.st==="ok"; }).length, err=Q.items.filter(function(x){ return x.st==="err"; }).length;
+  var waiting=Q.items.filter(function(x){ return x.st==="waiting"; }).length;
+  $("qBar").style.width = Math.round(100*(ok+err)/total)+"%";
+  var t;
+  if(Q.running) t="Reading card "+(ok+err+1)+" of "+total+"…";
+  else if(Q.halted) t=Q.halted;
+  else if(waiting) t=waiting+" waiting.";
+  else t="Done: "+ok+" saved"+(err? ", "+err+" need attention":"")+".";
+  $("qText").textContent=t;
+  var stop=$("qStop");
+  if(Q.running){ stop.textContent="Stop"; stop.onclick=function(){ Q.items.forEach(function(x){ if(x.st==="waiting") x.msg="Stopped"; }); Q.halted="Stopped. Press Resume to continue."; Q.ctl && Q.ctl.abort(); }; }
+  else if(waiting){ stop.textContent= Q.halted ? "Retry" : "Resume"; stop.onclick=function(){ Q.halted=null; Q.items.forEach(function(x){ if(x.st==="waiting") x.msg="Waiting"; }); runQueue(); }; }
+  else { stop.textContent="Clear"; stop.onclick=function(){ Q.items=[]; Q.done=0; renderQueue(); }; }
+  var errs=Q.items.filter(function(x){ return x.st==="err"; });
+  $("qList").innerHTML = Q.items.slice().reverse().slice(0,40).map(function(x){
+    var cls = x.st==="ok"?"ok":x.st==="err"?"err":x.st==="run"?"run":"";
+    return '<div class="qi">'+(x.thumb?'<img alt="" src="'+x.thumb+'">':'<img alt="">')+
+      '<span>'+esc(x.files.map(function(f){ return f.name||"photo"; }).join(" + "))+'</span>'+
+      '<span class="st '+cls+'">'+esc(x.st==="err" && x.msg.length>40 ? "Failed" : x.msg)+
+      (x.st==="err" ? ' <button class="btn ghost small" data-retry="'+x.id+'" type="button">Retry</button>':"")+'</span></div>';
+  }).join("");
+  if(errs.length){ var last=errs[errs.length-1]; if(last.msg.length>40) $("qText").textContent=last.msg; }
+}
+$("qList").addEventListener("click",function(e){
+  var b=e.target.closest("[data-retry]"); if(!b) return;
+  var it=Q.items.find(function(x){ return x.id===b.getAttribute("data-retry"); });
+  if(it){ it.st="waiting"; it.msg="Waiting"; Q.halted=null; renderQueue(); runQueue(); }
+});
+
+/* ---------- db ---------- */
+function baseDoc(){
+  var d={}; FIELDS.forEach(function(k){ d[k]=""; });
+  d.event = str($("eventName").value);
+  d.priority=""; d.checked=false; d.unsure=[]; d.other_text="";
+  d.scannedBy=S.uid||""; d.scannedAt=new Date().toISOString(); d.updatedAt=d.scannedAt;
+  d.thumb=""; d.thumbBack="";
+  return d;
+}
+function saveNew(fields, thumbs){
+  if(!db) return Promise.reject(new Error("The shared contact store is not available in this view."));
+  var d=baseDoc();
+  Object.keys(fields).forEach(function(k){ if(k in d || k==="other_text" || k==="unsure") d[k]=fields[k]; });
+  delete d.not_a_card;
+  d.thumb=thumbs[0]||""; d.thumbBack=thumbs[1]||"";
+  var ref=db.collection(COLL).doc();
+  return withRetry(function(){ return ref.set(d); }).then(function(){ return ref.id; });
+}
+function withRetry(fn){
+  return fn().catch(function(e){
+    if(e && e.code==="unavailable") return new Promise(function(r){ setTimeout(r, 600+Math.random()*900); }).then(fn);
+    if(e && e.code==="quota_exceeded") throw new Error("The contact store is full. Delete test cards or export and start a new event.");
+    if(e && e.code==="invalid_argument") throw new Error("You have view-only access, so new cards can't be saved. Ask the owner to make you a Contributor.");
+    throw e;
+  });
+}
+function startDb(){
+  db.collection(COLL).orderBy("scannedAt","desc").limit(1000).onSnapshot(function(snap){
+    S.cards = snap.docs.map(function(d){ var o=Object.assign({}, d.data()); o.id=d.id; return o; });
+    $("dbNotice").hidden=true;
+    render();
+    if(S.editing && !S.cards.some(function(c){ return c.id===S.editing; })) closeEditor();
+  }, function(e){
+    $("dbNotice").hidden=false;
+    $("dbNotice").textContent = e && e.code==="revoked" ? "Your access to this contact list changed. Reload the page." : "Lost the connection to the shared contact list. Reload the page.";
+  });
+}
+
+/* ---------- render ---------- */
+var FILTERS = [
+  {k:"all", t:"All", f:function(){ return true; }},
+  {k:"check", t:"To check", f:function(c){ return !c.checked; }},
+  {k:"hot", t:"Hot", f:function(c){ return c.priority==="Hot"; }},
+  {k:"noemail", t:"No email", f:function(c){ return !mailOf(c); }},
+  {k:"dup", t:"Duplicates", f:function(c,d){ return !!d[c.id]; }},
+  {k:"mine", t:"Scanned by me", f:function(c){ return S.uid && c.scannedBy===S.uid; }}
+];
+function matches(c,q){
+  if(!q) return true;
+  var hay=[fullName(c),c.company,c.job_title,c.email,c.email_2,c.city,c.country,c.segment,c.industry,c.notes,c.mobile,c.phone].join(" ").toLowerCase();
+  return q.split(/\s+/).every(function(w){ return hay.indexOf(w)>=0; });
+}
+function rowHtml(c, dups){
+  var th = c.thumb ? '<img class="th" alt="" src="'+c.thumb+'">' : '<span class="th none">'+esc(initials(c))+'</span>';
+  var sub=[str(c.job_title), str(c.company)].filter(Boolean).join(" · ");
+  if(fullName(c)==="" && c.company) sub=str(c.job_title);
+  var loc=[str(c.city), str(c.country)].filter(Boolean).join(", ");
+  var flags=[];
+  if(c.priority) flags.push('<span class="pill '+c.priority.toLowerCase()+'"><i></i>'+esc(c.priority)+'</span>');
+  if(dups[c.id]) flags.push('<span class="pill dup">Duplicate?</span>');
+  if(!mailOf(c)) flags.push('<span class="pill noemail">No email</span>');
+  if(!c.checked) flags.push('<span class="pill check">Check</span>');
+  return '<button class="row" type="button" data-open="'+esc(c.id)+'">'+th+
+    '<span class="who"><span class="nm">'+esc(displayName(c))+'</span>'+
+    (sub?'<span class="sub">'+esc(sub)+'</span>':'')+
+    '<span class="em">'+esc(mailOf(c) || loc || c.mobile || c.phone || "")+'</span></span>'+
+    '<span class="flags">'+flags.join("")+'</span></button>';
+}
+function render(){
+  var dups=dupMap(), cards=S.cards;
+  var mails={}; cards.forEach(function(c){ var m=mailOf(c); if(m) mails[m]=1; });
+  var nMail=Object.keys(mails).length, nCheck=cards.filter(function(c){ return !c.checked; }).length;
+  $("tCards").textContent=cards.length; $("tMail").textContent=nMail; $("tCheck").textContent=nCheck;
+  $("nList").textContent=cards.length;
+
+  $("filters").innerHTML = FILTERS.filter(function(f){ return f.k!=="mine" || S.uid; }).map(function(f){
+    var n=cards.filter(function(c){ return f.f(c,dups); }).length;
+    return '<button class="chip" type="button" data-f="'+f.k+'" aria-pressed="'+(S.filter===f.k)+'">'+f.t+'<span class="n">'+n+'</span></button>';
+  }).join("");
+
+  var F=FILTERS.find(function(f){ return f.k===S.filter; })||FILTERS[0];
+  var list=cards.filter(function(c){ return F.f(c,dups) && matches(c,S.q); });
+  if(!cards.length){
+    $("list").innerHTML = '<div class="empty"><h2>No cards yet</h2>'+
+      '<ol><li>Tap <b>Scan a card</b> and photograph one visiting card, flat and filling the frame.</li>'+
+      '<li>Claude reads every field: name, title, company, emails, phones, address, and sorts the company into a partner type.</li>'+
+      '<li>Check the highlighted fields, add a note about the meeting, save.</li>'+
+      '<li>After the fair, upload the rest from your gallery in one go, then download the Excel sheet for your mailer.</li></ol>'+
+      '<p class="small muted">Everyone you share this page with sees and adds to the same list.</p></div>';
+  } else if(!list.length){
+    $("list").innerHTML = '<div class="empty"><p class="muted">No contacts match this search or filter.</p></div>';
+  } else {
+    $("list").innerHTML = list.map(function(c){ return rowHtml(c,dups); }).join("");
+  }
+  renderGroups(dups); renderExport(dups); resolveNames();
+}
+function groupKey(c, by){
+  switch(by){
+    case "segment": return str(c.segment) || "Not classified";
+    case "country": return str(c.country) || "Country unknown";
+    case "company": return str(c.company) || "No company";
+    case "city": return str(c.city) ? (str(c.city)+(c.country?", "+str(c.country):"")) : "City unknown";
+    case "domain": var d=domainOf(c); return d ? (FREEMAIL.test(d) ? "Personal email ("+d+")" : d) : "No email";
+    case "priority": return c.priority || "No priority set";
+    case "scannedBy": return c.scannedBy ? (S.names[c.scannedBy] || "Teammate") : "Unknown";
+  }
+  return "";
+}
+function renderGroups(dups){
+  var by=$("groupBy").value, g={};
+  S.cards.forEach(function(c){ var k=groupKey(c,by); (g[k]=g[k]||[]).push(c); });
+  var keys=Object.keys(g).sort(function(a,b){ return g[b].length-g[a].length || a.localeCompare(b); });
+  var max=keys.length ? g[keys[0]].length : 1;
+  if(!S.cards.length){ $("groups").innerHTML='<p class="muted">Groups appear here once cards are scanned.</p>'; return; }
+  var open=lsGet("cs.open."+by)||"";
+  $("groups").innerHTML = keys.map(function(k){
+    var cs=g[k].slice().sort(function(a,b){ return displayName(a).localeCompare(displayName(b)); });
+    var mailable=cs.filter(function(c){ return mailOf(c); }).length;
+    return '<details class="grp"'+(open===k?" open":"")+' data-g="'+esc(k)+'"><summary><span class="gname">'+esc(k)+'</span>'+
+      '<span class="gn">'+cs.length+(mailable!==cs.length?' · '+mailable+' ✉':'')+'</span>'+
+      '<span class="gbar"><i style="width:'+Math.max(3,Math.round(100*cs.length/max))+'%"></i></span></summary>'+
+      '<div class="cards">'+cs.map(function(c){ return rowHtml(c,dups); }).join("")+'</div></details>';
+  }).join("");
+}
+
+/* ---------- export ---------- */
+function sortedCards(){
+  return S.cards.slice().sort(function(a,b){
+    return (str(a.segment)||"~").localeCompare(str(b.segment)||"~") || str(a.company).localeCompare(str(b.company)) || displayName(a).localeCompare(displayName(b));
+  });
+}
+function mailerRows(){
+  var seen={}, rows=[];
+  sortedCards().forEach(function(c){
+    var m=mailOf(c); if(!m || seen[m]) return; seen[m]=1;
+    rows.push([m, str(c.first_name), str(c.last_name), fullName(c), str(c.company), str(c.job_title), str(c.country), str(c.city), str(c.segment), str(c.priority), str(c.event)]);
+  });
+  return rows;
+}
+var MAILER_HEAD=["Email","First name","Last name","Full name","Company","Job title","Country","City","Partner type","Priority","Met at"];
+function renderExport(dups){
+  var cards=S.cards, rows=mailerRows();
+  var cos={}, ctys={};
+  cards.forEach(function(c){ var k=normCo(c.company); if(k) cos[k]=1; if(str(c.country)) ctys[str(c.country).toLowerCase()]=1; });
+  $("sAll").textContent=cards.length; $("sMail").textContent=rows.length;
+  $("sCo").textContent=Object.keys(cos).length; $("sCty").textContent=Object.keys(ctys).length;
+  var noMail=cards.filter(function(c){ return !mailOf(c); }).length, unc=cards.filter(function(c){ return !c.checked; }).length;
+  var nd=Object.keys(dups).length, w=[];
+  if(noMail) w.push(noMail+" without a usable email");
+  if(unc) w.push(unc+" not yet checked");
+  if(nd) w.push(nd+" possible duplicates");
+  $("sWarn").textContent = w.length ? "Before you send: "+w.join(", ")+". They are listed on the “To fix” sheet." : (cards.length?"Every card is checked and has an email.":"");
+  $("emailList").value = rows.map(function(r){ return r[0]; }).join(", ");
+  $("dlXlsx").disabled = $("dlCsv").disabled = !cards.length;
+}
+var CONTACT_HEAD=["No.","First name","Last name","Full name","Job title","Department","Company","Partner type","What they do",
+  "Email","Email 2","Mobile","Office phone","Other phone","WhatsApp / other","Website","LinkedIn",
+  "Street","City","State / region","Postal code","Country","Priority","Notes","Met at","Scanned by","Scanned on","Checked","Possible duplicate","Other card text"];
+function contactRow(c,i,dups){
+  return [i+1, str(c.first_name), str(c.last_name), fullName(c), str(c.job_title), str(c.department), str(c.company), str(c.segment), str(c.industry),
+    str(c.email), str(c.email_2), str(c.mobile), str(c.phone), str(c.phone_2), str(c.other_social), str(c.website), str(c.linkedin),
+    str(c.street), str(c.city), str(c.state), str(c.postal_code), str(c.country), str(c.priority), str(c.notes), str(c.event),
+    c.scannedBy ? (S.names[c.scannedBy]||"Teammate") : "", fmtDate(c.scannedAt), c.checked?"Yes":"No", dups[c.id]?"Yes":"", str(c.other_text)];
+}
+function countRows(title, keyFn){
+  var g={}; S.cards.forEach(function(c){ var k=keyFn(c); g[k]=(g[k]||0)+1; });
+  return [[title,"Contacts"]].concat(Object.keys(g).sort(function(a,b){ return g[b]-g[a] || a.localeCompare(b); }).map(function(k){ return [k,g[k]]; }));
+}
+function exportXlsx(){
+  var dups=dupMap(), cs=sortedCards();
+  var contacts=[CONTACT_HEAD].concat(cs.map(function(c,i){ return contactRow(c,i,dups); }));
+  var mailer=[MAILER_HEAD].concat(mailerRows());
+  var summary=[["Event", str($("eventName").value) || "—"],["Exported", new Date().toLocaleString()],["Contacts", S.cards.length],["Unique emails", mailer.length-1],[""]]
+    .concat(countRows("Partner type", function(c){ return str(c.segment)||"Not classified"; })).concat([[""]])
+    .concat(countRows("Country", function(c){ return str(c.country)||"Unknown"; })).concat([[""]])
+    .concat(countRows("Company", function(c){ return str(c.company)||"No company"; }));
+  var fix=[["Problem"].concat(CONTACT_HEAD.slice(1))];
+  cs.forEach(function(c,i){
+    var p=[]; if(!mailOf(c)) p.push("No email"); if(!c.checked) p.push("Not checked"+((c.unsure||[]).length?" ("+c.unsure.join(", ")+")":"")); if(dups[c.id]) p.push("Possible duplicate");
+    if(p.length) fix.push([p.join("; ")].concat(contactRow(c,i,dups).slice(1)));
+  });
+  var name="Card-contacts"+(str($("eventName").value)?"-"+str($("eventName").value).replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-"):"")+"-"+new Date().toISOString().slice(0,10)+".xlsx";
+  saveFile(name, makeXlsx([
+    {name:"Contacts", rows:contacts, widths:[5,14,14,22,24,16,26,24,24,30,26,18,18,18,20,22,26,28,16,14,11,16,9,36,18,16,13,8,10,36]},
+    {name:"Mailer list", rows:mailer, widths:[32,14,14,22,26,24,16,16,24,9,18]},
+    {name:"Summary", rows:summary, widths:[40,12], plain:true},
+    {name:"To fix", rows:fix, widths:[34,14,14,22,24,16,26,24,24,30,26,18,18,18,20,22,26,28,16,14,11,16,9,36,18,16,13,8,10,36]}
+  ]));
+}
+function exportCsv(){
+  var rows=[MAILER_HEAD].concat(mailerRows());
+  var csv="﻿"+rows.map(function(r){ return r.map(function(v){ v=String(v); return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }).join(","); }).join("\r\n");
+  saveFile("Mailer-list-"+new Date().toISOString().slice(0,10)+".csv", new Blob([csv],{type:"text/csv"}));
+}
+function saveFile(name, blob){
+  if(!downloads){ toast("Downloads are not available in this view. Open the page on claude.ai or in the Claude app."); return; }
+  downloads.save({filename:name, data:blob}).then(function(r){
+    toast(r && r.status==="delivered" ? name+" sent." : "Saved "+name);
+  }, function(e){
+    var c=e && e.code;
+    toast(c==="declined" ? "Download cancelled." : c==="rate_limited" ? "A save prompt is already open." : "Could not save the file here ("+(c||"error")+").");
+  });
+}
+
+/* minimal xlsx writer: a zip of SpreadsheetML with a bold, frozen, filterable header row */
+var CRCT=(function(){var t=[],c,n,k;for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(u){ var c=0xFFFFFFFF; for(var i=0;i<u.length;i++) c=CRCT[(c^u[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function u8(s){ return new TextEncoder().encode(s); }
+function xmle(t){ return String(t).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function colRef(i){ var s="", n=i+1; while(n>0){ var m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; }
+function sheetXml(sh){
+  var rows=sh.rows, ncol=rows.reduce(function(m,r){ return Math.max(m,(r||[]).length); },1);
+  var body=rows.map(function(r,ri){
+    var hdr=!sh.plain && ri===0;
+    return '<row r="'+(ri+1)+'">'+(r||[]).map(function(v,ci){
+      var ref=colRef(ci)+(ri+1), st=hdr?' s="1"':'';
+      if(typeof v==="number" && isFinite(v)) return '<c r="'+ref+'"'+st+'><v>'+v+'</v></c>';
+      if(v===null||v===undefined||v==="") return "";
+      return '<c r="'+ref+'"'+st+' t="inlineStr"><is><t xml:space="preserve">'+xmle(v)+'</t></is></c>';
+    }).join("")+'</row>';
+  }).join("");
+  var views = sh.plain ? "" : '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>';
+  var cols = sh.widths ? '<cols>'+sh.widths.map(function(w,i){ return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'; }).join("")+'</cols>' : "";
+  var af = (!sh.plain && rows.length>1) ? '<autoFilter ref="A1:'+colRef(ncol-1)+rows.length+'"/>' : "";
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    views+cols+'<sheetData>'+body+'</sheetData>'+af+'</worksheet>';
+}
+function zipStore(files){
+  var parts=[], cd=[], off=0;
+  files.forEach(function(f){
+    var data=f.data, crc=crc32(data), nm=u8(f.name);
+    var lh=new Uint8Array(30+nm.length), d1=new DataView(lh.buffer);
+    d1.setUint32(0,0x04034b50,true); d1.setUint16(4,20,true); d1.setUint32(14,crc,true);
+    d1.setUint32(18,data.length,true); d1.setUint32(22,data.length,true); d1.setUint16(26,nm.length,true); lh.set(nm,30);
+    parts.push(lh,data);
+    var ch=new Uint8Array(46+nm.length), d2=new DataView(ch.buffer);
+    d2.setUint32(0,0x02014b50,true); d2.setUint16(4,20,true); d2.setUint16(6,20,true);
+    d2.setUint32(16,crc,true); d2.setUint32(20,data.length,true); d2.setUint32(24,data.length,true);
+    d2.setUint16(28,nm.length,true); d2.setUint32(42,off,true); ch.set(nm,46);
+    cd.push(ch); off+=lh.length+data.length;
+  });
+  var cdSize=cd.reduce(function(a,b){ return a+b.length; },0);
+  var eo=new Uint8Array(22), d3=new DataView(eo.buffer);
+  d3.setUint32(0,0x06054b50,true); d3.setUint16(8,files.length,true); d3.setUint16(10,files.length,true);
+  d3.setUint32(12,cdSize,true); d3.setUint32(16,off,true);
+  return new Blob(parts.concat(cd,[eo]),{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function makeXlsx(sheets){
+  var X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  var names=sheets.map(function(s){ return s.name.replace(/[\[\]\*\?\/\\:]/g,"-").slice(0,31); });
+  var files=[
+    {name:"[Content_Types].xml", data:u8(X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+
+      sheets.map(function(s,i){ return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join("")+'</Types>')},
+    {name:"_rels/.rels", data:u8(X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')},
+    {name:"xl/workbook.xml", data:u8(X+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+
+      names.map(function(n,i){ return '<sheet name="'+xmle(n)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>'; }).join("")+'</sheets>'+
+      (function(){ var dn=sheets.map(function(s,i){ if(s.plain||s.rows.length<2) return ""; var nc=s.rows.reduce(function(m,r){ return Math.max(m,r.length); },1);
+        return '<definedName name="_xlnm._FilterDatabase" localSheetId="'+i+'" hidden="1">\''+xmle(names[i])+'\'!$A$1:$'+colRef(nc-1)+'$'+s.rows.length+'</definedName>'; }).join("");
+        return dn ? '<definedNames>'+dn+'</definedNames>' : ""; })()+'</workbook>')},
+    {name:"xl/_rels/workbook.xml.rels", data:u8(X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      sheets.map(function(s,i){ return '<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>'; }).join("")+
+      '<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>')},
+    {name:"xl/styles.xml", data:u8(X+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+      '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts>'+
+      '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0E5B5E"/><bgColor indexed="64"/></patternFill></fill></fills>'+
+      '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'+
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
+      '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs>'+
+      '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>')}
+  ];
+  sheets.forEach(function(s,i){ files.push({name:"xl/worksheets/sheet"+(i+1)+".xml", data:u8(sheetXml(s))}); });
+  return zipStore(files);
+}
+
+/* ---------- editor ---------- */
+function cardById(id){ return S.cards.find(function(c){ return c.id===id; }); }
+var draftNew=null, pendingBack=null;
+function openEditor(id, fresh){
+  var c = id ? cardById(id) : draftNew;
+  if(!c) return;
+  S.editing=id||null; pendingBack=null;
+  $("sTitle").textContent = id ? displayName(c) : "New contact";
+  FIELDS.forEach(function(k){ var el=$("f-"+k); if(el) el.value=str(c[k]); });
+  var uns=c.unsure||[];
+  document.querySelectorAll("#form .fld[data-k]").forEach(function(f){
+    var k=f.getAttribute("data-k"), on=!c.checked && uns.indexOf(k)>=0;
+    f.classList.toggle("unsure",on);
+    var lb=f.querySelector("label"), q=lb.querySelector(".q");
+    if(on && !q){ q=document.createElement("span"); q.className="q"; q.textContent="check"; lb.appendChild(q); }
+    if(!on && q) q.remove();
+  });
+  setPrio(c.priority||"");
+  $("extraWrap").hidden=!str(c.other_text); $("extra").textContent=str(c.other_text);
+  renderShots(c);
+  var note=$("sNote");
+  if(fresh && uns.length){ note.hidden=false; note.className="notice"; note.textContent="Read from the card. The highlighted fields were hard to read, so compare them with the photo."; }
+  else if(fresh){ note.hidden=false; note.className="notice info"; note.textContent="Read from the card. Compare with the photo, add a note about the meeting, then save."; }
+  else note.hidden=true;
+  var who = c.scannedBy ? (S.names[c.scannedBy] || "a teammate") : "";
+  $("sMeta").textContent = id ? ("Scanned "+fmtDate(c.scannedAt)+(who?" by "+who:"")+(c.checked?" · checked":" · not checked yet")) : "";
+  $("sReread").hidden = !id || !c.thumb || !sample || S.canAI===false;
+  $("delArea").innerHTML = id ? '<button class="btn danger" id="sDel" type="button">Delete</button>' : "";
+  $("sheet").hidden=false; document.body.style.overflow="hidden";
+  $("sheet").scrollTop=0;
+  setTimeout(function(){ $("sClose").focus(); },30);
+}
+function renderShots(c){
+  var h="";
+  if(c.thumb) h+='<figure><img alt="Front of the card" src="'+c.thumb+'"><figcaption>Front</figcaption></figure>';
+  var back = pendingBack || c.thumbBack;
+  if(back) h+='<figure><img alt="Back of the card" src="'+back+'"><figcaption>Back'+(pendingBack?" (not yet read)":"")+'</figcaption></figure>';
+  else if(S.editing && c.thumb) h+='<label class="slot filelabel">+ Add the back of the card<input type="file" id="backInput" accept="image/*" capture="environment" aria-label="Photograph the back of the card"></label>';
+  $("shots").innerHTML=h; $("shots").hidden=!h;
+  var bi=$("backInput");
+  if(bi) bi.addEventListener("change",function(){
+    var f=bi.files && bi.files[0]; if(!f) return;
+    shrink(f,820,.66).then(function(s){ pendingBack=s.dataUrl; renderShots(cardById(S.editing)||c);
+      toast(sample && S.canAI!==false ? "Back added. Tap “Read card again” to read both sides." : "Back added. Save to keep it."); });
+  });
+}
+function setPrio(v){ document.querySelectorAll("#prio button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v")===v)); }); }
+function getPrio(){ var b=document.querySelector('#prio button[aria-pressed="true"]'); return b ? b.getAttribute("data-v") : ""; }
+$("prio").addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b) return; var v=b.getAttribute("data-v"); setPrio(getPrio()===v?"":v); });
+function closeEditor(){ $("sheet").hidden=true; document.body.style.overflow=""; S.editing=null; draftNew=null; pendingBack=null; }
+$("sClose").addEventListener("click",closeEditor);
+document.addEventListener("keydown",function(e){ if(e.key==="Escape" && !$("sheet").hidden) closeEditor(); });
+
+function formValues(){
+  var o={}; FIELDS.forEach(function(k){ o[k]=str($("f-"+k).value); });
+  o.email=o.email.toLowerCase(); o.email_2=o.email_2.toLowerCase(); o.website=cleanUrl(o.website); o.linkedin=cleanUrl(o.linkedin);
+  o.priority=getPrio();
+  return o;
+}
+$("sSave").addEventListener("click",function(){
+  if(!db){ toast("The shared contact store is not available in this view."); return; }
+  var v=formValues();
+  if(!v.first_name && !v.last_name && !v.company && !v.email){ toast("Add at least a name, company or email."); return; }
+  if(v.email && !goodEmail(v.email)){ toast("The email address doesn't look complete. Check it against the card."); $("f-email").focus(); return; }
+  var btn=$("sSave"); btn.disabled=true;
+  var p;
+  if(S.editing){
+    var c=cardById(S.editing); if(!c){ btn.disabled=false; closeEditor(); return; }
+    var d=Object.assign({}, c); delete d.id;
+    Object.assign(d, v, {checked:true, unsure:[], updatedAt:new Date().toISOString()});
+    if(pendingBack) d.thumbBack=pendingBack;
+    var ref=db.collection(COLL).doc(S.editing);
+    p=withRetry(function(){ return ref.set(d); });
+  } else {
+    var nd=Object.assign(baseDoc(), v, {checked:true});
+    var r=db.collection(COLL).doc();
+    p=withRetry(function(){ return r.set(nd); });
+  }
+  p.then(function(){ toast("Saved "+(fullName(v)||v.company||"contact")+"."); closeEditor(); },
+         function(e){ toast((e && e.message) || "Could not save. Try again."); })
+   .then(function(){ btn.disabled=false; });
+});
+$("delArea").addEventListener("click",function(e){
+  if(e.target.id==="sDel"){
+    $("delArea").innerHTML='<span class="confirm">Delete this card for everyone? <button class="btn danger" id="sDelYes" type="button">Delete</button><button class="btn ghost" id="sDelNo" type="button">Keep</button></span>';
+  } else if(e.target.id==="sDelNo"){
+    $("delArea").innerHTML='<button class="btn danger" id="sDel" type="button">Delete</button>';
+  } else if(e.target.id==="sDelYes"){
+    var id=S.editing; if(!id||!db) return;
+    db.collection(COLL).doc(id).delete().then(function(){ toast("Card deleted."); closeEditor(); },
+      function(){ toast("Could not delete. You may have view-only access."); });
+  }
+});
+$("sReread").addEventListener("click",function(){
+  var c=cardById(S.editing); if(!c || !c.thumb || !sample) return;
+  var btn=$("sReread"), ctl=new AbortController(), back=pendingBack||c.thumbBack;
+  var blobs=[dataUrlToBlob(c.thumb)]; if(back) blobs.push(dataUrlToBlob(back));
+  btn.disabled=true; btn.textContent="Reading…";
+  readCard(blobs, ctl.signal).then(function(f){
+    var cur=formValues();
+    AI_FIELDS.forEach(function(k){ if(f[k] && !cur[k]) $("f-"+k).value=f[k]; else if(f[k] && f[k]!==cur[k] && f.unsure.indexOf(k)<0) $("f-"+k).value=f[k]; });
+    if(f.other_text){ $("extraWrap").hidden=false; $("extra").textContent=f.other_text; c.other_text=f.other_text; }
+    toast("Fields refreshed from the card"+(back?" (both sides)":"")+". Review, then save.");
+  }, function(e){ toast(aiErrText(e && e.code)); })
+  .then(function(){ btn.disabled=false; btn.textContent="Read card again"; });
+});
+$("manualBtn").addEventListener("click",function(){ draftNew=baseDoc(); openEditor(null,false); setTimeout(function(){ $("f-first_name").focus(); },60); });
+
+/* ---------- wiring ---------- */
+$("scanInput").addEventListener("change",function(e){ addToQueue(e.target.files); e.target.value=""; });
+$("uploadInput").addEventListener("change",function(e){ addToQueue(e.target.files); e.target.value=""; });
+document.addEventListener("click",function(e){
+  var o=e.target.closest("[data-open]"); if(o){ openEditor(o.getAttribute("data-open"), false); return; }
+  var f=e.target.closest("[data-f]"); if(f){ S.filter=f.getAttribute("data-f"); render(); }
+});
+document.querySelectorAll(".tab").forEach(function(t){ t.addEventListener("click",function(){ showTab(t.getAttribute("data-tab")); }); });
+function showTab(k){
+  S.tab=k; lsSet("cs.tab",k);
+  document.querySelectorAll(".tab").forEach(function(t){ t.setAttribute("aria-selected", String(t.getAttribute("data-tab")===k)); });
+  ["list","groups","export"].forEach(function(p){ $("pane-"+p).hidden = p!==k; });
+}
+$("q").addEventListener("input",function(e){ S.q=e.target.value.toLowerCase().trim(); render(); });
+$("groupBy").addEventListener("change",function(){ lsSet("cs.groupBy",$("groupBy").value); renderGroups(dupMap()); });
+$("groups").addEventListener("toggle",function(e){ var d=e.target; if(d.open) lsSet("cs.open."+$("groupBy").value, d.getAttribute("data-g")); },true);
+$("eventName").addEventListener("change",function(){ lsSet("cs.event",$("eventName").value); });
+$("dlXlsx").addEventListener("click",exportXlsx);
+$("dlCsv").addEventListener("click",exportCsv);
+$("copyEmails").addEventListener("click",function(){
+  var t=$("emailList").value; if(!t){ toast("No emails yet."); return; }
+  var sel=function(){ $("emailList").select(); toast("Select-all done. Copy with your keyboard or long-press."); };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ toast("Emails copied."); }, sel); else sel();
+});
+$("segList").innerHTML=SEGMENTS.map(function(s){ return '<option value="'+esc(s)+'">'; }).join("");
+$("eventName").value = lsGet("cs.event") || "";
+var gb=lsGet("cs.groupBy"); if(gb) $("groupBy").value=gb;
+var tb=lsGet("cs.tab"); if(tb==="groups"||tb==="export") showTab(tb);
+
+function showAiNotice(){
+  var n=$("aiNotice");
+  if(S.canAI===false){ n.hidden=false; n.textContent=S.aiOff; } else n.hidden=true;
+}
+var nameTick=0;
+function resolveNames(){
+  if(!user) return;
+  var ids=[]; S.cards.forEach(function(c){ if(c.scannedBy && ids.indexOf(c.scannedBy)<0) ids.push(c.scannedBy); });
+  if(!ids.length) return;
+  var my=++nameTick;
+  user.profiles(ids).then(function(ps){
+    if(my!==nameTick) return;
+    var changed=false;
+    ids.forEach(function(id){ var n=(ps[id] && ps[id].name) || ""; if(ps[id] && ps[id].isMe) n=n ? n+" (you)" : "You"; if(S.names[id]!==n){ S.names[id]=n; changed=true; } });
+    if(changed && $("groupBy").value==="scannedBy") renderGroups(dupMap());
+  }, function(){});
+}
+
+render();
+
+/* ---------- capabilities ---------- */
+if(!window.claude || !window.claude.use){
+  $("dbNotice").hidden=false;
+  $("dbNotice").textContent="Open this page on claude.ai or in the Claude app. Card reading, the shared list and Excel export run there.";
+  S.canAI=false; S.aiOff="Card reading runs only inside Claude."; return;
+}
+var use=window.claude.use;
+use("user").then(function(u){ user=u; if(!u) return; return u.id().then(function(id){ S.uid=id; render(); }); }).catch(function(){});
+use("downloads").then(function(d){ downloads=d; }).catch(function(){});
+use("db").then(function(d){
+  db=d;
+  if(!d){ $("dbNotice").hidden=false; $("dbNotice").textContent="Sign in to Claude to see and save the shared contact list."; return; }
+  startDb();
+}).catch(function(){});
+use("sample").then(function(s){
+  sample=s;
+  if(!s){ S.canAI=false; S.aiOff="Automatic card reading isn't available in this view. You can type contacts in by hand."; showAiNotice(); return; }
+  return s.limits().then(function(l){
+    if(!l || !l.images){ S.canAI=false; S.aiOff="This view can't send photos to Claude, so cards can't be read automatically here. Open the page in the Claude app or on claude.ai."; }
+    else S.canAI=true;
+    showAiNotice();
+  }, function(){ S.canAI=false; S.aiOff="Automatic card reading isn't available in this view."; showAiNotice(); });
+}).catch(function(){});
+
+})();
+</script>
