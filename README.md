@@ -310,3 +310,58 @@ view-only, and the page tells them so.
 
 **Mailer list (.csv)** is the same mailer sheet as a UTF-8 CSV, and the page also shows every email as
 one comma-separated block you can copy into BCC.
+
+---
+
+# Card Scanner on Firebase (open to anyone with the team code)
+
+The same scanner, hosted on Firebase so teammates don't need a Claude account:
+**https://cards-now-6087f.web.app** (project `cards-now-6087f`).
+
+- **Sign-in:** Google accounts (Firebase Auth).
+- **Shared list:** Firestore `cards` collection, live on every device, and it keeps working offline at a
+  fair (cards queue on the phone and sync when the connection returns).
+- **Who can edit:** the admin (`k.shrishant@gmail.com`) sets a **team code** on the *Excel & mailer* tab.
+  Anyone who signs in and enters the code can scan, edit, delete and export. People who find the
+  link without the code see nothing. Changing the code stops new joins; existing members keep access.
+- **Card reading:** on the phone (Tesseract OCR), same as the claude.ai fallback. Check names, titles
+  and companies against the photo before saving.
+- **Export:** the same Excel workbook and mailer CSV, downloaded directly.
+
+## Files
+
+| Path | What it is |
+|---|---|
+| `web/index.html` | the hosted page, **generated** by `python3 tools/build-web.py` from `src/card-scanner.html` |
+| `web/ocr/` | on-phone reader, fetched at deploy by `./fetch-ocr.sh web/ocr` (not committed) |
+| `firebase.json`, `.firebaserc` | Hosting, Firestore (`(default)` database, `asia-south1`) and Google sign-in config |
+| `firestore.rules` | security rules: admin + members only, schema-checked writes |
+| `.github/workflows/firebase-deploy.yml` | registers the web app (first run), deploys rules + Hosting, enables Google sign-in |
+
+The page reads its Firebase settings from Hosting's reserved `/__/firebase/init.json`, so no API keys
+live in the code. On `localhost` it talks to the emulators instead:
+`npx -y firebase-tools@latest emulators:start --only auth,firestore,hosting`.
+
+## Firebase deploy: one-time setup
+
+The workflow runs on every push to `main` or this branch, and from the Actions tab (*Run workflow*).
+It needs one repository secret with a deploy key:
+
+1. Open https://console.cloud.google.com/iam-admin/serviceaccounts?project=cards-now-6087f and click
+   **Create service account**. Name it `github-deploy`.
+2. Give it the roles **Firebase Admin** and **Service Usage Admin**, then **Done**.
+3. Open the new account → **Keys** → **Add key** → **Create new key** → **JSON**. A file downloads.
+4. In GitHub, open this repository → **Settings** → **Secrets and variables** → **Actions** →
+   **New repository secret**. Name: `FIREBASE_SERVICE_ACCOUNT_CARDS_NOW_6087F`. Value: paste the whole
+   JSON file. Save, then delete the downloaded file.
+5. **Actions** → *Deploy Card Scanner to Firebase* → **Run workflow**.
+
+After the first deploy, sign in at https://cards-now-6087f.web.app with `k.shrishant@gmail.com`,
+open *Excel & mailer*, tap **New random code** → **Save code** → **Copy invite message**, and send it to the team.
+
+If the *Turn on Google sign-in* step reports a problem, switch it on by hand: Firebase console →
+Authentication → Sign-in method → Google → Enable.
+
+The rules were tested in the Firestore emulator (29 allow/deny cases), and the whole flow (admin sets
+code, teammate joins, scans, saves; admin sees it live; Excel download) was run end to end against the
+Auth, Firestore and Hosting emulators.

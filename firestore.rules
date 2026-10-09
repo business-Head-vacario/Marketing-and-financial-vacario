@@ -1,0 +1,159 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: cards            (shared contact list, one document per visiting card)
+// Document ID: auto-generated
+// Fields (all required; the app always writes the full set on create):
+//   - first_name, last_name, job_title, department, company, segment, industry,
+//     website, linkedin, email, email_2, mobile, phone, phone_2, other_social,
+//     street, city, state, postal_code, country, event: string (<= 300 chars)
+//   - notes: string (<= 4000)          - what was discussed at the meeting
+//   - other_text: string (<= 2000)     - leftover text read from the card
+//   - priority: string, one of "", "Hot", "Warm", "Cold"
+//   - checked: bool                    - a person has reviewed the fields
+//   - unsure: list of field names (<= 30 strings of <= 40 chars)
+//   - thumb, thumbBack: string (<= 300000) - JPEG data URL of the card photo
+//   - scannedBy: string (immutable)    - uid of the person who scanned it
+//   - scannedByName: string (immutable, <= 100) - their display name at scan time
+//   - scannedAt: timestamp (immutable) - server time of the scan
+//   - updatedAt: timestamp             - server time of the last change
+//   - updatedBy: string                - uid of the last editor
+//
+// Collection: members          (who has joined the team)
+// Document ID: the member's uid
+// Fields:
+//   - code: string    - the team code they entered (must match settings/team.code)
+//   - email: string   - their sign-in email (must match the auth token)
+//   - name: string (<= 100)
+//   - joinedAt: timestamp
+//
+// Document: settings/team      (admin only)
+//   - code: string (6-40 chars) - the current team join code
+//   - updatedAt: timestamp
+//
+// Access model: the admin (owner's Google account) and anyone who has joined with
+// the current team code can read and edit every card. Nobody else can read anything.
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helper Functions ----------
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isAuthenticated()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() == "k.shrishant@gmail.com";
+    }
+    function isMember() {
+      return isAuthenticated()
+        && (isAdmin() || exists(/databases/$(database)/documents/members/$(request.auth.uid)));
+    }
+    function shortStr(v) {
+      return v is string && v.size() <= 300;
+    }
+    function strMax(v, n) {
+      return v is string && v.size() <= n;
+    }
+    function isValidUnsure(l) {
+      return l is list && l.size() <= 30
+        && (l.size() < 1 || (l[0] is string && l[0].size() <= 40))
+        && (l.size() < 2 || (l[1] is string && l[1].size() <= 40))
+        && (l.size() < 3 || (l[2] is string && l[2].size() <= 40))
+        && (l.size() < 4 || (l[3] is string && l[3].size() <= 40))
+        && (l.size() < 5 || (l[4] is string && l[4].size() <= 40))
+        && (l.size() < 6 || (l[5] is string && l[5].size() <= 40))
+        && (l.size() < 7 || (l[6] is string && l[6].size() <= 40))
+        && (l.size() < 8 || (l[7] is string && l[7].size() <= 40))
+        && (l.size() < 9 || (l[8] is string && l[8].size() <= 40))
+        && (l.size() < 10 || (l[9] is string && l[9].size() <= 40))
+        && (l.size() < 11 || (l[10] is string && l[10].size() <= 40))
+        && (l.size() < 12 || (l[11] is string && l[11].size() <= 40))
+        && l.size() <= 12;
+    }
+
+    // ---------- Domain Validators ----------
+    function isValidCard(d) {
+      return d.keys().hasOnly([
+          'first_name', 'last_name', 'job_title', 'department', 'company', 'segment', 'industry',
+          'website', 'linkedin', 'email', 'email_2', 'mobile', 'phone', 'phone_2', 'other_social',
+          'street', 'city', 'state', 'postal_code', 'country', 'event', 'notes', 'other_text',
+          'priority', 'checked', 'unsure', 'thumb', 'thumbBack',
+          'scannedBy', 'scannedByName', 'scannedAt', 'updatedAt', 'updatedBy'])
+        && d.keys().hasAll([
+          'first_name', 'last_name', 'job_title', 'department', 'company', 'segment', 'industry',
+          'website', 'linkedin', 'email', 'email_2', 'mobile', 'phone', 'phone_2', 'other_social',
+          'street', 'city', 'state', 'postal_code', 'country', 'event', 'notes', 'other_text',
+          'priority', 'checked', 'unsure', 'thumb', 'thumbBack',
+          'scannedBy', 'scannedByName', 'scannedAt', 'updatedAt', 'updatedBy'])
+        && shortStr(d.first_name) && shortStr(d.last_name) && shortStr(d.job_title)
+        && shortStr(d.department) && shortStr(d.company) && shortStr(d.segment) && shortStr(d.industry)
+        && shortStr(d.website) && shortStr(d.linkedin) && shortStr(d.email) && shortStr(d.email_2)
+        && shortStr(d.mobile) && shortStr(d.phone) && shortStr(d.phone_2) && shortStr(d.other_social)
+        && shortStr(d.street) && shortStr(d.city) && shortStr(d.state) && shortStr(d.postal_code)
+        && shortStr(d.country) && shortStr(d.event)
+        && strMax(d.notes, 4000) && strMax(d.other_text, 2000)
+        && d.priority in ['', 'Hot', 'Warm', 'Cold']
+        && d.checked is bool
+        && isValidUnsure(d.unsure)
+        && strMax(d.thumb, 300000) && strMax(d.thumbBack, 300000)
+        && d.scannedBy is string && strMax(d.scannedByName, 100)
+        && d.scannedAt is timestamp && d.updatedAt is timestamp
+        && d.updatedBy == request.auth.uid
+        && d.updatedAt == request.time;
+    }
+
+    // ---------- cards ----------
+    match /cards/{cardId} {
+      allow read: if isMember();
+      allow create: if isMember()
+        && isValidCard(request.resource.data)
+        && request.resource.data.scannedBy == request.auth.uid
+        && request.resource.data.scannedAt == request.time;
+      allow update: if isMember()
+        && isValidCard(request.resource.data)
+        && request.resource.data.scannedBy == resource.data.scannedBy
+        && request.resource.data.scannedByName == resource.data.scannedByName
+        && request.resource.data.scannedAt == resource.data.scannedAt;
+      allow delete: if isMember();
+    }
+
+    // ---------- members ----------
+    match /members/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['code', 'email', 'name', 'joinedAt'])
+        && request.resource.data.keys().hasAll(['code', 'email', 'name', 'joinedAt'])
+        && request.resource.data.code is string
+        && exists(/databases/$(database)/documents/settings/team)
+        && request.resource.data.code == get(/databases/$(database)/documents/settings/team).data.code
+        && request.resource.data.email == request.auth.token.email
+        && strMax(request.resource.data.name, 100)
+        && request.resource.data.joinedAt == request.time;
+      allow update: if false;
+      allow delete: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // ---------- settings (admin only) ----------
+    match /settings/team {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+        && request.resource.data.keys().hasOnly(['code', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['code', 'updatedAt'])
+        && request.resource.data.code is string
+        && request.resource.data.code.size() >= 6 && request.resource.data.code.size() <= 40
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // ---------- everything else: denied ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

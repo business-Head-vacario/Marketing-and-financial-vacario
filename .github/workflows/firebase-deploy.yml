@@ -1,0 +1,71 @@
+# Builds the Card Scanner and deploys it to Firebase project cards-now-6087f:
+# registers the web app (first run only), deploys Firestore rules + Hosting, and turns on Google sign-in.
+# Needs one repository secret, FIREBASE_SERVICE_ACCOUNT_CARDS_NOW_6087F (see README → "Firebase deploy").
+name: Deploy Card Scanner to Firebase
+
+on:
+  push:
+    branches: [main, claude/business-card-ocr-contacts-eiux96]
+    paths:
+      - web/**
+      - src/card-scanner.html
+      - src/ocr-boot.js
+      - tools/build-web.py
+      - fetch-ocr.sh
+      - firebase.json
+      - .firebaserc
+      - firestore.rules
+      - firestore.indexes.json
+      - .github/workflows/firebase-deploy.yml
+  workflow_dispatch:
+
+concurrency: firebase-deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: cards-now-6087f
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Load the deploy key
+        env:
+          SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CARDS_NOW_6087F }}
+        run: |
+          if [ -z "$SA_KEY" ]; then
+            echo "::error::Missing repository secret FIREBASE_SERVICE_ACCOUNT_CARDS_NOW_6087F. See README → Firebase deploy."
+            exit 1
+          fi
+          printf '%s' "$SA_KEY" > "$RUNNER_TEMP/firebase-sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-sa.json" >> "$GITHUB_ENV"
+
+      - name: Build the page and fetch the on-phone reader
+        run: |
+          python3 tools/build-web.py
+          ./fetch-ocr.sh web/ocr
+
+      - name: Register the web app (first run only)
+        run: |
+          count=$(npx -y firebase-tools@latest apps:list WEB --project "$PROJECT" --json | jq '.result | length')
+          if [ "$count" = "0" ]; then
+            npx -y firebase-tools@latest apps:create WEB "Card Scanner" --project "$PROJECT"
+          else
+            echo "A web app is already registered in $PROJECT ($count found)."
+          fi
+          npx -y firebase-tools@latest apps:list WEB --project "$PROJECT"
+
+      - name: Deploy Firestore rules and Hosting
+        run: npx -y firebase-tools@latest deploy --only firestore,hosting --project "$PROJECT" --non-interactive
+
+      - name: Turn on Google sign-in
+        continue-on-error: true
+        run: npx -y firebase-tools@latest deploy --only auth --project "$PROJECT" --non-interactive
+
+      - name: Remove the key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/firebase-sa.json"

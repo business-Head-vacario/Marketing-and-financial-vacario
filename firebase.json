@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "public": "web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "cleanUrls": true,
+    "headers": [
+      { "source": "/ocr/**", "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }] },
+      { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "database": "(default)",
+    "location": "asia-south1"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Vacario Card Scanner",
+        "supportEmail": "k.shrishant@gmail.com",
+        "authorizedRedirectUris": [
+          "https://cards-now-6087f.firebaseapp.com/__/auth/handler",
+          "https://cards-now-6087f.web.app/__/auth/handler",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}
