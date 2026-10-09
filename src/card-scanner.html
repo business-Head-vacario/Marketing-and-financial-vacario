@@ -75,7 +75,7 @@ button{cursor:pointer}
 .btn.big small{font-size:12px; font-weight:400; opacity:.85}
 .btn.ghost{background:transparent; border-color:transparent; color:var(--accent-ink); padding-inline:8px}
 .btn.danger{color:var(--crit); border-color:var(--crit)}
-.btn[disabled]{opacity:.5; cursor:not-allowed}
+.btn[disabled],.btn.off{opacity:.5; cursor:not-allowed}
 .btn svg{width:20px; height:20px; flex:none}
 .filelabel{position:relative; overflow:hidden}
 .filelabel input{position:absolute; inset:0; opacity:0; cursor:pointer; font-size:0}
@@ -386,7 +386,9 @@ var AI_FIELDS = FIELDS.filter(function(k){ return k!=="notes" && k!=="event"; })
 var COLL = "cards";
 
 var $ = function(id){ return document.getElementById(id); };
-var S = { cards: [], filter: "all", q: "", tab: "list", editing: null, uid: null, names: {}, canAI: null, aiOff: "" };
+var S = { cards: [], filter: "all", q: "", tab: "list", editing: null, uid: null, names: {}, engine: null, readOff: "" };
+var engineSet, engineReady = new Promise(function(r){ engineSet = r; });
+function setEngine(e){ if(S.engine) return; S.engine=e; engineSet(e); showAiNotice(); }
 var db = null, sample = null, user = null, downloads = null;
 
 /* ---------- small helpers ---------- */
@@ -488,12 +490,264 @@ function aiErrText(code){
     case "image_rejected": return "That photo could not be read. Try a sharper photo, JPEG or PNG.";
     case "refused": case "empty_completion": return "Claude could not read this one. Retake the photo with the card filling the frame.";
     case "invalid_json": return "The answer came back garbled. Retry this card.";
+    case "ocr_unavailable": return "The on-phone card reader could not start in this browser. Update the browser, try Chrome or Safari, or type contacts in by hand.";
+    case "ocr_empty": return "No text found. Retake the photo flat, in good light, with the card filling the frame.";
     default: return "Connection hiccup while reading. Retry this card.";
   }
 }
-var FATAL = {not_granted:1, sampling_disabled:1, capability_disabled:1, capability_removed:1, not_declared:1, images_unavailable:1, session_expired:1, rate_limited:1};
+var FATAL = {ocr_unavailable:1, not_granted:1, sampling_disabled:1, capability_disabled:1, capability_removed:1, not_declared:1, images_unavailable:1, session_expired:1, rate_limited:1};
 
 function readCard(blobs, signal){
+  return S.engine==="claude" ? claudeRead(blobs, signal) : deviceRead(blobs, signal);
+}
+
+/* ---------- on-device reading (Tesseract OCR + field rules), for browsers without Claude ---------- */
+var OCR = { p: null, log: null };
+function ocrBase(){ return new URL("ocr/", location.href).href; }
+function loadScript(src){
+  return new Promise(function(res,rej){
+    var s=document.createElement("script"); s.src=src; s.async=true;
+    s.onload=res; s.onerror=function(){ rej({code:"ocr_unavailable"}); };
+    document.head.appendChild(s);
+  });
+}
+function ocrWorker(){
+  if(OCR.p) return OCR.p;
+  var base=ocrBase();
+  OCR.p = (window.Tesseract ? Promise.resolve() : loadScript(base+"tesseract.min.js")).then(function(){
+    var failed = new Promise(function(_,rej){ OCR.fail=function(){ rej({code:"ocr_unavailable"}); }; });
+    /* ocr-boot.js maps the model request onto eng-traineddata.wasm (artifacts don't serve .gz) */
+    var made = window.Tesseract.createWorker("eng", 1, {
+      workerPath: base+"ocr-boot.js", corePath: base.replace(/\/$/,""), langPath: base.replace(/\/$/,""),
+      workerBlobURL: false, cacheMethod: "none", gzip: true,
+      errorHandler: function(){ if(OCR.fail) OCR.fail(); },
+      logger: function(m){ if(OCR.log) OCR.log(m); }
+    });
+    var limit = new Promise(function(_,rej){ setTimeout(function(){ rej({code:"ocr_unavailable"}); }, 120000); });
+    return Promise.race([made, failed, limit]);
+  }).then(function(w){
+    return w.setParameters({ preserve_interword_spaces: "1", user_defined_dpi: "300" }).then(function(){ return w; });
+  });
+  OCR.p.catch(function(){ OCR.p=null; });
+  return OCR.p;
+}
+function prepForOcr(blob){
+  /* grey, contrast-stretched, ~2000px long edge: what Tesseract reads best */
+  return loadImg(blob).then(function(o){
+    var w=o.im.naturalWidth, h=o.im.naturalHeight, s=Math.min(2.5, 2000/Math.max(w,h));
+    var cv=document.createElement("canvas"); cv.width=Math.round(w*s); cv.height=Math.round(h*s);
+    var cx=cv.getContext("2d"); cx.drawImage(o.im,0,0,cv.width,cv.height); URL.revokeObjectURL(o.url);
+    var id=cx.getImageData(0,0,cv.width,cv.height), d=id.data, lo=255, hi=0, i, g;
+    for(i=0;i<d.length;i+=16){ g=.299*d[i]+.587*d[i+1]+.114*d[i+2]; if(g<lo) lo=g; if(g>hi) hi=g; }
+    var span=Math.max(40,hi-lo);
+    for(i=0;i<d.length;i+=4){ g=.299*d[i]+.587*d[i+1]+.114*d[i+2]; g=Math.max(0,Math.min(255,(g-lo)*255/span)); d[i]=d[i+1]=d[i+2]=g; }
+    cx.putImageData(id,0,0);
+    return cv;
+  });
+}
+function deviceRead(blobs, signal){
+  var texts=[];
+  return ocrWorker().then(function(w){
+    return blobs.reduce(function(p,b){
+      return p.then(function(){
+        if(signal && signal.aborted) throw {code:"cancelled"};
+        return prepForOcr(b).then(function(cv){ return w.recognize(cv); }).then(function(r){ texts.push(r.data.text||""); });
+      });
+    }, Promise.resolve());
+  }).then(function(){
+    if(signal && signal.aborted) throw {code:"cancelled"};
+    var f=parseCardText(texts.join("\n"));
+    if(!f) throw {code:"ocr_empty"};
+    return f;
+  }, function(e){ throw (e && e.code) ? e : {code:"ocr_unavailable"}; });
+}
+
+var COUNTRIES = ["India","United States","USA","United Kingdom","UK","Germany","France","Italy","Spain","Portugal","Netherlands","Belgium","Switzerland","Austria",
+  "United Arab Emirates","UAE","Saudi Arabia","Qatar","Oman","Bahrain","Kuwait","Singapore","Malaysia","Thailand","Indonesia","Vietnam","Philippines","Sri Lanka","Nepal",
+  "Bhutan","Maldives","Bangladesh","China","Hong Kong","Japan","South Korea","Korea","Taiwan","Australia","New Zealand","Canada","Mexico","Brazil","Argentina","South Africa",
+  "Kenya","Egypt","Morocco","Turkey","Greece","Poland","Czech Republic","Hungary","Sweden","Norway","Denmark","Finland","Ireland","Israel","Jordan","Russia","Kazakhstan","Uzbekistan","Georgia","Azerbaijan"];
+var COUNTRY_FIX = {"USA":"United States","UK":"United Kingdom","UAE":"United Arab Emirates","Korea":"South Korea"};
+var DIAL = [["971","United Arab Emirates"],["966","Saudi Arabia"],["974","Qatar"],["968","Oman"],["973","Bahrain"],["965","Kuwait"],["977","Nepal"],["975","Bhutan"],["960","Maldives"],
+  ["880","Bangladesh"],["852","Hong Kong"],["886","Taiwan"],["94","Sri Lanka"],["91","India"],["65","Singapore"],["60","Malaysia"],["66","Thailand"],["62","Indonesia"],["84","Vietnam"],
+  ["63","Philippines"],["86","China"],["81","Japan"],["82","South Korea"],["61","Australia"],["64","New Zealand"],["44","United Kingdom"],["49","Germany"],["33","France"],["39","Italy"],
+  ["34","Spain"],["351","Portugal"],["31","Netherlands"],["32","Belgium"],["41","Switzerland"],["43","Austria"],["353","Ireland"],["30","Greece"],["90","Turkey"],["48","Poland"],
+  ["46","Sweden"],["47","Norway"],["45","Denmark"],["358","Finland"],["27","South Africa"],["254","Kenya"],["20","Egypt"],["212","Morocco"],["972","Israel"],["962","Jordan"],
+  ["55","Brazil"],["52","Mexico"],["54","Argentina"],["7","Russia"],["1","United States"]];
+var TLD = {in:"India",uk:"United Kingdom",de:"Germany",fr:"France",it:"Italy",es:"Spain",pt:"Portugal",nl:"Netherlands",be:"Belgium",ch:"Switzerland",at:"Austria",ae:"United Arab Emirates",
+  sa:"Saudi Arabia",qa:"Qatar",om:"Oman",sg:"Singapore",my:"Malaysia",th:"Thailand",id:"Indonesia",vn:"Vietnam",ph:"Philippines",lk:"Sri Lanka",np:"Nepal",bt:"Bhutan",mv:"Maldives",
+  bd:"Bangladesh",cn:"China",hk:"Hong Kong",jp:"Japan",kr:"South Korea",tw:"Taiwan",au:"Australia",nz:"New Zealand",ca:"Canada",mx:"Mexico",br:"Brazil",za:"South Africa",ke:"Kenya",
+  eg:"Egypt",ma:"Morocco",tr:"Turkey",gr:"Greece",pl:"Poland",se:"Sweden",no:"Norway",dk:"Denmark",fi:"Finland",ie:"Ireland",il:"Israel",jo:"Jordan",ru:"Russia"};
+var STATES = /^(andhra pradesh|arunachal pradesh|assam|bihar|chhattisgarh|goa|gujarat|haryana|himachal pradesh|jharkhand|karnataka|kerala|madhya pradesh|maharashtra|manipur|meghalaya|mizoram|nagaland|odisha|orissa|punjab|rajasthan|sikkim|tamil nadu|telangana|tripura|uttar pradesh|uttarakhand|west bengal|delhi ncr|jammu (and|&) kashmir|ladakh|bavaria|bayern|hesse|hessen|tyrol|tirol|california|new york|texas|florida|ontario|quebec|british columbia|new south wales|victoria|queensland|england|scotland|wales)$/i;
+var TITLE_WORDS = /\b(manager|director|head|ceo|cto|cfo|coo|cmo|md|gm|vp|svp|avp|founder|co-?founder|president|chairman|partner|owner|proprietor|officer|executive|exec|lead|consultant|specialist|coordinator|engineer|analyst|associate|advisor|adviser|sales|marketing|business development|operations|account|accounts|reservations|product|regional|general|senior|sr\.?|assistant|asst\.?|chief|principal|representative|agent|supervisor|trainee|intern|secretary|administrator|admin|developer|designer|architect)\b/i;
+var CO_WORDS = /\b(ltd|limited|pvt|private|llp|llc|inc|incorporated|corp|corporation|co\.|company|gmbh|ag|s\.?a\.?|s\.?r\.?l\.?|s\.?p\.?a\.?|b\.?v\.?|plc|pty|group|holdings|enterprises|international|global|travels?|tours?|holidays|tourism|hotels?|resorts?|hospitality|airlines?|airways|aviation|cruises?|dmc|destinations?|journeys|voyages|expeditions|ventures|capital|technologies|technology|tech|solutions|systems|software|labs|media|services|consultants|consulting|agency|associates|trading|exports|imports|industries|foundation|board|ministry|council|association|federation)\b/i;
+var ADDR_WORDS = /\b(road|rd\.?|street|st\.?|avenue|ave\.?|lane|marg|nagar|colony|sector|block|plot|floor|flr|suite|ste\.?|building|bldg|tower|complex|plaza|park|estate|chowk|bazar|bazaar|near|opp\.?|behind|p\.?o\.?\s*box|po box|strasse|straße|str\.|platz|rue|via|calle|district|dist\.?|phase|city|highway|hwy|no\.|#)\b/i;
+function guessSegment(t){
+  t=t.toLowerCase();
+  var rules=[
+    [/\bdmc\b|destination management|ground handl|inbound/, "DMC / ground handler"],
+    [/\bhotels?\b|resorts?|\binn\b|suites|hospitality|palace|retreat|lodge|homestay|villas?/, "Hotel / accommodation"],
+    [/airlines?|airways|aviation|\brail|cruises?|car rental|\bbus\b|coach|transport/, "Airline / transport"],
+    [/tourism board|ministry|government|govt|department of tourism|\bcouncil\b|convention bureau|\bcvb\b/, "Tourism board / government"],
+    [/\bmice\b|events?\b|conference|exhibition|expo|wedding/, "MICE / events"],
+    [/\bota\b|booking platform|online travel|travel tech|traveltech/, "OTA / travel tech"],
+    [/capital|ventures|investments?|\bbank\b|finance|fund\b|angel/, "Investor / finance"],
+    [/media|magazine|news|publication|marketing|advertis|digital agency|\bpr\b|influencer/, "Media / marketing"],
+    [/software|technolog|\btech\b|solutions|systems|\bsaas\b|\bit\b|digital|labs|\bapi\b/, "Technology / SaaS vendor"],
+    [/travels?|tours?|holidays|tour operator|journeys|voyages|expeditions|vacations|trips|\btravel agent/, "Travel agency / tour operator"]
+  ];
+  for(var i=0;i<rules.length;i++) if(rules[i][0].test(t)) return rules[i][1];
+  return "";
+}
+function properCase(s){
+  if(s!==s.toUpperCase()) return s;
+  return s.toLowerCase().replace(/(^|[\s\-'.])([a-z])/g,function(m,a,b){ return a+b.toUpperCase(); });
+}
+function cleanPhone(raw, cc){
+  var s=raw.replace(/[oO]/g,"0").replace(/[lI|]/g,"1").replace(/[^\d+()\-.\s]/g,"").replace(/\s+/g," ").trim();
+  var digits=s.replace(/\D/g,"");
+  if(digits.length<7 || digits.length>15) return "";
+  var pc=s.match(/^\((\d{1,3})\)\s*(.*)$/);
+  if(pc && DIAL.some(function(d){ return d[0]===pc[1]; })) s="+"+pc[1]+" "+pc[2];
+  if(!/^\+/.test(s)){
+    if(/^00/.test(digits)) s="+"+s.replace(/^\s*0\s*0\s*/,"");
+    else if(cc && /^0/.test(digits)) s=s.replace(/^\(?0\)?\s*/,"+"+cc+" ");
+    else if(cc==="91" && digits.length===10 && /^[6-9]/.test(digits)) s="+91 "+digits;
+    else if(cc && digits.length>10 && digits.indexOf(cc)===0) s="+"+digits;
+  }
+  return s.replace(/\s*[-.]\s*/g," ").replace(/\(\s*0\s*\)/,"").replace(/\s+/g," ").trim();
+}
+function parseCardText(text){
+  var raw=String(text||"").replace(/\r/g,"").replace(/[|¦]/g," ").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  var lines=raw.split("\n").map(function(l){ return l.replace(/\s{2,}/g,"  ").trim(); })
+    .filter(function(l){ return l.replace(/[^A-Za-z0-9@]/g,"").length>=2; });
+  if(!lines.length) return null;
+  var f={}; AI_FIELDS.forEach(function(k){ f[k]=""; });
+  var used=lines.map(function(){ return false; }), unsure={};
+  var all=lines.join("\n");
+
+  /* emails: undo common OCR spacing ("name @ firm . com", "(at)") */
+  var emails=[];
+  lines.forEach(function(l,i){
+    var t=l.replace(/\s*\(at\)\s*|\s*\[at\]\s*/gi,"@").replace(/\s*@\s*/g,"@").replace(/(@[^\s]*?)\s*\.\s*/g,"$1.");
+    var m=t.match(/[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}/g);
+    if(m){ m.forEach(function(e){ e=e.toLowerCase().replace(/^(e-?mail|email|mail|e)[:.]?/,""); if(emails.indexOf(e)<0) emails.push(e); }); used[i]=true; }
+  });
+  f.email=emails[0]||""; f.email_2=emails[1]||"";
+
+  /* web + linkedin */
+  lines.forEach(function(l,i){
+    if(/linked\s*in/i.test(l)){ var m=l.match(/linkedin\.com\/[^\s,;]+/i); f.linkedin=m?m[0].toLowerCase():l.replace(/.*linked\s*in\s*[:\-]?\s*/i,""); used[i]=true; return; }
+    var w=l.replace(/\s*\.\s*/g,".").match(/\b(?:https?:\/\/)?(?:www\.)?[a-z0-9\-]{2,}(?:\.[a-z0-9\-]{2,})*\.(?:com|net|org|in|co|io|travel|tours|info|biz|ae|uk|de|fr|it|es|sg|my|th|lk|np|au|ca|ch|nl|be|at|jp|cn|hk|ae|asia|holiday|hotel|global|world|online|tech|app|ai|co\.in|co\.uk|com\.au|com\.sg)(?:\/[^\s]*)?\b/i);
+    if(w && l.indexOf("@")<0 && !f.website){ f.website=cleanUrl(w[0].toLowerCase()); used[i]=true; }
+  });
+  if(!f.website && f.email){ var dm=f.email.split("@")[1]; if(dm && !FREEMAIL.test(dm)) f.website=dm; }
+
+  /* country, to complete phone numbers */
+  var country="";
+  COUNTRIES.some(function(c){ if(new RegExp("\\b"+c.replace(/\s/g,"\\s+")+"\\b",c.length<=3?"":"i").test(all)){ country=COUNTRY_FIX[c]||c; return true; } return false; });
+  var plus=all.match(/\+\s?(\d{1,3})/);
+  if(!country && plus){ DIAL.some(function(d){ if(plus[1].indexOf(d[0])===0){ country=d[1]; return true; } return false; }); }
+  if(!country){ var dom=(domainOf({email:f.email})||f.website).split("/")[0], tl=dom.split(".").pop(); if(TLD[tl]) country=TLD[tl]; }
+  var cc=""; DIAL.some(function(d){ if(d[1]===country){ cc=d[0]; return true; } return false; });
+  f.country=country; if(country && !new RegExp(country,"i").test(all)) unsure.country=1;
+
+  /* phones with their labels */
+  var phones=[];
+  lines.forEach(function(l,i){
+    if(l.indexOf("@")>=0) return;
+    var re=/((?:mob(?:ile)?|cell|hp|m|tel(?:ephone)?|ph(?:one)?|t|off(?:ice)?|o|direct|d|dir|fax|f|whats\s*app|wa)\.?\s*[:\-]?\s*)?(\+?\(?\d[\d\s().\-]{6,}\d)/gi, m, hit=false;
+    while((m=re.exec(l))){
+      var lab=(m[1]||"").toLowerCase().replace(/[^a-z]/g,""), num=cleanPhone(m[2],cc);
+      if(!num) continue;
+      if(/^\d{5,6}$/.test(m[2].replace(/\s/g,""))) continue;
+      hit=true; phones.push({lab:lab, num:num});
+    }
+    if(hit && l.replace(/\b(mob|mobile|cell|hp|m|tel|telephone|ph|phone|t|off|office|o|direct|d|dir|fax|f|whats\s*app|wa)\b/gi,"").replace(/[^A-Za-z]/g,"").length<4) used[i]=true;
+  });
+  var others=[];
+  phones.forEach(function(p){
+    if(/^(fax|f)$/.test(p.lab)) others.push("Fax "+p.num);
+    else if(/^(whatsapp|wa)$/.test(p.lab)) f.other_social="WhatsApp: "+p.num;
+    else if(/^(mob|mobile|cell|hp|m)$/.test(p.lab) && !f.mobile) f.mobile=p.num;
+    else if(/^(tel|telephone|ph|phone|t|off|office|o|direct|d|dir)$/.test(p.lab) && !f.phone) f.phone=p.num;
+    else others.push(p.num);
+  });
+  others.forEach(function(n){ if(!/^Fax/.test(n) && !f.mobile) f.mobile=n; else if(!/^Fax/.test(n) && !f.phone) f.phone=n; else if(!f.phone_2) f.phone_2=n; });
+  if(phones.some(function(p){ return !p.lab; })){ unsure.mobile=1; unsure.phone=1; }
+
+  /* address: lines with street words, postcodes or the country */
+  var addr=[];
+  lines.forEach(function(l,i){
+    if(used[i]) return;
+    var pin=/\b\d{5,6}\b|\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b|\b\d{3}\s\d{3}\b/.test(l);
+    if(ADDR_WORDS.test(l) || pin || (country && new RegExp("\\b"+country+"\\b","i").test(l) && l.length<60) || /,\s*\w+.*,/.test(l)){ addr.push(l); used[i]=true; }
+  });
+  if(addr.length){
+    var a=addr.join(", ").replace(/\s*,\s*,/g,",").replace(/\s+/g," ");
+    var pc=a.match(/\b(\d{6}|\d{5}|[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}|\d{3}\s\d{3})\b/);
+    if(pc) f.postal_code=pc[1];
+    var parts=a.split(/\s*,\s*|\s+-\s+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    var cNames=[country].concat(Object.keys(COUNTRY_FIX).filter(function(k){ return COUNTRY_FIX[k]===country; })).map(function(x){ return x.toLowerCase(); });
+    if(country) parts=parts.filter(function(p){ return cNames.indexOf(p.replace(/[^A-Za-z ]/g,"").trim().toLowerCase())<0; });
+    var skip={};
+    for(var j=parts.length-1;j>=0;j--){
+      var nm=parts[j].replace(/\b\d{3,6}\b|\b\d{3}\s\d{3}\b|[\-:.]/g,"").trim();
+      if(!nm || !/^[A-Za-z][A-Za-z .']{2,30}$/.test(nm) || ADDR_WORDS.test(nm)) continue;
+      if(!f.state && STATES.test(nm)){ f.state=properCase(nm); skip[j]=1; continue; }
+      f.city=properCase(nm); skip[j]=1; break;
+    }
+    f.street=parts.filter(function(_,k){ return !skip[k]; }).join(", ").replace(new RegExp("\\b"+(f.postal_code||"#none#")+"\\b"),"").replace(/,\s*$/,"").replace(/\s{2,}/g," ").trim();
+    unsure.street=1; unsure.city=1;
+  }
+
+  /* name, title, company from what is left */
+  var rest=[]; lines.forEach(function(l,i){ if(!used[i]) rest.push({l:l.replace(/^[^A-Za-z]+|[^A-Za-z.)]+$/g,""), i:i}); });
+  rest=rest.filter(function(r){ return r.l.length>=2; });
+  var co=rest.find(function(r){ return CO_WORDS.test(r.l); });
+  if(co){ f.company=properCase(co.l); co.taken=1; }
+  var ttl=rest.filter(function(r){ return !r.taken && TITLE_WORDS.test(r.l) && r.l.split(/\s+/).length<=8; });
+  if(ttl.length){ f.job_title=properCase(ttl[0].l); ttl[0].taken=1; }
+  var mailUser=(f.email||"").split("@")[0].replace(/[^a-z]/g," ");
+  var nameCands=rest.filter(function(r){
+    if(r.taken) return false;
+    var w=r.l.replace(/\b(mr|mrs|ms|dr|shri|smt)\.?\s+/i,"").split(/\s+/);
+    return w.length>=1 && w.length<=4 && /^[A-Za-z][A-Za-z.'\-\s]+$/.test(r.l) && !TITLE_WORDS.test(r.l) && !CO_WORDS.test(r.l) && r.l.length<=40;
+  }).map(function(r){
+    var score=0, low=r.l.toLowerCase(), w=r.l.split(/\s+/);
+    if(w.length>=2 && w.length<=3) score+=3;
+    if(mailUser && w.some(function(x){ return x.length>2 && mailUser.indexOf(x.toLowerCase())>=0; })) score+=5;
+    if(ttl.length && Math.abs(ttl[0].i-r.i)===1) score+=2;
+    if(/^[A-Z][a-z]+(\s[A-Z][a-z.]+)+$/.test(r.l) || r.l===r.l.toUpperCase()) score+=1;
+    if(low.length<4) score-=3;
+    return {r:r, score:score};
+  }).sort(function(a,b){ return b.score-a.score; });
+  if(nameCands.length){
+    var nmL=nameCands[0].r; nmL.taken=1;
+    var parts2=properCase(nmL.l.replace(/\b(mr|mrs|ms|dr|shri|smt)\.?\s+/i,"")).split(/\s+/);
+    f.first_name=parts2.length>1 ? parts2.slice(0,-1).join(" ") : parts2[0];
+    f.last_name=parts2.length>1 ? parts2[parts2.length-1] : "";
+  }
+  var brand=(domainOf({email:f.email}) || f.website || "").replace(/^www\./,"").split(".")[0].replace(/[^a-z0-9]/g,"");
+  if(f.company && brand && brand.length>=3 && !FREEMAIL.test(brand+".")){
+    var flat=f.company.toLowerCase().replace(/[^a-z0-9]/g,"");
+    var shares=flat.indexOf(brand)>=0 || brand.indexOf(flat)>=0 || f.company.toLowerCase().split(/[^a-z0-9]+/).some(function(w){ return w.length>=4 && brand.indexOf(w)>=0; });
+    var legal=/\b(ltd|limited|pvt|llp|llc|inc|corp|gmbh|ag|plc|pty|pte|s\.?a\.?|b\.?v\.?)\b/i.test(f.company);
+    if(!shares && !legal){ f.industry=f.company; f.company=brand.charAt(0).toUpperCase()+brand.slice(1); }
+  }
+  if(!f.company){
+    var left=rest.find(function(r){ return !r.taken && r.l.length>=3; });
+    if(left){ f.company=properCase(left.l); left.taken=1; }
+    else if(f.website){ var b=f.website.split(".")[f.website.indexOf("www.")===0?1:0]; f.company=b.charAt(0).toUpperCase()+b.slice(1); }
+  }
+  f.other_text=rest.filter(function(r){ return !r.taken; }).map(function(r){ return r.l; }).join("; ").slice(0,400);
+  f.segment=guessSegment([f.company,f.industry,f.job_title,f.other_text,f.website].join(" "));
+  f.unsure=["first_name","last_name","job_title","company","segment"].concat(Object.keys(unsure)).filter(function(k){ return f[k]; });
+  if(!f.email) f.unsure.push("email");
+  f.not_a_card = !f.email && !f.mobile && !f.phone && !f.website && !f.first_name;
+  return f;
+}
+
+function claudeRead(blobs, signal){
   return sample.json(prompt(blobs.length>1), {images: blobs, signal: signal, modelTier: "default"}).then(function(r){
     if(!r || typeof r!=="object" || Array.isArray(r)) throw {code:"invalid_json"};
     var out={};
@@ -512,19 +766,27 @@ var Q = { items: [], running: false, ctl: null, done: 0 };
 function addToQueue(files){
   files = Array.prototype.slice.call(files||[]).filter(function(f){ return /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name); });
   if(!files.length) return;
-  if(!sample || S.canAI===false){ toast(S.aiOff || "Automatic reading is not available here. Use “Type a contact in by hand”."); return; }
+  if(S.readOff){ toast(S.readOff); return; }
   var pairs = $("twoSided").checked;
   for(var i=0;i<files.length;i+= pairs?2:1){
     var group = pairs ? files.slice(i,i+2) : [files[i]];
     Q.items.push({ id: "q"+Date.now()+"_"+i, files: group, st: "waiting", msg: "Waiting", thumb: null, single: files.length===1 });
   }
-  renderQueue(); runQueue();
+  renderQueue();
+  if(!S.engine) $("qText").textContent="Getting the card reader ready…";
+  engineReady.then(function(){ runQueue(); });
 }
 function runQueue(){
   if(Q.running) return;
   var it = Q.items.find(function(x){ return x.st==="waiting"; });
   if(!it){ renderQueue(); return; }
   Q.running = true; it.st="run"; it.msg="Reading…"; renderQueue();
+  var lastPct=-1;
+  OCR.log = function(m){
+    var pct=Math.round((m.progress||0)*100);
+    var t = /recogniz/.test(m.status) ? "Reading… "+pct+"%" : "Loading the on-phone reader (first time only)…";
+    if(pct===lastPct && it.msg===t) return; lastPct=pct; it.msg=t; renderQueue();
+  };
   var ctl = Q.ctl = new AbortController();
   var shots;
   Promise.all(it.files.map(function(f){ return shrink(f, 1600, .85); }))
@@ -547,13 +809,15 @@ function runQueue(){
       if(code && FATAL[code]){
         Q.items.forEach(function(x){ if(x.st==="waiting") x.msg="Paused"; });
         Q.halted = aiErrText(code);
-        if(code!=="rate_limited"){ S.canAI=false; S.aiOff=aiErrText(code); showAiNotice(); }
+        if(code==="ocr_unavailable"){ S.readOff=aiErrText(code); showAiNotice(); }
+        else if(code!=="rate_limited" && S.engine==="claude"){ S.engine="device"; showAiNotice(); Q.items.forEach(function(x){ if(x.st==="err"||x.st==="waiting"){ x.st="waiting"; x.msg="Waiting"; } }); Q.halted=null; Q.running=false; Q.ctl=null; return "retry"; }
         return "halt";
       }
     })
     .then(function(flag){
       Q.running=false; Q.ctl=null;
       if(flag==="halt"){ renderQueue(); return; }
+      if(flag==="retry"){ renderQueue(); runQueue(); return; }
       Q.halted=null; runQueue();
     });
 }
@@ -565,7 +829,7 @@ function renderQueue(){
   var waiting=Q.items.filter(function(x){ return x.st==="waiting"; }).length;
   $("qBar").style.width = Math.round(100*(ok+err)/total)+"%";
   var t;
-  if(Q.running) t="Reading card "+(ok+err+1)+" of "+total+"…";
+  if(Q.running) t="Reading card "+(ok+err+1)+" of "+total+(S.engine==="device"?" on this phone":"")+"…";
   else if(Q.halted) t=Q.halted;
   else if(waiting) t=waiting+" waiting.";
   else t="Done: "+ok+" saved"+(err? ", "+err+" need attention":"")+".";
@@ -893,8 +1157,8 @@ function openEditor(id, fresh){
   else note.hidden=true;
   var who = c.scannedBy ? (S.names[c.scannedBy] || "a teammate") : "";
   $("sMeta").textContent = id ? ("Scanned "+fmtDate(c.scannedAt)+(who?" by "+who:"")+(c.checked?" · checked":" · not checked yet")) : "";
-  $("sReread").hidden = !id || !c.thumb || !sample || S.canAI===false;
-  $("delArea").innerHTML = id ? '<button class="btn danger" id="sDel" type="button">Delete</button>' : "";
+  $("sReread").hidden = !id || !c.thumb || !S.engine || !!S.readOff;
+  $("delArea").innerHTML = id && !S.readOff ? '<button class="btn danger" id="sDel" type="button">Delete</button>' : "";
   $("sheet").hidden=false; document.body.style.overflow="hidden";
   $("sheet").scrollTop=0;
   setTimeout(function(){ $("sClose").focus(); },30);
@@ -910,7 +1174,7 @@ function renderShots(c){
   if(bi) bi.addEventListener("change",function(){
     var f=bi.files && bi.files[0]; if(!f) return;
     shrink(f,820,.66).then(function(s){ pendingBack=s.dataUrl; renderShots(cardById(S.editing)||c);
-      toast(sample && S.canAI!==false ? "Back added. Tap “Read card again” to read both sides." : "Back added. Save to keep it."); });
+      toast(S.engine && !S.readOff ? "Back added. Tap “Read card again” to read both sides." : "Back added. Save to keep it."); });
   });
 }
 function setPrio(v){ document.querySelectorAll("#prio button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v")===v)); }); }
@@ -961,12 +1225,13 @@ $("delArea").addEventListener("click",function(e){
   }
 });
 $("sReread").addEventListener("click",function(){
-  var c=cardById(S.editing); if(!c || !c.thumb || !sample) return;
+  var c=cardById(S.editing); if(!c || !c.thumb || !S.engine) return;
   var btn=$("sReread"), ctl=new AbortController(), back=pendingBack||c.thumbBack;
   var blobs=[dataUrlToBlob(c.thumb)]; if(back) blobs.push(dataUrlToBlob(back));
   btn.disabled=true; btn.textContent="Reading…";
   readCard(blobs, ctl.signal).then(function(f){
     var cur=formValues();
+    if(f.not_a_card){ toast("No card details found in the photo."); return; }
     AI_FIELDS.forEach(function(k){ if(f[k] && !cur[k]) $("f-"+k).value=f[k]; else if(f[k] && f[k]!==cur[k] && f.unsure.indexOf(k)<0) $("f-"+k).value=f[k]; });
     if(f.other_text){ $("extraWrap").hidden=false; $("extra").textContent=f.other_text; c.other_text=f.other_text; }
     toast("Fields refreshed from the card"+(back?" (both sides)":"")+". Review, then save.");
@@ -1006,7 +1271,10 @@ var tb=lsGet("cs.tab"); if(tb==="groups"||tb==="export") showTab(tb);
 
 function showAiNotice(){
   var n=$("aiNotice");
-  if(S.canAI===false){ n.hidden=false; n.textContent=S.aiOff; } else n.hidden=true;
+  if(S.readOff){ n.hidden=false; n.className="notice"; n.textContent=S.readOff; }
+  else if(S.engine==="device"){ n.hidden=false; n.className="notice info";
+    n.textContent="Cards are read on this device, because this browser doesn't offer Claude reading. Emails, phones and websites come through well; check names, titles and companies against the photo before saving. Where Claude reading is available, the page uses it automatically."; }
+  else n.hidden=true;
 }
 var nameTick=0;
 function resolveNames(){
@@ -1028,10 +1296,20 @@ render();
 if(!window.claude || !window.claude.use){
   $("dbNotice").hidden=false;
   $("dbNotice").textContent="Open this page on claude.ai or in the Claude app. Card reading, the shared list and Excel export run there.";
-  S.canAI=false; S.aiOff="Card reading runs only inside Claude."; return;
+  setEngine("device"); return;
 }
 var use=window.claude.use;
-use("user").then(function(u){ user=u; if(!u) return; return u.id().then(function(id){ S.uid=id; render(); }); }).catch(function(){});
+use("user").then(function(u){
+  user=u; if(!u) return;
+  u.can("data.write").then(function(ok){
+    if(ok!==false) return;
+    S.readOff="You can view this list but not add to it. Ask the owner to invite you by email as an Editor (Share menu), then reopen the page.";
+    $("scanLbl").classList.add("off"); $("uploadLbl").classList.add("off"); $("manualBtn").disabled=true;
+    $("scanInput").disabled=true; $("uploadInput").disabled=true; $("sSave").hidden=true; $("sReread").hidden=true;
+    showAiNotice();
+  }, function(){});
+  return u.id().then(function(id){ S.uid=id; render(); });
+}).catch(function(){});
 use("downloads").then(function(d){ downloads=d; }).catch(function(){});
 use("db").then(function(d){
   db=d;
@@ -1040,13 +1318,9 @@ use("db").then(function(d){
 }).catch(function(){});
 use("sample").then(function(s){
   sample=s;
-  if(!s){ S.canAI=false; S.aiOff="Automatic card reading isn't available in this view. You can type contacts in by hand."; showAiNotice(); return; }
-  return s.limits().then(function(l){
-    if(!l || !l.images){ S.canAI=false; S.aiOff="This view can't send photos to Claude, so cards can't be read automatically here. Open the page in the Claude app or on claude.ai."; }
-    else S.canAI=true;
-    showAiNotice();
-  }, function(){ S.canAI=false; S.aiOff="Automatic card reading isn't available in this view."; showAiNotice(); });
-}).catch(function(){});
+  if(!s){ setEngine("device"); return; }
+  return s.limits().then(function(l){ setEngine(l && l.images ? "claude" : "device"); }, function(){ setEngine("device"); });
+}).catch(function(){ setEngine("device"); });
 
 })();
 </script>

@@ -257,8 +257,21 @@ A phone-first app for turning trade-fair visiting cards into a contact database 
 
 **Live page:** https://claude.ai/artifact/Bow2bE3ZoEUHqAZqd4UFzG (private; share it from the page's Share menu,
 giving teammates *Contributor* or *Editor* access so they can add cards).
-**Source:** `src/card-scanner.html`. It runs only inside claude.ai or the Claude app, because it uses the
-platform's camera upload, Claude vision, shared database and downloads.
+**Source:** `src/card-scanner.html`, plus `src/ocr-boot.js` and the on-device OCR engine in `src/ocr/`
+(not committed, about 11 MB: run `./fetch-ocr.sh` before publishing). It runs inside claude.ai or the
+Claude app, which provide the shared database and downloads.
+
+**Two ways of reading a card.** Where the viewer's Claude supports it, Claude reads the photo (best accuracy,
+partner type inferred from the whole card). Where it doesn't, as in some mobile browsers, the page reads the
+card on the device with Tesseract OCR and a set of field rules: emails, phones, websites, postcodes and
+country come through reliably, while names, titles and companies are best guesses, flagged for checking.
+The English model is published as `ocr/eng-traineddata.wasm` because artifacts don't serve `.gz` files;
+`ocr-boot.js` maps Tesseract's request onto it.
+
+**Who can add cards.** Viewing works for anyone the page is shared with. Saving needs write access: people in
+your organization at Contributor or above, or outside people invited **by email as Editors** (and only while
+the page is not also shared by public link). Anyone opening a public link from outside the organization is
+view-only, and the page tells them so.
 
 ## How it works
 
